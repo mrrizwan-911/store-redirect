@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingCart, Heart, User, Search, Menu, X } from 'lucide-react'
+import { ShoppingBag, Heart, User, Search, Menu, X } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { toggleCart } from '@/store/slices/cartSlice'
@@ -34,12 +34,14 @@ const NAV_CATEGORIES = [
 export function Navbar() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const dispatch = useAppDispatch()
   const cartItems = useAppSelector(state => state.cart.items)
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
   const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated)
 
   useEffect(() => {
+    setMounted(true)
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
     }
@@ -47,32 +49,30 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const navLinkStyles = "relative text-[11px] font-medium uppercase tracking-[0.2em] text-gray-800 hover:text-black transition-colors font-sans after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100"
+  const navLinkStyles = "relative text-[11px] font-normal uppercase tracking-[0.2em] text-gray-800 hover:text-black transition-colors font-sans after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100"
 
   return (
     <header className={cn(
-      "sticky top-0 z-50 w-full transition-all duration-500 bg-white/98 backdrop-blur-md",
-      isScrolled ? "py-1 border-b border-gray-100" : "py-3"
+      "sticky top-0 z-50 w-full transition-all duration-500 bg-white border-b-2 border-[#EEEEEE]",
+      isScrolled ? "py-1" : "py-3"
     )}>
       <div className="mx-auto max-w-7xl px-8">
         <div className="flex h-[32px] items-center justify-between gap-12">
 
           {/* Logo Area */}
           <Link href="/" className="shrink-0 group cursor-pointer flex items-center">
-            <span className="font-serif text-2xl font-medium tracking-[0.2em] text-black uppercase transition-all group-hover:tracking-[0.25em] leading-none">
+            <span className="font-display text-xl lg:text-2xl font-bold tracking-tighter text-black uppercase transition-all leading-none">
               STORE
             </span>
           </Link>
 
           {/* Desktop Nav (Pure Text & Minimalist) */}
           <div className="hidden flex-1 justify-center lg:flex">
-            <nav className="flex items-center gap-12">
+            <nav className="flex items-center gap-10">
               {NAV_CATEGORIES.map(cat => (
                 <div
                   key={cat.label}
                   className="relative group h-full flex items-center"
-                  onMouseEnter={() => setActiveCategory(cat.label)}
-                  onMouseLeave={() => setActiveCategory(null)}
                 >
                   <Link href={cat.href} className={navLinkStyles}>
                     {cat.label}
@@ -84,23 +84,22 @@ export function Navbar() {
 
           {/* Right Icons (No Boxes, Clean Icons) */}
           <div className="flex items-center gap-8">
-            <button className="hidden items-center gap-2.5 text-[10px] uppercase tracking-[0.2em] text-gray-600 hover:text-black transition-all md:inline-flex font-sans font-bold" aria-label="Search">
-              <Search className="h-5 w-5 stroke-[1.5]" />
-              Search
-            </button>
             <div className="flex items-center gap-6">
-              <Link href="/wishlist" className="text-gray-600 hover:text-black hover:opacity-70 transition-all" aria-label="Wishlist">
+              <button className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100" aria-label="Search">
+                <Search className="h-5 w-5 stroke-[1.5]" />
+              </button>
+              <Link href="/wishlist" className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100" aria-label="Wishlist">
                 <Heart className="h-5 w-5 stroke-[1.5]" />
               </Link>
-              <Link href={isAuthenticated ? '/account' : '/login'} className="text-gray-600 hover:text-black hover:opacity-70 transition-all" aria-label="Account">
+              <Link href={mounted && isAuthenticated ? '/account' : '/login'} className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100" aria-label="Account">
                 <User className="h-5 w-5 stroke-[1.5]" />
               </Link>
               <button
                 onClick={() => dispatch(toggleCart())}
-                className="relative text-gray-600 hover:text-black hover:opacity-70 transition-all"
+                className="relative text-gray-600 hover:text-black transition-all after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100"
                 aria-label={`Cart with ${cartCount} items`}
               >
-                <ShoppingCart className="h-5 w-5 stroke-[1.5]" />
+                <ShoppingBag className="h-5 w-5 stroke-[1.5]" />
                 {cartCount > 0 && (
                   <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center bg-black text-[8px] font-bold text-white rounded-none">
                     {cartCount}

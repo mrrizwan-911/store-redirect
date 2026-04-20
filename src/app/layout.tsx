@@ -30,15 +30,20 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${playfair.variable} ${dmSans.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#E8D5B0" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="Store" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
-      <body className="min-h-full flex flex-col font-body bg-background text-text-primary">
+      <body
+        className="min-h-full flex flex-col font-body bg-background text-text-primary"
+        suppressHydrationWarning
+      >
         <ReduxProvider>
           {children}
           <CartDrawer />

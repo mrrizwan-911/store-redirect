@@ -98,13 +98,13 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-16">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-text-secondary mb-12">
-        <Link href="/" className="hover:text-primary transition-colors">Home</Link>
-        <ChevronRight className="w-3 h-3" />
-        <Link href={`/categories/${product.category.slug}`} className="hover:text-primary transition-colors">
+      <nav className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-text-secondary mb-10">
+        <Link href="/" className="hover:text-text-primary transition-colors">Home</Link>
+        <ChevronRight className="w-3 h-3 opacity-50" />
+        <Link href={`/categories/${product.category.slug}`} className="hover:text-text-primary transition-colors">
           {product.category.name}
         </Link>
-        <ChevronRight className="w-3 h-3" />
+        <ChevronRight className="w-3 h-3 opacity-50" />
         <span className="text-text-primary truncate max-w-[200px]">{product.name}</span>
       </nav>
 
@@ -118,7 +118,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
         {/* Right: Product Details (5 cols on large screens) */}
         <div className="lg:col-span-5 space-y-10">
           <div className="space-y-4">
-            <h1 className="text-4xl md:text-5xl font-display uppercase leading-tight tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-display leading-tight tracking-tight">
               {product.name}
             </h1>
 
@@ -215,20 +215,20 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
               />
               <button
                 onClick={handleWhatsAppOrder}
-                className="w-full h-12 border border-black flex items-center justify-center gap-2 text-sm uppercase tracking-widest font-bold hover:bg-neutral-50 transition-all duration-300"
+                className="w-full h-12 border border-black flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold hover:bg-neutral-50 transition-colors"
               >
-                <MessageCircle className="w-5 h-5 text-[#25D366]" />
-                Order via WhatsApp
+                <MessageCircle className="w-4 h-4" />
+                WhatsApp Order
               </button>
             </div>
 
             <div className="flex justify-center gap-8 pt-2">
-              <button className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-bold hover:text-primary transition-colors">
-                <Heart className="w-4 h-4" />
+              <button className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] font-bold hover:opacity-60 transition-opacity">
+                <Heart className="w-3.5 h-3.5" />
                 Add to Wishlist
               </button>
-              <button className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-bold hover:text-primary transition-colors">
-                <RefreshCcw className="w-4 h-4" />
+              <button className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] font-bold hover:opacity-60 transition-opacity">
+                <RefreshCcw className="w-3.5 h-3.5" />
                 Compare
               </button>
             </div>
@@ -237,28 +237,28 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           {/* Info Features */}
           <div className="grid grid-cols-2 gap-y-6 pt-10 border-t border-border">
             <div className="flex gap-3">
-              <Truck className="w-5 h-5 text-text-secondary" />
+              <Truck className="w-4 h-4 text-text-secondary" />
               <div>
                 <h4 className="text-[10px] uppercase tracking-widest font-bold">Free Delivery</h4>
                 <p className="text-[11px] text-text-secondary">On orders over PKR 3,000</p>
               </div>
             </div>
             <div className="flex gap-3">
-              <RefreshCcw className="w-5 h-5 text-text-secondary" />
+              <RefreshCcw className="w-4 h-4 text-text-secondary" />
               <div>
                 <h4 className="text-[10px] uppercase tracking-widest font-bold">Easy Returns</h4>
                 <p className="text-[11px] text-text-secondary">7-day hassle free returns</p>
               </div>
             </div>
             <div className="flex gap-3">
-              <ShieldCheck className="w-5 h-5 text-text-secondary" />
+              <ShieldCheck className="w-4 h-4 text-text-secondary" />
               <div>
                 <h4 className="text-[10px] uppercase tracking-widest font-bold">Genuine Products</h4>
                 <p className="text-[11px] text-text-secondary">100% authentic quality</p>
               </div>
             </div>
             <div className="flex gap-3">
-              <MessageCircle className="w-5 h-5 text-text-secondary" />
+              <MessageCircle className="w-4 h-4 text-text-secondary" />
               <div>
                 <h4 className="text-[10px] uppercase tracking-widest font-bold">Expert Support</h4>
                 <p className="text-[11px] text-text-secondary">24/7 dedicated assistance</p>

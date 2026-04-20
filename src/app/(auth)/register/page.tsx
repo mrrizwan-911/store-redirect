@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 import { registerSchema } from '@/lib/validations/auth';
 import { ZodError } from 'zod';
 import AuthLayout from '@/components/store/auth/AuthLayout';
@@ -14,6 +15,7 @@ import AuthLayout from '@/components/store/auth/AuthLayout';
 export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -70,14 +72,14 @@ export default function RegisterPage() {
       subtitle="CREATE ACCOUNT"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-1">
-          <Label
+        <div className="space-y-1.5">
+          <label
             htmlFor="name"
-            className="text-[11px] uppercase tracking-[0.3em] font-medium text-black"
+            className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block"
           >
             Full Name
-          </Label>
-          <Input
+          </label>
+          <input
             id="name"
             name="name"
             type="text"
@@ -85,18 +87,18 @@ export default function RegisterPage() {
             required
             value={formData.name}
             onChange={handleChange}
-            className="input-underline h-12 text-[15px]"
+            className="input-underline w-full h-12 text-[16px] outline-none"
           />
         </div>
 
-        <div className="space-y-1">
-          <Label
+        <div className="space-y-1.5">
+          <label
             htmlFor="email"
-            className="text-[11px] uppercase tracking-[0.3em] font-medium text-black"
+            className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block"
           >
             Email Address
-          </Label>
-          <Input
+          </label>
+          <input
             id="email"
             name="email"
             type="email"
@@ -104,34 +106,47 @@ export default function RegisterPage() {
             required
             value={formData.email}
             onChange={handleChange}
-            className="input-underline h-12 text-[15px]"
+            className="input-underline w-full h-12 text-[16px] outline-none"
           />
         </div>
 
-        <div className="space-y-1">
-          <Label
+        <div className="space-y-1.5">
+          <label
             htmlFor="password"
-            className="text-[11px] uppercase tracking-[0.3em] font-medium text-black"
+            className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block"
           >
             Password
-          </Label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            placeholder="••••••••"
-            required
-            value={formData.password}
-            onChange={handleChange}
-            className="input-underline h-12"
-          />
+          </label>
+          <div className="relative">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="••••••••"
+              required
+              value={formData.password}
+              onChange={handleChange}
+              className="input-underline w-full h-12 text-[16px] outline-none pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-black transition-colors"
+            >
+              {showPassword ? (
+                <Eye className="w-5 h-5" />
+              ) : (
+                <EyeOff className="w-5 h-5" />
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="space-y-4 pt-4">
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-black hover:bg-[#1A1A1A] text-white uppercase tracking-[0.2em] font-bold rounded-[12px] h-[60px] transition-all"
+            className="w-full bg-black hover:bg-[#1A1A1A] text-white uppercase tracking-[0.2em] text-[13px] font-bold rounded-[12px] h-[60px] transition-all"
           >
             {isLoading ? 'Creating Account...' : 'Sign Up'}
           </Button>
@@ -145,7 +160,7 @@ export default function RegisterPage() {
             onClick={handleGoogleLogin}
             type="button"
             variant="outline"
-            className="w-full border-neutral-200 hover:bg-neutral-50 text-black uppercase tracking-[0.2em] font-bold rounded-[12px] h-[60px] transition-all flex items-center justify-center gap-3"
+            className="w-full border-neutral-200 hover:bg-neutral-50 text-black uppercase tracking-[0.2em] text-[13px] font-bold rounded-[12px] h-[60px] transition-all flex items-center justify-center gap-3"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -159,15 +174,13 @@ export default function RegisterPage() {
       </form>
 
       <div className="mt-10 text-center">
-        <p className="text-[16px] text-neutral-500 whitespace-nowrap">
+        <p className="text-[16px] text-neutral-500">
           Already have an account?{' '}
-          <Link href="/login" className="text-black font-bold hover:underline underline-offset-4">
+          <Link href="/login" className="text-black font-bold ml-1">
             Sign In
           </Link>
         </p>
       </div>
     </AuthLayout>
-  );
-}
   );
 }

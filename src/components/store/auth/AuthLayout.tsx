@@ -15,27 +15,27 @@ interface AuthLayoutProps {
  */
 const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) => {
   return (
-    <main className="h-[100dvh] w-full overflow-hidden flex flex-col items-center justify-center bg-background text-foreground px-6 md:px-0">
-      {/* Content Wrapper with bottom padding to ensure 12vh empty space at the bottom */}
-      <div className="w-full max-w-md flex flex-col items-center pb-[12vh]">
+    <main className="h-[100dvh] w-full overflow-hidden flex flex-col items-center justify-center bg-white text-black px-6 md:px-0">
+      {/* Content Wrapper with bottom padding to ensure 10% empty space at the bottom */}
+      <div className="w-full max-w-[380px] flex flex-col items-center pb-[12vh]">
         {/* Logo */}
         <Link href="/" className="mb-12 group">
-          <span className="font-display text-3xl font-bold tracking-[0.3em] uppercase transition-all group-hover:tracking-[0.4em]">
+          <span className="font-display text-2xl font-bold tracking-[0.3em] uppercase transition-all group-hover:tracking-[0.4em]">
             STORE
           </span>
         </Link>
 
         {(title || subtitle) && (
-          <div className="text-center mb-10 space-y-3">
-            {title && (
-              <h1 className="text-[38px] font-display tracking-tighter uppercase leading-none">
-                {title}
-              </h1>
-            )}
+          <div className="text-center mb-10 space-y-2">
             {subtitle && (
-              <p className="text-text-secondary text-sm md:text-base font-light tracking-widest uppercase">
+              <p className="text-neutral-500 text-[11px] font-bold tracking-[0.3em] uppercase">
                 {subtitle}
               </p>
+            )}
+            {title && (
+              <h1 className="text-[44px] font-display font-medium tracking-tight leading-none text-black">
+                {title}
+              </h1>
             )}
           </div>
         )}

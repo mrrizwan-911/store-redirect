@@ -22,6 +22,8 @@ export function LookbookTeaser() {
                 src={lookbook1}
                 alt="Lookbook Editorial 1"
                 fill
+                unoptimized
+                sizes="(max-width: 1024px) 50vw, 25vw"
                 className="object-cover transition-transform duration-[2000ms] group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-black/10 transition-all group-hover:bg-black/0" />
@@ -33,6 +35,8 @@ export function LookbookTeaser() {
                 src={lookbook2}
                 alt="Lookbook Editorial 2"
                 fill
+                unoptimized
+                sizes="(max-width: 1024px) 50vw, 25vw"
                 className="object-cover transition-transform duration-[2000ms] group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-black/20 transition-all group-hover:bg-black/5" />
@@ -44,6 +48,8 @@ export function LookbookTeaser() {
                 src={lookbook3}
                 alt="Lookbook Editorial 3"
                 fill
+                unoptimized
+                sizes="(max-width: 1024px) 50vw, 25vw"
                 className="object-cover transition-transform duration-[2000ms] group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-black/30 transition-all group-hover:bg-black/10" />

@@ -140,7 +140,7 @@ function VerifyOtpContent() {
               inputMode="numeric"
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              className="w-full h-16 border-b-2 border-neutral-100 text-center text-2xl font-display bg-transparent text-black focus:border-black focus:ring-0 outline-none transition-all duration-300"
+              className="w-12 h-16 border-2 border-neutral-200 rounded-[12px] text-center text-2xl font-display bg-transparent text-black focus:border-black focus:ring-0 outline-none transition-all duration-300"
               autoFocus={index === 0}
             />
           ))}
@@ -150,30 +150,31 @@ function VerifyOtpContent() {
           <Button
             type="submit"
             disabled={isLoading || timeLeft === 0}
-            className="w-full bg-black hover:bg-[#1A1A1A] text-white uppercase tracking-[0.2em] font-bold rounded-[12px] h-[60px] transition-all"
+            className="w-full bg-black hover:bg-[#1A1A1A] text-white uppercase tracking-[0.2em] text-[13px] font-bold rounded-[12px] h-[60px] transition-all"
           >
             {isLoading ? 'Verifying...' : 'Verify OTP'}
           </Button>
 
           <div className="text-center space-y-4">
+            <p className="text-[16px] text-neutral-500">
+              Didn't receive the code?{' '}
+              <button
+                onClick={handleResend}
+                type="button"
+                disabled={timeLeft > 540}
+                className="text-black font-bold disabled:opacity-20 ml-1"
+              >
+                Resend OTP
+              </button>
+            </p>
+
             <p className="text-[11px] uppercase tracking-[0.3em] text-neutral-400">
               Expires in <span className="text-black font-bold font-mono">{formatTime(timeLeft)}</span>
             </p>
-
-            <button
-              onClick={handleResend}
-              type="button"
-              disabled={timeLeft > 540}
-              className="text-[11px] uppercase tracking-[0.3em] text-black font-bold underline underline-offset-8 disabled:opacity-20 transition-opacity"
-            >
-              Resend Code
-            </button>
           </div>
         </div>
       </form>
     </AuthLayout>
-  );
-}
   );
 }
 

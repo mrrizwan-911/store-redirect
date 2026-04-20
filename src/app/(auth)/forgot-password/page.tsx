@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
           <Button
             asChild
             variant="outline"
-            className="w-full border-neutral-200 hover:bg-neutral-50 text-black uppercase tracking-[0.2em] font-bold rounded-[12px] h-[60px] transition-all"
+            className="w-full border-neutral-200 hover:bg-neutral-50 text-black uppercase tracking-[0.2em] text-[13px] font-bold rounded-[12px] h-[60px] transition-all"
           >
             <Link href="/login">Back to Login</Link>
           </Button>
@@ -67,39 +67,39 @@ export default function ForgotPasswordPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="space-y-1">
-          <Label
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-1.5">
+          <label
             htmlFor="email"
-            className="text-[11px] uppercase tracking-[0.3em] font-medium text-black"
+            className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block"
           >
             Email Address
-          </Label>
-          <Input
+          </label>
+          <input
             id="email"
             name="email"
             type="email"
-            placeholder="ENTER YOUR EMAIL"
+            placeholder="Email@example.com"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="input-underline h-12 text-[15px]"
+            className="input-underline w-full h-12 text-[16px] outline-none"
           />
         </div>
 
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-black hover:bg-[#1A1A1A] text-white uppercase tracking-[0.2em] font-bold rounded-[12px] h-[60px] transition-all"
+          className="w-full bg-black hover:bg-[#1A1A1A] text-white uppercase tracking-[0.2em] text-[13px] font-bold rounded-[12px] h-[60px] transition-all"
         >
           {isLoading ? 'Sending...' : 'Send Reset Link'}
         </Button>
       </form>
 
       <div className="mt-10 text-center">
-        <p className="text-[16px] text-neutral-500 whitespace-nowrap">
+        <p className="text-[16px] text-neutral-500">
           Remember your password?{' '}
-          <Link href="/login" className="text-black font-bold hover:underline underline-offset-4">
+          <Link href="/login" className="text-black font-bold ml-1">
             Sign In
           </Link>
         </p>

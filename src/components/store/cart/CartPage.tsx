@@ -15,11 +15,6 @@ export function CartPage() {
   const { items } = useAppSelector((state) => state.cart)
 
   const [discount, setDiscount] = useState<{ amount: number; code: string } | null>(null)
-  const [mounted, setMounted] = useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
 
   const handleQuantityChange = (productId: string, variantId: string | undefined, currentQty: number, change: number) => {
     const newQty = currentQty + change
@@ -39,8 +34,6 @@ export function CartPage() {
     dispatch(addToWishlist({ productId: item.productId, variantId: item.variantId, size: item.size, color: item.color }))
     dispatch(removeItem({ productId: item.productId, variantId: item.variantId }))
   }
-
-  if (!mounted) return null
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const total = Math.max(0, subtotal - (discount?.amount || 0))

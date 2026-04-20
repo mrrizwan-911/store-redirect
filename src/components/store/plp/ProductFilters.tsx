@@ -84,13 +84,13 @@ export function ProductFilters({ onFilterChange, currentFilters, categories = []
     currentFilters.minRating !== null
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       {hasActiveFilters && (
-        <div className="flex items-center justify-between border-b border-black pb-4">
-          <h2 className="text-[11px] uppercase tracking-[0.2em] font-bold">Active Filters</h2>
+        <div className="flex items-center justify-between border-b border-[#E5E5E5] pb-4">
+          <h2 className="text-[11px] uppercase tracking-[0.18em]">Active Filters</h2>
           <button
             onClick={() => onFilterChange({ minPrice: 0, maxPrice: 20000, sizes: [], colors: [], minRating: null })}
-            className="text-[10px] uppercase tracking-widest font-bold underline hover:text-neutral-500"
+            className="text-[10px] uppercase tracking-[0.16em] text-neutral-600 underline hover:text-black"
           >
             Clear All
           </button>
@@ -99,13 +99,13 @@ export function ProductFilters({ onFilterChange, currentFilters, categories = []
 
       {/* Categories */}
       {categories.length > 0 && (
-        <div className="border-b border-neutral-100 pb-8">
+        <div className="border-b border-[#E5E5E5] pb-6">
           <button
             onClick={() => toggleSection('category')}
-            className="flex w-full items-center justify-between text-[11px] uppercase tracking-[0.2em] font-bold mb-6"
+            className="mb-4 flex w-full items-center justify-between text-[11px] uppercase tracking-[0.18em]"
           >
             Category
-            {openSections.category ? <Minus className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+            {openSections.category ? <Minus className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
           </button>
           <AnimatePresence initial={false}>
             {openSections.category && (
@@ -114,7 +114,7 @@ export function ProductFilters({ onFilterChange, currentFilters, categories = []
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3, ease: [0.19, 1, 0.22, 1] }}
-                className="overflow-hidden space-y-3"
+                className="space-y-2.5 overflow-hidden"
               >
                 {categories.map((cat) => (
                   <div
@@ -123,14 +123,14 @@ export function ProductFilters({ onFilterChange, currentFilters, categories = []
                     onClick={() => handleCategoryChange(cat.slug)}
                   >
                     <div className={cn(
-                      "w-4 h-4 border border-black flex items-center justify-center transition-colors",
+                      "flex h-3.5 w-3.5 items-center justify-center border border-black transition-colors",
                       currentFilters.category === cat.slug ? "bg-black" : "bg-white group-hover:bg-neutral-50"
                     )}>
                       {currentFilters.category === cat.slug && <span className="text-[10px] text-white">✓</span>}
                     </div>
                     <span className={cn(
                       "text-xs uppercase tracking-wider transition-colors",
-                      currentFilters.category === cat.slug ? "font-bold" : "text-neutral-600 group-hover:text-black"
+                      currentFilters.category === cat.slug ? "font-medium text-black" : "text-neutral-600 group-hover:text-black"
                     )}>
                       {cat.name}
                     </span>
@@ -143,13 +143,13 @@ export function ProductFilters({ onFilterChange, currentFilters, categories = []
       )}
 
       {/* Price Range */}
-      <div className="border-b border-neutral-100 pb-8">
+      <div className="border-b border-[#E5E5E5] pb-6">
         <button
           onClick={() => toggleSection('price')}
-          className="flex w-full items-center justify-between text-[11px] uppercase tracking-[0.2em] font-bold mb-6"
+          className="mb-4 flex w-full items-center justify-between text-[11px] uppercase tracking-[0.18em]"
         >
           Price Range
-          {openSections.price ? <Minus className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+          {openSections.price ? <Minus className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
         </button>
         <AnimatePresence initial={false}>
           {openSections.price && (
@@ -176,13 +176,13 @@ export function ProductFilters({ onFilterChange, currentFilters, categories = []
       </div>
 
       {/* Size */}
-      <div className="border-b border-neutral-100 pb-8">
+      <div className="border-b border-[#E5E5E5] pb-6">
         <button
           onClick={() => toggleSection('size')}
-          className="flex w-full items-center justify-between text-[11px] uppercase tracking-[0.2em] font-bold mb-6"
+          className="mb-4 flex w-full items-center justify-between text-[11px] uppercase tracking-[0.18em]"
         >
           Size
-          {openSections.size ? <Minus className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+          {openSections.size ? <Minus className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
         </button>
         <AnimatePresence initial={false}>
           {openSections.size && (
@@ -190,14 +190,14 @@ export function ProductFilters({ onFilterChange, currentFilters, categories = []
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden grid grid-cols-4 gap-2"
+              className="grid grid-cols-4 gap-1.5 overflow-hidden"
             >
               {SIZES.map(size => (
                 <button
                   key={size}
                   onClick={() => handleSizeToggle(size)}
                   className={cn(
-                    "h-10 flex items-center justify-center border text-[10px] font-bold transition-all",
+                    "flex h-9 items-center justify-center border text-[10px] transition-all",
                     currentFilters.sizes.includes(size)
                       ? "bg-black text-white border-black"
                       : "bg-white text-black border-neutral-200 hover:border-black"
@@ -212,13 +212,13 @@ export function ProductFilters({ onFilterChange, currentFilters, categories = []
       </div>
 
       {/* Color */}
-      <div className="border-b border-neutral-100 pb-8">
+      <div className="border-b border-[#E5E5E5] pb-6">
         <button
           onClick={() => toggleSection('color')}
-          className="flex w-full items-center justify-between text-[11px] uppercase tracking-[0.2em] font-bold mb-6"
+          className="mb-4 flex w-full items-center justify-between text-[11px] uppercase tracking-[0.18em]"
         >
           Color
-          {openSections.color ? <Minus className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+          {openSections.color ? <Minus className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
         </button>
         <AnimatePresence initial={false}>
           {openSections.color && (
@@ -226,7 +226,7 @@ export function ProductFilters({ onFilterChange, currentFilters, categories = []
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden flex flex-wrap gap-3"
+              className="flex flex-wrap gap-2.5 overflow-hidden"
             >
               {COLORS.map(color => (
                 <button
@@ -234,7 +234,7 @@ export function ProductFilters({ onFilterChange, currentFilters, categories = []
                   onClick={() => handleColorToggle(color.name)}
                   title={color.name}
                   className={cn(
-                    "w-6 h-6 border transition-all flex items-center justify-center",
+                    "flex h-5 w-5 items-center justify-center border transition-all",
                     currentFilters.colors.includes(color.name) ? "ring-1 ring-black ring-offset-2 border-black" : "border-neutral-200"
                   )}
                   style={{ backgroundColor: color.hex }}
@@ -248,13 +248,13 @@ export function ProductFilters({ onFilterChange, currentFilters, categories = []
       </div>
 
       {/* Rating */}
-      <div className="pb-8">
+      <div className="pb-2">
         <button
           onClick={() => toggleSection('rating')}
-          className="flex w-full items-center justify-between text-[11px] uppercase tracking-[0.2em] font-bold mb-6"
+          className="mb-4 flex w-full items-center justify-between text-[11px] uppercase tracking-[0.18em]"
         >
           Rating
-          {openSections.rating ? <Minus className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+          {openSections.rating ? <Minus className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
         </button>
         <AnimatePresence initial={false}>
           {openSections.rating && (

@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export function NewsletterSection() {
   const [email, setEmail] = useState('')
@@ -18,52 +19,70 @@ export function NewsletterSection() {
   }
 
   return (
-    <section className="py-32 bg-white">
-      <div className="max-w-4xl mx-auto px-4 md:px-6 text-center">
-        <span className="text-[10px] uppercase tracking-[0.6em] text-neutral-400 font-bold mb-8 block">
-          Stay Connected
-        </span>
-
+    <section className="py-24 md:py-32 bg-white overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 md:px-10">
         {isSubmitted ? (
-          <div className="animate-in fade-in zoom-in duration-700">
+          <div className="animate-in fade-in zoom-in duration-700 text-center py-10">
             <CheckCircle2 className="w-16 h-16 text-black mx-auto mb-8 stroke-[1]" />
-            <h2 className="font-display text-4xl md:text-5xl font-medium uppercase mb-6 tracking-tight">
+            <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tight mb-4 text-black">
               You&apos;re on the list
             </h2>
-            <p className="text-neutral-500 max-w-md mx-auto font-sans font-light">
-              Thank you for joining our inner circle. Check your inbox soon for your exclusive 10% discount code.
+            <p className="text-neutral-600 max-w-md mx-auto font-sans text-base leading-relaxed">
+              Thank you for joining. Check your inbox soon for your exclusive 10% discount code.
             </p>
           </div>
         ) : (
-          <>
-            <h2 className="font-display text-5xl md:text-7xl font-medium uppercase mb-10 tracking-tighter leading-[0.9]">
-              Get 10% off <br /> <span className="italic font-light opacity-80">your first</span> order
-            </h2>
-            <p className="text-neutral-400 text-base md:text-lg font-light mb-16 max-w-lg mx-auto leading-relaxed font-sans">
-              Join our mailing list for exclusive access to new arrivals, private sales, and seasonal fashion editorials.
-            </p>
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-16 lg:gap-24">
+            {/* Typography Block */}
+            <div className="flex-1 text-center lg:text-left">
+              <span className="text-[10px] uppercase tracking-[0.4em] text-neutral-500 font-bold mb-8 block">
+                Newsletter
+              </span>
+              <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight leading-[0.95] text-black">
+                Get 10% off <br className="hidden lg:block" /> your first order
+              </h2>
+              <p className="text-neutral-600 text-base md:text-lg mt-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-sans">
+                Exclusive access to new arrivals, private sales, and seasonal editorials. No noise.
+              </p>
+            </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-0 max-w-xl mx-auto border border-black/10 focus-within:border-black transition-colors duration-500">
-              <Input
-                type="email"
-                placeholder="ENTER YOUR EMAIL"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-16 rounded-none border-none bg-transparent px-8 text-[10px] uppercase tracking-[0.3em] focus-visible:ring-0 flex-1"
-              />
-              <Button
-                type="submit"
-                className="h-16 px-12 rounded-none uppercase tracking-[0.3em] text-[10px] font-bold transition-all bg-black text-white hover:bg-neutral-800 shrink-0"
+            {/* Action Block */}
+            <div className="w-full lg:w-[450px] shrink-0">
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col lg:flex-row items-stretch lg:items-end gap-6 lg:gap-0 group"
               >
-                Join Now
-              </Button>
-            </form>
+                <div className="relative flex-1">
+                  <Input
+                    type="email"
+                    placeholder="Email address"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={cn(
+                      "h-16 lg:h-14 rounded-none border-0 border-b border-neutral-200 bg-transparent px-0",
+                      "text-lg lg:text-base focus-visible:ring-0 focus-visible:border-black transition-all duration-500",
+                      "placeholder:text-neutral-300 placeholder:uppercase placeholder:tracking-widest placeholder:text-[10px]"
+                    )}
+                  />
+                </div>
+                <Button
+                  type="submit"
+                  className={cn(
+                    "h-16 lg:h-14 px-12 rounded-none uppercase tracking-[0.2em] text-[11px] font-bold",
+                    "bg-black text-white hover:bg-neutral-900 transition-all duration-500",
+                    "active:scale-95 shadow-2xl lg:shadow-none"
+                  )}
+                >
+                  Subscribe
+                </Button>
+              </form>
 
-            <p className="mt-8 text-[9px] uppercase tracking-[0.4em] text-neutral-300 font-medium">
-              Privacy guaranteed. Unsubscribe at any time.
-            </p>
-          </>
+              <p className="mt-6 text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-medium text-center lg:text-left">
+                Unsubscribe anytime.
+              </p>
+            </div>
+          </div>
         )}
       </div>
     </section>

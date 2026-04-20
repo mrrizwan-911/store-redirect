@@ -23,6 +23,22 @@ export function HeroBanner() {
   const [currentSlide, setCurrentSlide] = useState(0)
 
   useEffect(() => {
+    // #region agent log
+    fetch('http://127.0.0.1:7668/ingest/2b712e1c-2036-4764-9d93-0324dd8ffeeb', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '072827' },
+      body: JSON.stringify({
+        sessionId: '072827',
+        runId: 'initial-repro',
+        hypothesisId: 'H5',
+        location: 'HeroBanner.tsx:28',
+        message: 'hero-mounted',
+        data: { slidesCount: SLIDES.length, initialSlide: 0, firstImage: SLIDES[0]?.image ?? 'missing' },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {})
+    // #endregion
+
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % SLIDES.length)
     }, 6400)
@@ -53,6 +69,7 @@ export function HeroBanner() {
                 alt={SLIDES[currentSlide].title}
                 fill
                 priority
+                unoptimized
                 sizes="100vw"
                 className="object-cover"
               />

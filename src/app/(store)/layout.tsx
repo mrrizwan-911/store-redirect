@@ -12,7 +12,6 @@ export default function StoreLayout({
     <div className="flex flex-col min-h-screen">
       <AnnouncementBar />
       <Navbar />
-      <CartDrawer />
       <main className="flex-1">
         {children}
       </main>

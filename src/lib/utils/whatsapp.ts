@@ -28,6 +28,35 @@ export function generateWhatsAppOrderUrl(params: WhatsAppOrderParams): string {
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
 }
 
+export interface OrderConfirmationParams {
+  orderNumber: string
+  total: number
+  paymentMethod: string
+  itemsCount: number
+}
+
+/**
+ * Generates a WhatsApp message for a customer to confirm their completed order.
+ */
+export function generateWhatsAppOrderConfirmationUrl(params: OrderConfirmationParams): string {
+  const { orderNumber, total, paymentMethod, itemsCount } = params
+
+  const message = [
+    `Hi! I've just placed an order.`,
+    ``,
+    `Order Number: #${orderNumber}`,
+    `Items: ${itemsCount}`,
+    `Total: PKR ${total.toLocaleString('en-PK')}`,
+    `Payment Method: ${paymentMethod}`,
+    ``,
+    `Please process my order as soon as possible. Thanks!`,
+  ].join('\n')
+
+  const phone = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '').replace(/[^0-9]/g, '')
+
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+}
+
 export interface CartItemForWhatsApp {
   name: string
   size?: string
@@ -53,6 +82,35 @@ export function generateWhatsAppCartUrl(
     `Total: PKR ${total.toLocaleString('en-PK')}`,
     ``,
     `Please confirm availability and delivery details.`,
+  ].join('\n')
+
+  const phone = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '').replace(/[^0-9]/g, '')
+
+  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+}
+
+export interface OrderConfirmationParams {
+  orderNumber: string
+  total: number
+  paymentMethod: string
+  itemsCount: number
+}
+
+/**
+ * Generates a WhatsApp message for a customer to confirm their completed order.
+ */
+export function generateWhatsAppOrderConfirmationUrl(params: OrderConfirmationParams): string {
+  const { orderNumber, total, paymentMethod, itemsCount } = params
+
+  const message = [
+    `Hi! I've just placed an order.`,
+    ``,
+    `Order Number: #${orderNumber}`,
+    `Items: ${itemsCount}`,
+    `Total: PKR ${total.toLocaleString('en-PK')}`,
+    `Payment Method: ${paymentMethod}`,
+    ``,
+    `Please process my order as soon as possible. Thanks!`,
   ].join('\n')
 
   const phone = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '').replace(/[^0-9]/g, '')

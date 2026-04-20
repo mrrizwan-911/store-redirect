@@ -18,6 +18,9 @@
 /.next/
 .claude/
 /out/
+docs/
+playwright-report/
+playwright/
 
 # production
 /build
@@ -63,3 +66,8 @@ testsprite_tests/
 # Scripts and extra tests
 check-db.ts
 scripts/
+tests/
+# Additional exclusions
+get-errors.patch
+.testsprite/
+jest.config.js

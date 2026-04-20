@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Heart, ShoppingBag, Star } from 'lucide-react'
+import { Heart, Plus, Star } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { addItem, openCart } from '@/store/slices/cartSlice'
 import { toggleWishlist } from '@/store/slices/wishlistSlice'
@@ -66,7 +66,7 @@ export function ProductCard({
 
   return (
     <div
-      className="group relative bg-white rounded-none transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      className="group relative bg-white rounded-none border border-[#E5E5E5] transition-colors duration-300 hover:border-black/25"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -77,8 +77,9 @@ export function ProductCard({
             src={(isHovered && secondaryImageUrl) ? secondaryImageUrl : imageUrl}
             alt={name}
             fill
+            unoptimized
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-[1.06]"
+            className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
           />
         </Link>
 
@@ -96,31 +97,33 @@ export function ProductCard({
           )}
         </div>
 
-        {/* Action Icons Overlay */}
-        <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+        {/* Minimal Actions (hover/focus) */}
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button
             onClick={handleWishlist}
             className={cn(
-              "w-9 h-9 flex items-center justify-center bg-white/95 text-neutral-600 transition-all hover:bg-black hover:text-white shadow-sm border border-neutral-100",
-              isInWishlist && "bg-black text-white border-black"
+              "h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors",
+              isInWishlist && "border-black text-black"
             )}
             aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
           >
-            <Heart className={cn("w-4 h-4", isInWishlist && "fill-current")} />
+            <Heart className={cn("w-3.5 h-3.5", isInWishlist && "fill-current")} />
+            <span className="hidden sm:inline">Save</span>
           </button>
           <button
             onClick={handleAddToCart}
-            className="w-9 h-9 flex items-center justify-center bg-white/95 text-neutral-600 transition-all hover:bg-black hover:text-white shadow-sm border border-neutral-100"
+            className="h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors"
             aria-label="Add to cart"
           >
-            <ShoppingBag className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Add</span>
           </button>
         </div>
 
         {/* Quick Add Button */}
         <button
           onClick={handleAddToCart}
-          className="absolute bottom-0 left-0 right-0 bg-white text-black py-4 text-[10px] font-bold uppercase tracking-[0.15em] transition-transform duration-500 translate-y-full group-hover:translate-y-0 border-t border-neutral-100 hover:bg-black hover:text-white z-20 shadow-[0_-5px_15px_-5px_rgba(0,0,0,0.05)]"
+          className="absolute bottom-0 left-0 right-0 bg-white text-black py-3.5 text-[10px] font-bold uppercase tracking-[0.18em] transition-transform duration-500 translate-y-full group-hover:translate-y-0 border-t border-[#E5E5E5] hover:bg-black hover:text-white z-20"
         >
           Quick Add — PKR {(salePrice || price).toLocaleString()}
         </button>
@@ -134,7 +137,7 @@ export function ProductCard({
           </span>
           {avgRating && (
             <div className="flex items-center gap-1">
-              <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+              <Star className="w-2.5 h-2.5 fill-neutral-400 text-neutral-400" />
               <span className="text-[10px] font-bold text-black">{avgRating}</span>
             </div>
           )}
@@ -161,8 +164,8 @@ export function ProductCard({
           {/* Low Stock Indicator */}
           {isLowStock && (
             <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <span className="text-[10px] text-amber-700 font-bold uppercase tracking-wider">
+              <div className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-pulse" />
+              <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
                 Only {stockCount} left
               </span>
             </div>

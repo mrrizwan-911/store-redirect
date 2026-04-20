@@ -11,15 +11,6 @@ interface FlashSaleCountdownProps {
 
 export function FlashSaleCountdown({ saleEndTimeUTC, saleName, discountPct }: FlashSaleCountdownProps) {
   const { hours, minutes, seconds, isExpired } = useFlashSaleTimer(saleEndTimeUTC)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return <div className="h-24 w-full bg-[#FAFAFA] animate-pulse border border-[#E5E5E5]"></div>
-  }
 
   if (isExpired) {
     return (
