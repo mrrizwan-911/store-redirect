@@ -2,11 +2,20 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingBag, Heart, User, Search, Menu, X } from 'lucide-react'
+import { ShoppingBag, Heart, User, Search, Menu, X, LayoutDashboard, LogOut } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { toggleCart } from '@/store/slices/cartSlice'
+import { logout } from '@/store/slices/authSlice'
 import { cn } from '@/lib/utils'
+import { useRouter } from 'next/navigation'
 
 const NAV_CATEGORIES = [
   {
@@ -35,10 +44,15 @@ export function Navbar() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [isScrolled, setIsScrolled] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [isAccountOpen, setIsAccountOpen] = useState(false)
+
+  const router = useRouter()
   const dispatch = useAppDispatch()
   const cartItems = useAppSelector(state => state.cart.items)
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
-  const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated)
+  const { isAuthenticated, user } = useAppSelector(state => state.auth)
+
+  const dashboardHref = user?.role === 'ADMIN' ? '/admin' : '/account'
 
   useEffect(() => {
     setMounted(true)
@@ -91,9 +105,60 @@ export function Navbar() {
               <Link href="/wishlist" className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100" aria-label="Wishlist">
                 <Heart className="h-5 w-5 stroke-[1.5]" />
               </Link>
-              <Link href={mounted && isAuthenticated ? '/account' : '/login'} className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100" aria-label="Account">
-                <User className="h-5 w-5 stroke-[1.5]" />
-              </Link>
+
+              {/* Dynamic Account Button */}
+              {!mounted ? (
+                <div className="text-gray-600 h-5 w-5 stroke-[1.5]"><User className="h-5 w-5" /></div>
+              ) : isAuthenticated ? (
+                <div
+                  className="relative"
+                  onMouseEnter={() => setIsAccountOpen(true)}
+                  onMouseLeave={() => setIsAccountOpen(false)}
+                >
+                  <DropdownMenu open={isAccountOpen} onOpenChange={setIsAccountOpen}>
+                    <DropdownMenuTrigger
+                      onClick={() => router.push(dashboardHref)}
+                      className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100 outline-none"
+                      aria-label="Account Menu"
+                    >
+                      <User className="h-5 w-5 stroke-[1.5]" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48 bg-[#F8F8F8] border border-neutral-200 shadow-xl rounded-none py-1.5 px-1.5">
+                      <DropdownMenuItem
+                        className="px-4 py-2.5 text-[11px] uppercase tracking-[0.15em] font-bold cursor-pointer text-neutral-600 hover:text-black focus:bg-neutral-200/50 focus:text-black flex items-center gap-3 transition-all rounded-none outline-none"
+                        onClick={() => {
+                          setIsAccountOpen(false);
+                          router.push(dashboardHref);
+                        }}
+                      >
+                        <LayoutDashboard className="w-4 h-4 stroke-[1.5]" />
+                        Dashboard
+                      </DropdownMenuItem>
+                      <div className="h-px bg-neutral-200 my-1" />
+                      <DropdownMenuItem
+                        className="px-4 py-2.5 text-[11px] uppercase tracking-[0.15em] font-bold cursor-pointer text-red-500 hover:text-red-700 focus:bg-red-50 focus:text-red-700 flex items-center gap-3 transition-all rounded-none outline-none"
+                        onClick={() => {
+                          setIsAccountOpen(false);
+                          dispatch(logout());
+                          router.push('/login');
+                        }}
+                      >
+                        <LogOut className="w-4 h-4 stroke-[1.5]" />
+                        Logout
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100"
+                  aria-label="Login"
+                >
+                  <User className="h-5 w-5 stroke-[1.5]" />
+                </Link>
+              )}
+
               <button
                 onClick={() => dispatch(toggleCart())}
                 className="relative text-gray-600 hover:text-black transition-all after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100"
@@ -145,10 +210,27 @@ export function Navbar() {
                     </nav>
 
                     <div className="mt-auto pt-8 border-t border-black/5 flex flex-col gap-4">
-                      <Link href="/account" className="flex items-center gap-3 text-sm font-medium">
-                        <User className="w-4 h-4" /> My Account
-                      </Link>
-                      <Link href="/wishlist" className="flex items-center gap-3 text-sm font-medium">
+                      {isAuthenticated ? (
+                        <>
+                          <Link href={dashboardHref} className="flex items-center gap-3 text-sm font-medium uppercase tracking-widest text-black">
+                            <User className="w-4 h-4" /> Dashboard
+                          </Link>
+                          <button
+                            onClick={() => {
+                              dispatch(logout());
+                              router.push('/login');
+                            }}
+                            className="flex items-center gap-3 text-sm font-medium uppercase tracking-widest text-red-600 text-left"
+                          >
+                            <LogOut className="w-4 h-4" /> Logout
+                          </button>
+                        </>
+                      ) : (
+                        <Link href="/login" className="flex items-center gap-3 text-sm font-medium uppercase tracking-widest text-black">
+                          <User className="w-4 h-4" /> Sign In
+                        </Link>
+                      )}
+                      <Link href="/wishlist" className="flex items-center gap-3 text-sm font-medium uppercase tracking-widest text-black">
                         <Heart className="w-4 h-4" /> Wishlist
                       </Link>
                     </div>

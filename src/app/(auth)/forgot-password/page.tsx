@@ -2,13 +2,26 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { useAppSelector } from '@/store/hooks';
 import AuthLayout from '@/components/store/auth/AuthLayout';
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      const redirectPath = user.role === 'ADMIN' ? '/admin' : '/account';
+      router.push(redirectPath);
+    }
+  }, [isAuthenticated, user, router]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [email, setEmail] = useState('');
@@ -60,7 +73,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthLayout title="Recover" subtitle="RESET PASSWORD">
-      <div className="text-center mb-8">
+      <div className="text-center mb-6">
         <p className="text-[13px] text-neutral-500 uppercase tracking-widest leading-relaxed">
           Enter your email address and we'll <br />
           send you a link to reset your password.
@@ -68,7 +81,7 @@ export default function ForgotPasswordPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-1.5">
+        <div className="space-y-0.5">
           <label
             htmlFor="email"
             className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block"
@@ -83,7 +96,7 @@ export default function ForgotPasswordPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="input-underline w-full h-12 text-[16px] outline-none"
+            className="input-underline w-full h-10 text-[16px] outline-none"
           />
         </div>
 
@@ -96,7 +109,7 @@ export default function ForgotPasswordPage() {
         </Button>
       </form>
 
-      <div className="mt-10 text-center">
+      <div className="mt-6 text-center">
         <p className="text-[16px] text-neutral-500">
           Remember your password?{' '}
           <Link href="/login" className="text-black font-bold ml-1">

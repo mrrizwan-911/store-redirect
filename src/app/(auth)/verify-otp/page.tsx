@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useAppSelector } from '@/store/hooks';
 import AuthLayout from '@/components/store/auth/AuthLayout';
 
 function VerifyOtpContent() {
@@ -11,6 +12,16 @@ function VerifyOtpContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId');
   const email = searchParams.get('email');
+
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const redirectPath = user.role === 'ADMIN' ? '/admin' : '/account';
+      router.push(redirectPath);
+    }
+  }, [isAuthenticated, user, router]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -121,15 +132,15 @@ function VerifyOtpContent() {
       title="Verify"
       subtitle="ENTER OTP"
     >
-      <div className="text-center mb-8">
+      <div className="text-center mb-6">
         <p className="text-[13px] text-neutral-500 uppercase tracking-widest leading-relaxed">
           We've sent a 6-digit code to <br />
           <span className="text-black font-bold">{email || 'your email'}</span>
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-10">
-        <div className="flex justify-between gap-2 md:gap-3" onPaste={handlePaste}>
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="flex justify-between gap-1.5 md:gap-2" onPaste={handlePaste}>
           {otp.map((digit, index) => (
             <input
               key={index}
@@ -140,13 +151,13 @@ function VerifyOtpContent() {
               inputMode="numeric"
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              className="w-12 h-16 border-2 border-neutral-200 rounded-[12px] text-center text-2xl font-display bg-transparent text-black focus:border-black focus:ring-0 outline-none transition-all duration-300"
+              className="w-11 h-14 border-2 border-neutral-200 rounded-[12px] text-center text-xl font-display bg-transparent text-black focus:border-black focus:ring-0 outline-none transition-all duration-300"
               autoFocus={index === 0}
             />
           ))}
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <Button
             type="submit"
             disabled={isLoading || timeLeft === 0}
@@ -155,7 +166,7 @@ function VerifyOtpContent() {
             {isLoading ? 'Verifying...' : 'Verify OTP'}
           </Button>
 
-          <div className="text-center space-y-4">
+          <div className="text-center space-y-3">
             <p className="text-[16px] text-neutral-500">
               Didn't receive the code?{' '}
               <button

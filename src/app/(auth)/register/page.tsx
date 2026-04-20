@@ -10,6 +10,8 @@ import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import { registerSchema } from '@/lib/validations/auth';
 import { ZodError } from 'zod';
+import { setUser, setToken } from '@/store/slices/authSlice';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import AuthLayout from '@/components/store/auth/AuthLayout';
 
 export default function RegisterPage() {
@@ -21,6 +23,16 @@ export default function RegisterPage() {
     email: '',
     password: '',
   });
+
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      const redirectPath = user.role === 'ADMIN' ? '/admin' : '/account';
+      router.push(redirectPath);
+    }
+  }, [isAuthenticated, user, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -71,8 +83,8 @@ export default function RegisterPage() {
       title="Register"
       subtitle="CREATE ACCOUNT"
     >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-1.5">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-0.5">
           <label
             htmlFor="name"
             className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block"
@@ -87,11 +99,11 @@ export default function RegisterPage() {
             required
             value={formData.name}
             onChange={handleChange}
-            className="input-underline w-full h-12 text-[16px] outline-none"
+            className="input-underline w-full h-10 text-[16px] outline-none"
           />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-0.5">
           <label
             htmlFor="email"
             className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block"
@@ -106,11 +118,11 @@ export default function RegisterPage() {
             required
             value={formData.email}
             onChange={handleChange}
-            className="input-underline w-full h-12 text-[16px] outline-none"
+            className="input-underline w-full h-10 text-[16px] outline-none"
           />
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-0.5">
           <label
             htmlFor="password"
             className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block"
@@ -126,7 +138,7 @@ export default function RegisterPage() {
               required
               value={formData.password}
               onChange={handleChange}
-              className="input-underline w-full h-12 text-[16px] outline-none pr-10"
+              className="input-underline w-full h-10 text-[16px] outline-none pr-10"
             />
             <button
               type="button"
@@ -173,7 +185,7 @@ export default function RegisterPage() {
         </div>
       </form>
 
-      <div className="mt-10 text-center">
+      <div className="mt-6 text-center">
         <p className="text-[16px] text-neutral-500">
           Already have an account?{' '}
           <Link href="/login" className="text-black font-bold ml-1">

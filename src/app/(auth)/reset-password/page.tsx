@@ -8,10 +8,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
+import { useAppSelector } from '@/store/hooks';
 import AuthLayout from '@/components/store/auth/AuthLayout';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      const redirectPath = user.role === 'ADMIN' ? '/admin' : '/account';
+      router.push(redirectPath);
+    }
+  }, [isAuthenticated, user, router]);
+
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -57,15 +68,15 @@ export default function ResetPasswordPage() {
 
   return (
     <AuthLayout title="Update" subtitle="NEW PASSWORD">
-      <div className="text-center mb-8">
+      <div className="text-center mb-6">
         <p className="text-[13px] text-neutral-500 uppercase tracking-widest leading-relaxed">
           Create a strong password to <br />
           secure your account.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-1.5">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-0.5">
           <label
             htmlFor="password"
             className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block"
@@ -81,7 +92,7 @@ export default function ResetPasswordPage() {
               required
               value={formData.password}
               onChange={handleChange}
-              className="input-underline w-full h-12 text-[16px] outline-none pr-10"
+              className="input-underline w-full h-10 text-[16px] outline-none pr-10"
             />
             <button
               type="button"
@@ -97,7 +108,7 @@ export default function ResetPasswordPage() {
           </div>
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-0.5">
           <label
             htmlFor="confirmPassword"
             className="text-[11px] uppercase tracking-[0.2em] font-bold text-black block"
@@ -113,7 +124,7 @@ export default function ResetPasswordPage() {
               required
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="input-underline w-full h-12 text-[16px] outline-none pr-10"
+              className="input-underline w-full h-10 text-[16px] outline-none pr-10"
             />
             <button
               type="button"
@@ -138,7 +149,7 @@ export default function ResetPasswordPage() {
         </Button>
       </form>
 
-      <div className="mt-10 text-center">
+      <div className="mt-6 text-center">
         <p className="text-[16px] text-neutral-500">
           Back to{' '}
           <Link href="/login" className="text-black font-bold ml-1">
