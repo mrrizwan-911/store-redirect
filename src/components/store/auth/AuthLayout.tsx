@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -17,6 +18,13 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, title, subtitle }) =>
     <main className="h-[100dvh] w-full overflow-hidden flex flex-col items-center justify-center bg-background text-foreground px-6 md:px-0">
       {/* Content Wrapper with bottom padding to ensure 12vh empty space at the bottom */}
       <div className="w-full max-w-md flex flex-col items-center pb-[12vh]">
+        {/* Logo */}
+        <Link href="/" className="mb-12 group">
+          <span className="font-display text-3xl font-bold tracking-[0.3em] uppercase transition-all group-hover:tracking-[0.4em]">
+            STORE
+          </span>
+        </Link>
+
         {(title || subtitle) && (
           <div className="text-center mb-10 space-y-3">
             {title && (
