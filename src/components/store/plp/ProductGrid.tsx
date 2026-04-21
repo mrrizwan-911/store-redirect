@@ -2,12 +2,13 @@
 
 import { ProductCard } from '../shared/ProductCard'
 import Link from 'next/link'
+import Image from 'next/image'
 import { LayoutGrid, List } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 
-interface ProductSummary {
+export interface ProductSummary {
   id: string
   name: string
   slug: string
@@ -151,12 +152,12 @@ export function ProductGrid({
                   href={`/products/${product.slug}`}
                   className="w-full md:w-56 lg:w-64 aspect-[4/5] relative overflow-hidden flex-shrink-0 bg-[#FAFAFA]"
                 >
-                  {/* Reuse ProductCard image language, but keep list layout calm */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={product.images[0]?.url || ''}
+                  <Image
+                    src={product.images[0]?.url || '/images/placeholder.jpg'}
                     alt={product.name}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                    fill
+                    unoptimized
+                    className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                   />
                 </Link>
 

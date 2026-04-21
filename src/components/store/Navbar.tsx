@@ -93,15 +93,18 @@ export function Navbar() {
                   </Link>
                 </div>
               ))}
+              <Link href="/lookbook" className={navLinkStyles}>
+                Lookbook
+              </Link>
             </nav>
           </div>
 
           {/* Right Icons (No Boxes, Clean Icons) */}
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-6">
-              <button className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100" aria-label="Search">
+              <Link href="/search" className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100" aria-label="Search">
                 <Search className="h-5 w-5 stroke-[1.5]" />
-              </button>
+              </Link>
               <Link href="/wishlist" className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100" aria-label="Wishlist">
                 <Heart className="h-5 w-5 stroke-[1.5]" />
               </Link>
@@ -162,10 +165,10 @@ export function Navbar() {
               <button
                 onClick={() => dispatch(toggleCart())}
                 className="relative text-gray-600 hover:text-black transition-all after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100"
-                aria-label={`Cart with ${cartCount} items`}
+                aria-label={`Cart with ${mounted ? cartCount : 0} items`}
               >
                 <ShoppingBag className="h-5 w-5 stroke-[1.5]" />
-                {cartCount > 0 && (
+                {mounted && cartCount > 0 && (
                   <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center bg-black text-[8px] font-bold text-white rounded-none">
                     {cartCount}
                   </span>
@@ -186,6 +189,12 @@ export function Navbar() {
                       STORE
                     </Link>
                     <nav className="flex flex-col gap-6">
+                      <Link
+                        href="/lookbook"
+                        className="text-sm font-medium uppercase tracking-widest text-black border-b border-black/5 pb-2"
+                      >
+                        Lookbook
+                      </Link>
                       {NAV_CATEGORIES.map(cat => (
                         <div key={cat.label} className="flex flex-col gap-3">
                           <Link

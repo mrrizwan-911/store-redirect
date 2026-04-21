@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { addItem, openCart } from '@/store/slices/cartSlice'
 import { toggleWishlist } from '@/store/slices/wishlistSlice'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface ProductCardProps {
   id: string
@@ -44,8 +44,13 @@ export function ProductCard({
 }: ProductCardProps) {
   const dispatch = useAppDispatch()
   const wishlist = useAppSelector(state => state.wishlist.productIds)
-  const isInWishlist = wishlist.includes(id)
+  const [mounted, setMounted] = useState(false)
+  const isInWishlist = mounted && wishlist.includes(id)
   const [isHovered, setIsHovered] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -66,12 +71,12 @@ export function ProductCard({
 
   return (
     <div
-      className="group relative bg-white rounded-none border border-[#E5E5E5] transition-colors duration-300 hover:border-black/25"
+      className="group relative bg-white rounded-[12px] border border-[#E5E5E5] transition-colors duration-300 hover:border-black/25 overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Container */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#FAFAFA]">
+      <div className="relative aspect-[4/5] overflow-hidden bg-[#FAFAFA] rounded-t-[12px]">
         <Link href={`/products/${slug}`} className="block h-full w-full relative">
           <Image
             src={(isHovered && secondaryImageUrl) ? secondaryImageUrl : imageUrl}

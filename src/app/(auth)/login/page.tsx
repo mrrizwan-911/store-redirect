@@ -70,7 +70,7 @@ export default function LoginPage() {
 
       // Success! Update Redux state
       dispatch(setUser(result.data.user));
-      dispatch(setToken(result.data.accessToken));
+      dispatch(setToken(result.data.access_token));
 
       toast.success('Welcome back!');
 

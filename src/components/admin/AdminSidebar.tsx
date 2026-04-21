@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   BarChart2, Package, ShoppingBag, Users, FileText,
-  Archive, Tag, Zap, Shirt, Star, Mail, Settings, LogOut
+  Archive, Tag, Zap, Shirt, Star, Mail, Settings, LogOut,
+  ExternalLink
 } from 'lucide-react'
 
 const navItems = [
@@ -27,8 +28,15 @@ export function AdminSidebar() {
 
   return (
     <aside className="w-60 bg-white border-r border-black flex flex-col h-full font-sans">
-      <div className="p-6 border-b border-black">
+      <div className="p-6 border-b border-black flex items-center justify-between">
         <h1 className="text-xl font-bold font-serif tracking-wide uppercase">Admin</h1>
+        <Link
+          href="/"
+          className="text-neutral-400 hover:text-black transition-colors"
+          title="Back to Storefront"
+        >
+          <ExternalLink className="w-4 h-4" />
+        </Link>
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4">

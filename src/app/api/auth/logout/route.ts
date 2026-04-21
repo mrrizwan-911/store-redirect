@@ -3,7 +3,7 @@ import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 
 export async function POST(req: NextRequest) {
-  const refreshToken = req.cookies.get('refreshToken')?.value
+  const refreshToken = req.cookies.get('refresh_token')?.value
 
   if (refreshToken) {
     // Silently delete — already expired tokens won't be found, that's fine
@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
   }
 
   const response = NextResponse.json({ success: true })
-  response.cookies.set('refreshToken', '', { maxAge: 0, path: '/' })
+  response.cookies.set('access_token', '', { maxAge: 0, path: '/' })
+  response.cookies.set('refresh_token', '', { maxAge: 0, path: '/' })
   return response
 }

@@ -69,17 +69,19 @@ export async function GET(req: NextRequest) {
 
     logger.auth('Google OAuth login', { userId: user.id, email: user.email })
 
-    const response = NextResponse.redirect(`${appUrl}/`)
-    response.cookies.set('refreshToken', refreshToken, {
+    const redirectPath = user.role === 'ADMIN' ? '/admin' : '/'
+    const response = NextResponse.redirect(`${appUrl}${redirectPath}`)
+
+    response.cookies.set('refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.APP_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
       path: '/',
     })
-    // Pass access token via a short-lived cookie for client-side pickup
-    response.cookies.set('accessToken', accessToken, {
-      httpOnly: false,
+    // Pass access token via a short-lived cookie for client-side pickup and middleware
+    response.cookies.set('access_token', accessToken, {
+      httpOnly: true,
       secure: process.env.APP_ENV === 'production',
       sameSite: 'lax',
       maxAge: 15 * 60, // 15 minutes

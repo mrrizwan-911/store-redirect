@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { HorizontalProductFilters } from './HorizontalProductFilters'
 import { ProductGrid } from './ProductGrid'
 import { SortDropdown } from './SortDropdown'
 import { motion } from 'framer-motion'
-import { SlidersHorizontal, X } from 'lucide-react'
+import { SlidersHorizontal, X, Search } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Input } from '@/components/ui/input'
 
 interface ProductListingClientProps {
   initialProducts: any[]
@@ -25,17 +26,21 @@ export function ProductListingClient({
   subtitle,
 }: ProductListingClientProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const [products, setProducts] = useState(initialProducts)
   const [total, setTotal] = useState(initialTotal)
   const [isLoading, setIsLoading] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [filtersOpen, setFiltersOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [searchInput, setSearchInput] = useState(searchParams.get('q') || searchParams.get('search') || '')
+
+  const isSearchPage = pathname === '/search'
 
   const currentFilters = {
     category: searchParams.get('category') || undefined,
     minPrice: Number(searchParams.get('minPrice')) || 0,
-    maxPrice: Number(searchParams.get('maxPrice')) || 20000,
+    maxPrice: Number(searchParams.get('maxPrice')) || 50000,
     sizes: searchParams.get('size')?.split(',').filter(Boolean) || [],
     colors: searchParams.get('color')?.split(',').filter(Boolean) || [],
     minRating: searchParams.get('rating') ? Number(searchParams.get('rating')) : null,
@@ -46,18 +51,22 @@ export function ProductListingClient({
   const hasActiveFilters =
     currentFilters.category ||
     currentFilters.minPrice > 0 ||
-    currentFilters.maxPrice < 20000 ||
+    currentFilters.maxPrice < 50000 ||
     currentFilters.sizes.length > 0 ||
     currentFilters.colors.length > 0 ||
     currentFilters.minRating !== null
 
-  const activeFilterCount = [
-    currentFilters.category ? 1 : 0,
-    currentFilters.minPrice > 0 || currentFilters.maxPrice < 20000 ? 1 : 0,
-    currentFilters.sizes.length > 0 ? 1 : 0,
-    currentFilters.colors.length > 0 ? 1 : 0,
-    currentFilters.minRating !== null ? 1 : 0,
-  ].reduce((a, b) => a + b, 0)
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const params = new URLSearchParams(searchParams.toString())
+    if (searchInput) {
+      params.set('q', searchInput)
+    } else {
+      params.delete('q')
+      params.delete('search')
+    }
+    router.push(`${pathname}?${params.toString()}`)
+  }
 
   const updateUrl = useCallback(
     (newFilters: any, newSort?: string) => {
@@ -69,7 +78,7 @@ export function ProductListingClient({
       if (newFilters.minPrice > 0) params.set('minPrice', newFilters.minPrice.toString())
       else params.delete('minPrice')
 
-      if (newFilters.maxPrice < 20000) params.set('maxPrice', newFilters.maxPrice.toString())
+      if (newFilters.maxPrice < 50000) params.set('maxPrice', newFilters.maxPrice.toString())
       else params.delete('maxPrice')
 
       if (newFilters.sizes.length > 0) params.set('size', newFilters.sizes.join(','))
@@ -78,8 +87,11 @@ export function ProductListingClient({
       if (newFilters.colors.length > 0) params.set('color', newFilters.colors.join(','))
       else params.delete('color')
 
-      if (newFilters.minRating) params.set('rating', newFilters.minRating.toString())
-      else params.delete('minRating')
+      if (newFilters.minRating !== null && newFilters.minRating !== undefined) {
+        params.set('rating', newFilters.minRating.toString())
+      } else {
+        params.delete('rating')
+      }
 
       if (newSort) params.set('sort', newSort)
 
@@ -89,6 +101,10 @@ export function ProductListingClient({
     },
     [router, searchParams]
   )
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -107,10 +123,11 @@ export function ProductListingClient({
       }
     }
 
-    if (searchParams.toString() !== '') {
+    // Only fetch if params changed AFTER initial mount to prevent redundant fetch
+    if (mounted) {
       fetchProducts()
     }
-  }, [searchParams])
+  }, [searchParams, mounted])
 
   return (
     <div className="min-h-screen bg-white text-black">
@@ -123,16 +140,34 @@ export function ProductListingClient({
           </p>
 
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 py-8">
-            {/* Left: Big editorial title */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
-            >
-              <h1 className="text-5xl md:text-7xl font-display italic leading-none tracking-tight text-white">
-                {title}
-              </h1>
-            </motion.div>
+            {/* Left: Big editorial title or Search Input */}
+            <div className="flex-1 max-w-2xl">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
+              >
+                {isSearchPage ? (
+                  <form onSubmit={handleSearchSubmit} className="relative">
+                    <h1 className="sr-only">{title}</h1>
+                    <Input
+                      type="text"
+                      placeholder="Search our collection..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      className="bg-transparent border-0 border-b border-white/20 rounded-none text-3xl md:text-5xl font-display italic placeholder:text-white/20 focus-visible:ring-0 focus-visible:border-white h-auto py-2 px-0"
+                    />
+                    <button type="submit" className="absolute right-0 bottom-4">
+                      <Search className="w-6 h-6 text-white/40 hover:text-white transition-colors" />
+                    </button>
+                  </form>
+                ) : (
+                  <h1 className="text-4xl sm:text-5xl md:text-7xl font-display italic leading-none tracking-tight text-white">
+                    {title}
+                  </h1>
+                )}
+              </motion.div>
+            </div>
 
             {/* Right: count + sort */}
             <motion.div
@@ -141,14 +176,15 @@ export function ProductListingClient({
               transition={{ duration: 0.5, delay: 0.15 }}
               className="flex items-center gap-6 pb-1"
             >
-              <span className="text-[10px] uppercase tracking-[0.25em] text-white/50">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-white/50 font-bold">
                 {total} {total === 1 ? 'Product' : 'Products'}
               </span>
-              {/* Sort in header, invert colours for dark bg */}
-              <div className="[&_button]:!text-white [&_button]:!border-white/40 [&_li]:!text-neutral-800">
+              {/* Sort in header */}
+              <div>
                 <SortDropdown
                   value={currentSort}
                   onChange={(val) => updateUrl(currentFilters, val)}
+                  isDarkBg={true}
                 />
               </div>
             </motion.div>
@@ -157,96 +193,39 @@ export function ProductListingClient({
       </div>
 
 
-      {/* ── Filters Toolbar ── */}
-      <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-neutral-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 md:px-8">
-          <div className="flex items-center gap-3 py-3">
-            {/* Filter Toggle */}
-            <button
-              id="filter-toggle-btn"
-              onClick={() => setFiltersOpen(prev => !prev)}
-              className={cn(
-                'inline-flex items-center gap-2 px-5 py-2 text-[10px] uppercase tracking-[0.2em] font-bold border transition-all duration-300',
-                filtersOpen
-                  ? 'bg-black text-white border-black'
-                  : 'bg-white text-black border-black hover:bg-black hover:text-white'
-              )}
-            >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              Filters
-              {activeFilterCount > 0 && (
-                <span className={cn(
-                  'inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold rounded-full',
-                  filtersOpen ? 'bg-white text-black' : 'bg-black text-white'
-                )}>
-                  {activeFilterCount}
-                </span>
-              )}
-              {filtersOpen && <X className="w-3 h-3 ml-0.5" />}
-            </button>
-
-            {/* Vertical separator */}
-            <div className="w-px h-5 bg-neutral-200" />
-
-            {/* Active chips when bar is closed */}
-            {!filtersOpen && hasActiveFilters && (
-              <div className="flex flex-wrap items-center gap-2 overflow-x-auto">
-                {currentFilters.category && (
-                  <Chip
-                    label={categories.find(c => c.slug === currentFilters.category)?.name ?? currentFilters.category!}
-                    onRemove={() => updateUrl({ ...currentFilters, category: undefined })}
-                  />
-                )}
-                {currentFilters.sizes.map(s => (
-                  <Chip key={s} label={s} onRemove={() => updateUrl({ ...currentFilters, sizes: currentFilters.sizes.filter(x => x !== s) })} />
-                ))}
-                {currentFilters.colors.map(c => (
-                  <Chip key={c} label={c} onRemove={() => updateUrl({ ...currentFilters, colors: currentFilters.colors.filter(x => x !== c) })} />
-                ))}
-                {currentFilters.minRating !== null && (
-                  <Chip label={`${currentFilters.minRating}★ & above`} onRemove={() => updateUrl({ ...currentFilters, minRating: null })} />
-                )}
-                <button
-                  onClick={() => updateUrl({ minPrice: 0, maxPrice: 20000, sizes: [], colors: [], minRating: null })}
-                  className="text-[9px] uppercase tracking-[0.2em] text-neutral-400 hover:text-black underline underline-offset-2 transition-colors ml-1 shrink-0"
-                >
-                  Clear All
-                </button>
-              </div>
+      <div className="max-w-7xl mx-auto px-6 md:px-8">
+        {/* ── Filters Body (Always Visible, Non-Sticky) ── */}
+        <div className="pt-10 pb-6 relative z-30">
+          <div className="flex items-center gap-3 mb-8">
+            <h2 className="text-[12px] uppercase tracking-[0.3em] font-black text-black">Refine By</h2>
+            <div className="flex-1 h-[2px] bg-neutral-200" />
+            {hasActiveFilters && (
+              <button
+                onClick={() => updateUrl({ category: undefined, minPrice: 0, maxPrice: 50000, sizes: [], colors: [], minRating: null })}
+                className="text-[10px] uppercase tracking-[0.2em] text-black font-black border-b-2 border-black hover:text-neutral-600 transition-colors shrink-0"
+              >
+                Clear All
+              </button>
             )}
           </div>
 
-          {/* Sliding Filter Bar */}
           <HorizontalProductFilters
-            isOpen={filtersOpen}
             currentFilters={currentFilters}
             onFilterChange={(f) => updateUrl(f)}
             categories={categories}
           />
         </div>
-      </div>
 
-      {/* ── Product Grid ── */}
-      <div className="max-w-7xl mx-auto px-6 md:px-8 py-10">
-        <ProductGrid
-          products={products}
-          isLoading={isLoading}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-        />
+        {/* ── Product Grid ── */}
+        <div className="py-10 relative z-10">
+          <ProductGrid
+            products={products}
+            isLoading={isLoading}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+          />
+        </div>
       </div>
     </div>
-  )
-}
-
-/** Small active-filter chip */
-function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-black text-white text-[9px] uppercase tracking-wider shrink-0">
-      {label}
-      <button onClick={onRemove} className="hover:opacity-60 transition-opacity">
-        <X className="w-2.5 h-2.5" />
-      </button>
-    </span>
   )
 }

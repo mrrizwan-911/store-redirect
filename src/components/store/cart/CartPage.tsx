@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { updateQuantity, removeItem } from '@/store/slices/cartSlice'
 import { addItem as addToWishlist } from '@/store/slices/wishlistSlice'
@@ -15,6 +15,11 @@ export function CartPage() {
   const { items } = useAppSelector((state) => state.cart)
 
   const [discount, setDiscount] = useState<{ amount: number; code: string } | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleQuantityChange = (productId: string, variantId: string | undefined, currentQty: number, change: number) => {
     const newQty = currentQty + change
@@ -50,6 +55,15 @@ export function CartPage() {
       total
     )
     window.open(url, '_blank')
+  }
+
+  // Prevent hydration mismatch by waiting for mount
+  if (!mounted) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center py-20 px-4">
+        <div className="w-10 h-10 border-4 border-black/10 border-t-black rounded-full animate-spin" />
+      </div>
+    )
   }
 
   if (items.length === 0) {

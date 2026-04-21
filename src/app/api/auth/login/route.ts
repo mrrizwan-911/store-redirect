@@ -59,12 +59,20 @@ export async function POST(req: NextRequest) {
     const response = NextResponse.json({
       success: true,
       data: {
-        accessToken,
+        access_token: accessToken,
         user: { id: user.id, name: user.name, email: user.email, role: user.role },
       },
     })
 
-    response.cookies.set('refreshToken', refreshToken, {
+    response.cookies.set('access_token', accessToken, {
+      httpOnly: true,
+      secure: process.env.APP_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60, // 15 minutes in seconds
+      path: '/',
+    })
+
+    response.cookies.set('refresh_token', refreshToken, {
       httpOnly: true,
       secure: process.env.APP_ENV === 'production',
       sameSite: 'lax',

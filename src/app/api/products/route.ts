@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
     maxPrice = 999999,
     size,
     color,
+    rating,
     sort = 'createdAt_desc',
     search,
     featured,
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
   if (sortField === 'price') sortField = 'basePrice'
   if (sortField === 'date') sortField = 'createdAt'
 
-  const where = {
+  const where: any = {
     isActive: true,
     ...(featured && { isFeatured: true }),
     ...(category && { category: { slug: category } }),
@@ -41,8 +42,8 @@ export async function GET(req: NextRequest) {
       ? {
           variants: {
             some: {
-              ...(size && { size }),
-              ...(color && { color }),
+              ...(size && { size: { in: size.split(',') } }),
+              ...(color && { color: { in: color.split(',') } }),
               stock: { gt: 0 }
             }
           }
@@ -54,6 +55,15 @@ export async function GET(req: NextRequest) {
         { description: { contains: search, mode: 'insensitive' as const } },
       ],
     }),
+  }
+
+  // Filter by rating if provided (approximate logic: products with reviews >= rating)
+  if (rating) {
+    where.reviews = {
+      some: {
+        rating: { gte: rating }
+      }
+    }
   }
 
   try {

@@ -2,22 +2,37 @@ import { db } from '@/lib/db/client'
 import { ProductListingClient } from '@/components/store/plp/ProductListingClient'
 import { notFound } from 'next/navigation'
 
-interface CategoryPageProps {
-  params: Promise<{ slug: string }>
+interface SubcategoryPageProps {
+  params: Promise<{ slug: string; sub: string }>
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
-  const { slug } = await params
+export default async function SubcategoryPage({ params, searchParams }: SubcategoryPageProps) {
+  const { slug, sub } = await params
   const resolvedSearchParams = await searchParams
 
-  // Verify category exists
-  const activeCategory = await db.category.findUnique({
-    where: { slug, isActive: true },
-    select: { name: true, description: true },
+  // Verify subcategory exists and belongs to the parent category
+  const subcategory = await db.category.findFirst({
+    where: {
+      slug: sub,
+      isActive: true,
+      parent: {
+        slug: slug,
+        isActive: true
+      }
+    },
+    select: {
+      name: true,
+      description: true,
+      parent: {
+        select: {
+          name: true
+        }
+      }
+    },
   })
 
-  if (!activeCategory) {
+  if (!subcategory) {
     notFound()
   }
 
@@ -37,10 +52,10 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   // Construct Prisma where clause
   const where: any = {
     isActive: true,
-    OR: [
-      { category: { slug: slug } },
-      { category: { parent: { slug: slug } } }
-    ],
+    category: {
+      slug: sub,
+      parent: { slug: slug }
+    },
     basePrice: { gte: minPrice, lte: maxPrice },
     ...(size || color
       ? {
@@ -79,7 +94,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     }),
     db.product.count({ where }),
     db.category.findMany({
-      where: { isActive: true },
+      where: { isActive: true, parentId: null },
       select: { name: true, slug: true },
       orderBy: { sortOrder: 'asc' },
     }),
@@ -104,8 +119,8 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       initialProducts={enrichedProducts}
       initialTotal={total}
       categories={categories}
-      title={activeCategory.name}
-      subtitle={activeCategory.description || `Refined collection in ${activeCategory.name}.`}
+      title={subcategory.name}
+      subtitle={subcategory.description || `Refined collection in ${subcategory.parent?.name} / ${subcategory.name}.`}
     />
   )
 }

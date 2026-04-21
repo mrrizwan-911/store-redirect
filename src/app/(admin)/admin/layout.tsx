@@ -5,7 +5,7 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
-  const token = cookieStore.get('refreshToken')?.value
+  const token = (await cookieStore).get('refresh_token')?.value
 
   if (!token) {
     redirect('/login')

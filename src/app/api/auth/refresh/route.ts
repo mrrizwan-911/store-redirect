@@ -5,7 +5,7 @@ import { verifyRefreshToken, signAccessToken, signRefreshToken } from '@/lib/aut
 
 export async function POST(req: NextRequest) {
   try {
-    const refreshToken = req.cookies.get('refreshToken')?.value
+    const refreshToken = req.cookies.get('refresh_token')?.value
     if (!refreshToken) {
       return NextResponse.json({ success: false, error: 'No refresh token' }, { status: 401 })
     }
@@ -43,8 +43,15 @@ export async function POST(req: NextRequest) {
 
     logger.auth('Token refreshed', { userId: payload.userId })
 
-    const response = NextResponse.json({ success: true, data: { accessToken } })
-    response.cookies.set('refreshToken', newRefreshToken, {
+    const response = NextResponse.json({ success: true, data: { access_token: accessToken } })
+    response.cookies.set('access_token', accessToken, {
+      httpOnly: true,
+      secure: process.env.APP_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60, // 15 minutes in seconds
+      path: '/',
+    })
+    response.cookies.set('refresh_token', newRefreshToken, {
       httpOnly: true,
       secure: process.env.APP_ENV === 'production',
       sameSite: 'lax',

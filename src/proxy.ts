@@ -6,7 +6,20 @@ export function proxy(req: NextRequest) {
   let token = authHeader?.replace('Bearer ', '')
 
   if (!token) {
-    token = req.cookies.get('refreshToken')?.value
+    token = req.cookies.get('access_token')?.value
+  }
+
+  if (pathname === '/') {
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        if (payload.role === 'ADMIN') {
+          return NextResponse.redirect(new URL('/admin', req.url))
+        }
+      } catch {
+        // Invalid token, just proceed to home
+      }
+    }
   }
 
   if (pathname.startsWith('/admin')) {
@@ -39,5 +52,5 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/account/:path*', '/checkout/:path*'],
+  matcher: ['/', '/admin/:path*', '/account/:path*', '/checkout/:path*'],
 }

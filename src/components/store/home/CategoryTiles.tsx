@@ -53,31 +53,40 @@ export function CategoryTiles() {
 
   return (
     <section className="py-20 px-4 md:px-6 max-w-7xl mx-auto">
-      {/* Mobile Layout (One per row, rectangular/pill shape) */}
+      {/* Mobile Layout (One per row, sharp rectangular shape) */}
       <div className="flex flex-col gap-4 md:hidden">
         {categories.map((cat) => (
           <Link
             key={cat.slug}
             href={`/categories/${cat.slug}`}
             className={cn(
-              "group relative h-24 flex items-center justify-between px-8 rounded-full overflow-hidden transition-all duration-500 active:scale-95 shadow-lg",
-              "hover:brightness-110 hover:shadow-xl hover:-translate-y-1",
-              cat.mobileBg
+              "group relative h-32 flex items-center justify-between px-8 rounded-none overflow-hidden transition-all duration-500 active:scale-[0.98] border border-border bg-white",
+              "hover:border-black"
             )}
           >
-            <h3 className="font-display text-2xl text-white font-medium relative z-10 transition-all duration-300 group-hover:scale-105 group-hover:translate-x-2">
-              {cat.name}
-            </h3>
-            <div className="bg-white/20 p-2 rounded-full relative z-10 transition-all duration-500 group-hover:bg-white/40 group-hover:scale-110 group-hover:-translate-x-2">
-              <ArrowRight className="text-white size-6 transition-transform duration-300 group-hover:rotate-[-45deg]" />
+            <div className="relative z-10">
+              <h3 className="font-display text-2xl text-black font-medium transition-all duration-300 group-hover:translate-x-2">
+                {cat.name}
+              </h3>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 mt-1 transition-all duration-300 group-hover:translate-x-2">
+                Shop Collection
+              </p>
             </div>
 
-            {/* Subtle gradient overlay for depth */}
-            <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent pointer-events-none group-hover:opacity-0 transition-opacity duration-500" />
+            <div className="relative z-10 transition-all duration-500 group-hover:-translate-x-2">
+              <ArrowRight className="text-black size-5 stroke-[1.5] transition-transform duration-300 group-hover:rotate-[-45deg]" />
+            </div>
 
-            {/* Shine effect animation */}
-            <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-25deg] -translate-x-[200%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out" />
+            {/* Subtle background image or minimal color */}
+            <div className="absolute right-0 top-0 h-full w-1/2 opacity-10 group-hover:opacity-20 transition-opacity duration-500 grayscale">
+               <Image
+                src={cat.image}
+                alt=""
+                fill
+                unoptimized
+                className="object-cover"
+               />
+            </div>
           </Link>
         ))}
       </div>

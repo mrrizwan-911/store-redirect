@@ -33,6 +33,11 @@ export const productFilterSchema = z
       .pipe(z.number().min(0).optional()),
     size: z.string().optional(),
     color: z.string().optional(),
+    rating: z
+      .string()
+      .optional()
+      .transform((val) => (val ? Number(val) : undefined))
+      .pipe(z.number().min(1).max(5).optional()),
     sort: z.string().optional(),
     search: z.string().optional(),
     featured: z

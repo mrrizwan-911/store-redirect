@@ -1,67 +1,77 @@
 import { db } from '@/lib/db/client'
 import { ProductListingClient } from '@/components/store/plp/ProductListingClient'
-import { notFound } from 'next/navigation'
+import { headers } from 'next/headers'
+import { appendFile } from 'node:fs/promises'
 
-interface CategoryPageProps {
-  params: Promise<{ slug: string }>
+interface SearchPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
-  const { slug } = await params
+export default async function SearchPage({ searchParams }: SearchPageProps) {
   const resolvedSearchParams = await searchParams
+  const query = (resolvedSearchParams.q as string) || (resolvedSearchParams.search as string) || ''
 
-  // Verify category exists
-  const activeCategory = await db.category.findUnique({
-    where: { slug, isActive: true },
-    select: { name: true, description: true },
-  })
+  try {
+    const requestHeaders = await headers()
+    const userAgent = requestHeaders.get('user-agent') ?? 'unknown'
+    const secChUa = requestHeaders.get('sec-ch-ua') ?? 'missing'
+    // #region agent log
+    await appendFile(
+      '/home/hasan/clothes-store/.cursor/debug-072827.log',
+      `${JSON.stringify({
+        sessionId: '072827',
+        runId: 'initial-repro-2',
+        hypothesisId: 'H6',
+        location: 'src/app/(store)/search/page.tsx:16',
+        message: 'search-page-server-render',
+        data: {
+          route: '/search',
+          query,
+          userAgent: userAgent.slice(0, 140),
+          secChUa: secChUa.slice(0, 140),
+        },
+        timestamp: Date.now(),
+      })}\n`
+    )
+    // #endregion
+  } catch {}
 
-  if (!activeCategory) {
-    notFound()
-  }
-
-  // Parse search params
+  // Parse filters
+  const category = (resolvedSearchParams.category as string) || undefined
   const minPrice = Number(resolvedSearchParams.minPrice) || 0
-  const maxPrice = Number(resolvedSearchParams.maxPrice) || 20000
+  const maxPrice = Number(resolvedSearchParams.maxPrice) || 50000
   const size = (resolvedSearchParams.size as string) || undefined
   const color = (resolvedSearchParams.color as string) || undefined
   const sort = (resolvedSearchParams.sort as string) || 'createdAt_desc'
-  const rating = Number(resolvedSearchParams.rating) || undefined
-  let [sortField, sortDir] = sort.split('_') as [string, 'asc' | 'desc']
+  const [sortField, sortDir] = sort.split('_') as [string, 'asc' | 'desc']
 
   // Map generic sort fields to database columns
-  if (sortField === 'price') sortField = 'basePrice'
-  if (sortField === 'date') sortField = 'createdAt'
+  let dbSortField = sortField
+  if (sortField === 'price') dbSortField = 'basePrice'
+  if (sortField === 'date') dbSortField = 'createdAt'
 
-  // Construct Prisma where clause
   const where: any = {
     isActive: true,
-    OR: [
-      { category: { slug: slug } },
-      { category: { parent: { slug: slug } } }
-    ],
     basePrice: { gte: minPrice, lte: maxPrice },
+    ...(query && {
+      OR: [
+        { name: { contains: query, mode: 'insensitive' } },
+        { description: { contains: query, mode: 'insensitive' } },
+        { tags: { has: query } },
+      ],
+    }),
+    ...(category && { category: { slug: category } }),
     ...(size || color
       ? {
           variants: {
             some: {
               ...(size && { size: { in: size.split(',') } }),
               ...(color && { color: { in: color.split(',') } }),
-              stock: { gt: 0 },
-            },
-          },
+              stock: { gt: 0 }
+            }
+          }
         }
       : {}),
-  }
-
-  // Filter by rating if provided
-  if (rating) {
-    where.reviews = {
-      some: {
-        rating: { gte: rating }
-      }
-    }
   }
 
   // Fetch data
@@ -74,12 +84,12 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
         variants: { select: { size: true, color: true, stock: true } },
         reviews: { select: { rating: true } },
       },
-      orderBy: { [sortField]: sortDir },
+      orderBy: { [dbSortField]: sortDir },
       take: 24,
     }),
     db.product.count({ where }),
     db.category.findMany({
-      where: { isActive: true },
+      where: { isActive: true, parentId: null },
       select: { name: true, slug: true },
       orderBy: { sortOrder: 'asc' },
     }),
@@ -104,8 +114,8 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
       initialProducts={enrichedProducts}
       initialTotal={total}
       categories={categories}
-      title={activeCategory.name}
-      subtitle={activeCategory.description || `Refined collection in ${activeCategory.name}.`}
+      title={query ? `Search: ${query}` : 'Search'}
+      subtitle={query ? `Found ${total} results for "${query}"` : 'Explore our collection'}
     />
   )
 }
