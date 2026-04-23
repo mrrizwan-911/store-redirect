@@ -5,12 +5,13 @@ import { usePathname } from 'next/navigation'
 import {
   BarChart2, Package, ShoppingBag, Users, FileText,
   Archive, Tag, Zap, Shirt, Star, Mail, Settings, LogOut,
-  ExternalLink
+  ExternalLink, FolderTree
 } from 'lucide-react'
 
 const navItems = [
   { icon: BarChart2, label: 'Analytics', route: '/d8f2a1/admin/analytics' },
   { icon: Package, label: 'Products', route: '/d8f2a1/admin/products' },
+  { icon: FolderTree, label: 'Categories', route: '/d8f2a1/admin/categories' },
   { icon: ShoppingBag, label: 'Orders', route: '/d8f2a1/admin/orders' },
   { icon: Users, label: 'Customers', route: '/d8f2a1/admin/customers' },
   { icon: FileText, label: 'Quotations', route: '/d8f2a1/admin/quotations' },

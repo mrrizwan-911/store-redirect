@@ -1,6 +1,7 @@
 import { db } from '@/lib/db/client'
 import { ProductListingClient } from '@/components/store/plp/ProductListingClient'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>
@@ -14,7 +15,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   // Verify category exists
   const activeCategory = await db.category.findUnique({
     where: { slug, isActive: true },
-    select: { name: true, description: true },
+    select: { id: true, name: true, description: true },
   })
 
   if (!activeCategory) {
@@ -65,7 +66,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   }
 
   // Fetch data
-  const [products, total, categories] = await Promise.all([
+  const [products, total, subcategories] = await Promise.all([
     db.product.findMany({
       where,
       include: {
@@ -79,9 +80,9 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
     }),
     db.product.count({ where }),
     db.category.findMany({
-      where: { isActive: true },
-      select: { name: true, slug: true },
-      orderBy: { sortOrder: 'asc' },
+      where: { parentId: activeCategory.id, isActive: true },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
+      select: { id: true, name: true, slug: true },
     }),
   ])
 
@@ -100,12 +101,22 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   })
 
   return (
-    <ProductListingClient
-      initialProducts={enrichedProducts}
-      initialTotal={total}
-      categories={categories}
-      title={activeCategory.name}
-      subtitle={activeCategory.description || `Refined collection in ${activeCategory.name}.`}
-    />
+    <div className="max-w-7xl mx-auto px-6 md:px-8 py-8">
+      <nav className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 mb-8 flex items-center gap-2">
+        <Link href="/" className="hover:text-black transition-colors">Home</Link>
+        <span className="text-neutral-200">/</span>
+        <span className="text-black font-bold">Shop</span>
+        <span className="text-neutral-200">/</span>
+        <span className="text-black font-bold">{activeCategory.name}</span>
+      </nav>
+
+      <ProductListingClient
+        initialProducts={enrichedProducts}
+        initialTotal={total}
+        categories={subcategories}
+        title={activeCategory.name}
+        subtitle={activeCategory.description || `Refined collection in ${activeCategory.name}.`}
+      />
+    </div>
   )
 }

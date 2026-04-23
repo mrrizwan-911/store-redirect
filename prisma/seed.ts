@@ -110,6 +110,13 @@ async function main() {
     }
   }
 
+  // 3. Set Protected Status for Roots
+  console.log('Protecting root categories...')
+  await db.category.updateMany({
+    where: { parentId: null },
+    data: { isProtected: true }
+  })
+
   // 4. Create Sample Products
   const products = [
     // Clothes

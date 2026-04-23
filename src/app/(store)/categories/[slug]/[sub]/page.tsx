@@ -1,6 +1,7 @@
 import { db } from '@/lib/db/client'
 import { ProductListingClient } from '@/components/store/plp/ProductListingClient'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 
 interface SubcategoryPageProps {
   params: Promise<{ slug: string; sub: string }>
@@ -22,11 +23,14 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
       }
     },
     select: {
+      id: true,
+      parentId: true,
       name: true,
       description: true,
       parent: {
         select: {
-          name: true
+          name: true,
+          slug: true
         }
       }
     },
@@ -80,7 +84,7 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
   }
 
   // Fetch data
-  const [products, total, categories] = await Promise.all([
+  const [products, total, siblings] = await Promise.all([
     db.product.findMany({
       where,
       include: {
@@ -94,9 +98,9 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
     }),
     db.product.count({ where }),
     db.category.findMany({
-      where: { isActive: true, parentId: null },
+      where: { parentId: subcategory.parentId!, isActive: true },
+      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
       select: { name: true, slug: true },
-      orderBy: { sortOrder: 'asc' },
     }),
   ])
 
@@ -115,12 +119,24 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
   })
 
   return (
-    <ProductListingClient
-      initialProducts={enrichedProducts}
-      initialTotal={total}
-      categories={categories}
-      title={subcategory.name}
-      subtitle={subcategory.description || `Refined collection in ${subcategory.parent?.name} / ${subcategory.name}.`}
-    />
+    <div className="max-w-7xl mx-auto px-6 md:px-8 py-8">
+      <nav className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 mb-8 flex items-center gap-2">
+        <Link href="/" className="hover:text-black transition-colors">Home</Link>
+        <span className="text-neutral-200">/</span>
+        <Link href={`/categories/${subcategory.parent?.slug}`} className="hover:text-black transition-colors">
+          {subcategory.parent?.name}
+        </Link>
+        <span className="text-neutral-200">/</span>
+        <span className="text-black font-bold">{subcategory.name}</span>
+      </nav>
+
+      <ProductListingClient
+        initialProducts={enrichedProducts}
+        initialTotal={total}
+        categories={siblings}
+        title={subcategory.name}
+        subtitle={subcategory.description || `Refined collection in ${subcategory.parent?.name} / ${subcategory.name}.`}
+      />
+    </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { productSchema, ProductInput } from '@/lib/validations/admin'
@@ -12,14 +12,20 @@ interface ProductFormProps {
   categories: { id: string; name: string }[]
 }
 
-export function ProductForm({ initialData, categories }: ProductFormProps) {
+export function ProductForm({ initialData, categories: _categories }: ProductFormProps) {
   const router = useRouter()
   const isEditing = !!initialData
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [images, setImages] = useState<any[]>(initialData?.images || [])
 
-  const { register, control, handleSubmit, formState: { errors } } = useForm<any>({
+  // Two-step category state
+  const [rootCategories, setRootCategories] = useState<{ id: string; name: string }[]>([])
+  const [subcategories, setSubcategories] = useState<{ id: string; name: string }[]>([])
+  const [selectedRootId, setSelectedRootId] = useState<string>('')
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
+
+  const { register, control, handleSubmit, setValue, watch, formState: { errors } } = useForm<any>({
     resolver: zodResolver(productSchema) as any,
     defaultValues: initialData || {
       name: '',
@@ -36,6 +42,81 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
       variants: [],
     },
   })
+
+  const formCategoryId = watch('categoryId')
+
+  // 1. Fetch roots on mount
+  useEffect(() => {
+    fetch('/api/categories?rootOnly=true')
+      .then(r => r.json())
+      .then(d => setRootCategories(d.data ?? []))
+  }, [])
+
+  // 2. Fetch subcategories when root changes
+  useEffect(() => {
+    if (!selectedRootId) {
+      setSubcategories([])
+      return
+    }
+
+    fetch(`/api/categories?parentId=${selectedRootId}`)
+      .then(r => r.json())
+      .then(d => {
+        const subs = d.data ?? []
+        setSubcategories(subs)
+
+        // On change (not initial load), reset subcategory if root changed
+        if (!isInitialLoad) {
+          setValue('categoryId', selectedRootId)
+        }
+      })
+  }, [selectedRootId, setValue, isInitialLoad])
+
+  // 3. Handle edit mode initialization
+  useEffect(() => {
+    if (isEditing && initialData?.categoryId && isInitialLoad) {
+      const initCategory = async () => {
+        try {
+          // Find if current category is a root or sub
+          const res = await fetch('/api/admin/categories')
+          const data = await res.json()
+          if (data.success) {
+            const allCats: any[] = data.data
+            // We need to flatten or find the category and its parent
+            let currentCat: any = null
+            let parentCat: any = null
+
+            for (const root of allCats) {
+              if (root.id === initialData.categoryId) {
+                currentCat = root
+                break
+              }
+              const sub = root.children?.find((s: any) => s.id === initialData.categoryId)
+              if (sub) {
+                currentCat = sub
+                parentCat = root
+                break
+              }
+            }
+
+            if (parentCat) {
+              setSelectedRootId(parentCat.id)
+              // subcategories will be fetched by the other useEffect
+            } else if (currentCat) {
+              setSelectedRootId(currentCat.id)
+            }
+          }
+        } catch (err) {
+          console.error('Failed to initialize categories', err)
+        } finally {
+          setIsInitialLoad(false)
+        }
+      }
+      initCategory()
+    } else {
+      setIsInitialLoad(false)
+    }
+  }, [isEditing, initialData?.categoryId, isInitialLoad])
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -126,10 +207,36 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
         {/* Category */}
         <div className="bg-[#FAFAFA] border border-[#E5E5E5] p-6 space-y-4">
           <h2 className="font-playfair text-xl text-[#000000]">Category</h2>
-          <select {...register('categoryId')} className="w-full border border-[#E5E5E5] p-2 focus:ring-1 focus:ring-black outline-none bg-white">
-            <option value="">Select Category</option>
-            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-[#737373] mb-1 uppercase tracking-widest font-bold">Root Category</label>
+              <select
+                value={selectedRootId}
+                onChange={(e) => setSelectedRootId(e.target.value)}
+                className="w-full border border-[#E5E5E5] p-2 focus:ring-1 focus:ring-black outline-none bg-white transition-all"
+              >
+                <option value="">Select Root Category</option>
+                {rootCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
+            </div>
+
+            {subcategories.length > 0 && (
+              <div>
+                <label className="block text-xs text-[#737373] mb-1 uppercase tracking-widest font-bold">Subcategory (optional)</label>
+                <select
+                  value={formCategoryId === selectedRootId ? '' : formCategoryId}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    setValue('categoryId', val || selectedRootId)
+                  }}
+                  className="w-full border border-[#E5E5E5] p-2 focus:ring-1 focus:ring-black outline-none bg-white transition-all"
+                >
+                  <option value="">None (Use Root Category)</option>
+                  {subcategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+            )}
+          </div>
           {errors.categoryId?.message && <p className="text-sm text-[#EF4444] mt-1">{errors.categoryId.message as string}</p>}
         </div>
 

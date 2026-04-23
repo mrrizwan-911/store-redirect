@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingBag, Heart, User, Search, Menu, X, LayoutDashboard, LogOut } from 'lucide-react'
+import { ShoppingBag, Heart, User, Search, Menu, X, LayoutDashboard, LogOut, ChevronDown } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import {
   DropdownMenu,
@@ -18,30 +18,40 @@ import { persistor } from '@/store'
 import { cn } from '@/lib/utils'
 import { useRouter, usePathname } from 'next/navigation'
 
+interface NavbarProps {
+  serverCategories?: {
+    id: string
+    name: string
+    slug: string
+    parentId: string | null
+    children: { id: string; name: string; slug: string }[]
+  }[]
+}
+
 const NAV_CATEGORIES = [
   {
     label: 'Clothes',
+    slug: 'clothes',
     href: '/categories/clothes',
-    sub: ['Tops', 'Bottoms', 'Outerwear', 'Formal', 'Casual'],
   },
   {
     label: 'Shoes',
+    slug: 'shoes',
     href: '/categories/shoes',
-    sub: ['Sneakers', 'Formal', 'Sandals', 'Boots', 'Sports'],
   },
   {
     label: 'Apparel',
+    slug: 'apparel',
     href: '/categories/apparel',
-    sub: ['Kurtas', 'Shalwar Kameez', 'Abayas', 'Sportswear'],
   },
   {
     label: 'Accessories',
+    slug: 'accessories',
     href: '/categories/accessories',
-    sub: ['Bags', 'Belts', 'Wallets', 'Sunglasses', 'Watches'],
   },
 ]
 
-export function Navbar() {
+export function Navbar({ serverCategories = [] }: NavbarProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isAccountOpen, setIsAccountOpen] = useState(false)
@@ -49,6 +59,14 @@ export function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const dispatch = useAppDispatch()
+
+  const getSubcategories = (rootSlug: string) =>
+    serverCategories.find(c => c.slug === rootSlug)?.children ?? []
+
+  const FIXED_SLUGS = ['clothes', 'shoes', 'apparel', 'accessories']
+  const extraRoots = serverCategories.filter(c => !FIXED_SLUGS.includes(c.slug) && !c.parentId)
+  const allRootsForMobile = serverCategories.filter(c => !c.parentId)
+
   const cartItems = useAppSelector(state => state.cart.items)
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
   const { isAuthenticated, user } = useAppSelector(state => state.auth)
@@ -127,8 +145,49 @@ export function Navbar() {
                   <Link href={cat.href} className={navLinkStyles}>
                     {cat.label}
                   </Link>
+
+                  {/* Mega Menu Dropdown */}
+                  {getSubcategories(cat.slug).length > 0 && (
+                    <div className="absolute top-full left-0 hidden group-hover:block w-48 bg-white border border-neutral-200 shadow-xl py-4 px-6">
+                      <div className="flex flex-col gap-3">
+                        {getSubcategories(cat.slug).map(sub => (
+                          <Link
+                            key={sub.id}
+                            href={`/categories/${cat.slug}/${sub.slug}`}
+                            className="text-[11px] uppercase tracking-wider text-neutral-500 hover:text-black transition-colors"
+                          >
+                            {sub.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
+
+              {/* "More" Overflow Dropdown */}
+              {extraRoots.length > 0 && (
+                <div className="relative h-full flex items-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className={cn(navLinkStyles, "flex items-center gap-1 outline-none uppercase tracking-[0.2em]")}>
+                      More <ChevronDown className="h-3 w-3" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-48 bg-white border border-neutral-200 shadow-xl rounded-none py-2 px-2">
+                      {extraRoots.map(extra => (
+                        <DropdownMenuItem key={extra.id} className="rounded-none p-0 focus:bg-neutral-50">
+                          <Link
+                            href={`/categories/${extra.slug}`}
+                            className="w-full px-4 py-2 text-[11px] uppercase tracking-wider text-neutral-600 hover:text-black outline-none block"
+                          >
+                            {extra.name}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+
               <Link href="/lookbook" className={navLinkStyles}>
                 Lookbook
               </Link>
@@ -252,25 +311,27 @@ export function Navbar() {
                       >
                         Lookbook
                       </Link>
-                      {NAV_CATEGORIES.map(cat => (
-                        <div key={cat.label} className="flex flex-col gap-3">
+                      {allRootsForMobile.map(cat => (
+                        <div key={cat.id} className="flex flex-col gap-3">
                           <Link
-                            href={cat.href}
+                            href={`/categories/${cat.slug}`}
                             className="text-sm font-medium uppercase tracking-widest text-black border-b border-black/5 pb-2"
                           >
-                            {cat.label}
+                            {cat.name}
                           </Link>
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-2 pl-2">
-                            {cat.sub.map(sub => (
-                              <Link
-                                key={sub}
-                                href={`${cat.href}/${sub.toLowerCase().replace(/\s+/g, '-')}`}
-                                className="text-[12px] text-neutral-500 hover:text-black transition-colors"
-                              >
-                                {sub}
-                              </Link>
-                            ))}
-                          </div>
+                          {getSubcategories(cat.slug).length > 0 && (
+                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 pl-2">
+                              {getSubcategories(cat.slug).map(sub => (
+                                <Link
+                                  key={sub.id}
+                                  href={`/categories/${cat.slug}/${sub.slug}`}
+                                  className="text-[12px] text-neutral-500 hover:text-black transition-colors"
+                                >
+                                  {sub.name}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </nav>

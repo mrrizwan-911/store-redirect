@@ -33,15 +33,6 @@ export function proxy(req: NextRequest) {
   // 2. Define protected routes
   const isAdminRoute = pathname.startsWith('/d8f2a1/admin')
   const isProtectedUserRoute = pathname.startsWith('/account') || pathname.startsWith('/checkout')
-  const isHomeRoute = pathname === '/'
-
-  // 3. Admin Redirect logic for Homepage
-  if (isHomeRoute && token) {
-    const payload = decodeJwt(token)
-    if (payload?.role === 'ADMIN') {
-      return NextResponse.redirect(new URL('/d8f2a1/admin', req.url))
-    }
-  }
 
   // 4. Protection for /admin routes
   if (isAdminRoute) {
