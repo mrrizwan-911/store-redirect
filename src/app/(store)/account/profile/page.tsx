@@ -7,9 +7,11 @@ import { toast } from 'sonner'
 import { Eye, EyeOff, User, Phone, Lock, Save } from 'lucide-react'
 import { profileSchema } from '@/lib/validations/profile'
 import { ZodError } from 'zod'
+import { useAppSelector } from '@/store/hooks'
 
 export default function ProfilePage() {
   const router = useRouter()
+  const { isAuthenticated } = useAppSelector((state) => state.auth)
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
@@ -25,6 +27,10 @@ export default function ProfilePage() {
   })
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setIsLoading(false)
+      return
+    }
     async function fetchProfile() {
       try {
         const res = await fetch('/api/account/profile')
@@ -44,7 +50,7 @@ export default function ProfilePage() {
       }
     }
     fetchProfile()
-  }, [])
+  }, [isAuthenticated])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target

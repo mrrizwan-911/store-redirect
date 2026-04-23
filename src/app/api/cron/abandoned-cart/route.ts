@@ -47,12 +47,13 @@ export async function GET(req: NextRequest) {
 
     if (recentEmail) continue
 
-    const html = abandonedCartTemplate(cart.user.name, cart.items as any)
+    const { subject, html, text } = abandonedCartTemplate(cart.user.name, cart.items as any)
 
     const sent = await sendEmail({
       to: cart.user.email,
-      subject: 'You left something behind 👀',
+      subject,
       html,
+      text,
       type: 'abandoned_cart',
       userId: cart.userId,
     })

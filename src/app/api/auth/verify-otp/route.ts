@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { otpSchema } from '@/lib/validations/auth'
+import { sendWelcomeEmail } from '@/lib/services/email/welcome'
 
 export async function POST(req: NextRequest) {
   try {
@@ -38,6 +39,19 @@ export async function POST(req: NextRequest) {
       db.otpToken.update({ where: { id: otp.id }, data: { used: true } }),
       db.user.update({ where: { id: userId }, data: { isVerified: true } }),
     ])
+
+    // Send welcome email (fire and forget)
+    db.user.findUnique({ where: { id: userId }, select: { name: true, email: true } })
+      .then((user) => {
+        if (user) {
+          sendWelcomeEmail(user.email, user.name).catch((err) => {
+            logger.error('Background welcome email failed', err, { userId })
+          })
+        }
+      })
+      .catch((err) => {
+        logger.error('Failed to fetch user for welcome email', err, { userId })
+      })
 
     logger.auth('Email verified', { userId })
 

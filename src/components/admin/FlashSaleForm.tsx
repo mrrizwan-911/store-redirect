@@ -55,7 +55,7 @@ export function FlashSaleForm({ initialData, products }: FlashSaleFormProps) {
         throw new Error(result.error || 'Failed to save flash sale')
       }
 
-      router.push('/admin/flash-sales')
+      router.push('/d8f2a1/admin/flash-sales')
       router.refresh()
     } catch (err: any) {
       setError(err.message)

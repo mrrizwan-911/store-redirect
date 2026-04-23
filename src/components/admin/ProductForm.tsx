@@ -63,7 +63,7 @@ export function ProductForm({ initialData, categories }: ProductFormProps) {
       }
 
       if (!isEditing) {
-        router.push(`/admin/products/${result.data.id}/edit`)
+        router.push(`/d8f2a1/admin/products/${result.data.id}/edit`)
       } else {
         router.refresh()
       }

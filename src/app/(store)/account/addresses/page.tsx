@@ -17,6 +17,7 @@ import {
 import { addressSchema, type AddressInput } from '@/lib/validations/address'
 import { ZodError } from 'zod'
 import { cn } from '@/lib/utils'
+import { useAppSelector } from '@/store/hooks'
 
 interface Address extends AddressInput {
   id: string
@@ -28,6 +29,7 @@ export default function AddressBookPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingAddress, setEditingAddress] = useState<Address | null>(null)
+  const { isAuthenticated } = useAppSelector((state) => state.auth)
 
   const [formData, setFormData] = useState<AddressInput>({
     label: '',
@@ -40,8 +42,12 @@ export default function AddressBookPage() {
   })
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setIsLoading(false)
+      return
+    }
     fetchAddresses()
-  }, [])
+  }, [isAuthenticated])
 
   async function fetchAddresses() {
     try {

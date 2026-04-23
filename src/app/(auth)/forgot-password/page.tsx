@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
   // Redirect if already authenticated
   React.useEffect(() => {
     if (isAuthenticated && user) {
-      const redirectPath = user.role === 'ADMIN' ? '/admin' : '/account';
+      const redirectPath = user.role === 'ADMIN' ? '/d8f2a1/admin' : '/account';
       router.push(redirectPath);
     }
   }, [isAuthenticated, user, router]);
@@ -31,15 +31,18 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
 
-      // In a real app:
-      // await fetch('/api/auth/forgot-password', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email }),
-      // });
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.error || 'Something went wrong. Please try again.');
+        return;
+      }
 
       setIsSubmitted(true);
       toast.success('Reset link sent to your email.');

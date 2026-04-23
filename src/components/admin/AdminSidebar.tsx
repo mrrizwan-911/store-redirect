@@ -9,18 +9,18 @@ import {
 } from 'lucide-react'
 
 const navItems = [
-  { icon: BarChart2, label: 'Analytics', route: '/admin/analytics' },
-  { icon: Package, label: 'Products', route: '/admin/products' },
-  { icon: ShoppingBag, label: 'Orders', route: '/admin/orders' },
-  { icon: Users, label: 'Customers', route: '/admin/customers' },
-  { icon: FileText, label: 'Quotations', route: '/admin/quotations' },
-  { icon: Archive, label: 'Inventory', route: '/admin/inventory' },
-  { icon: Tag, label: 'Coupons', route: '/admin/coupons' },
-  { icon: Zap, label: 'Flash Sales', route: '/admin/flash-sales' },
-  { icon: Shirt, label: 'Outfits', route: '/admin/outfits' },
-  { icon: Star, label: 'Loyalty', route: '/admin/loyalty' },
-  { icon: Mail, label: 'Notifications', route: '/admin/notifications' },
-  { icon: Settings, label: 'Settings', route: '/admin/settings' },
+  { icon: BarChart2, label: 'Analytics', route: '/d8f2a1/admin/analytics' },
+  { icon: Package, label: 'Products', route: '/d8f2a1/admin/products' },
+  { icon: ShoppingBag, label: 'Orders', route: '/d8f2a1/admin/orders' },
+  { icon: Users, label: 'Customers', route: '/d8f2a1/admin/customers' },
+  { icon: FileText, label: 'Quotations', route: '/d8f2a1/admin/quotations' },
+  { icon: Archive, label: 'Inventory', route: '/d8f2a1/admin/inventory' },
+  { icon: Tag, label: 'Coupons', route: '/d8f2a1/admin/coupons' },
+  { icon: Zap, label: 'Flash Sales', route: '/d8f2a1/admin/flash-sales' },
+  { icon: Shirt, label: 'Outfits', route: '/d8f2a1/admin/outfits' },
+  { icon: Star, label: 'Loyalty', route: '/d8f2a1/admin/loyalty' },
+  { icon: Mail, label: 'Notifications', route: '/d8f2a1/admin/notifications' },
+  { icon: Settings, label: 'Settings', route: '/d8f2a1/admin/settings' },
 ]
 
 export function AdminSidebar() {

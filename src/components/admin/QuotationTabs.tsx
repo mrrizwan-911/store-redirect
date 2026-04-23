@@ -26,7 +26,7 @@ export function QuotationTabs() {
     } else {
       params.set("status", value);
     }
-    router.push(`/admin/quotations?${params.toString()}`);
+    router.push(`/d8f2a1/admin/quotations?${params.toString()}`);
   };
 
   return (

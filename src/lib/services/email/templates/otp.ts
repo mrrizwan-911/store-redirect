@@ -1,5 +1,16 @@
-export function otpEmailTemplate(name: string, code: string): string {
-  return `
+export function otpEmailTemplate(name: string, code: string): { subject: string; html: string; text: string } {
+  const subject = `Your verification code: ${code}`
+
+  const text = `Hi ${name},
+
+Your Calnza verification code is: ${code}
+
+This code expires in 10 minutes.
+If you didn't create an account, ignore this email.
+
+CALNZA LUXURY E-COMMERCE © 2026`.trim()
+
+  const html = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -37,4 +48,6 @@ export function otpEmailTemplate(name: string, code: string): string {
 </body>
 </html>
   `.trim()
+
+  return { subject, html, text }
 }

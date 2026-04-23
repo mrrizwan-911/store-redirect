@@ -25,7 +25,7 @@ export function AccountLayout({ children }: AccountLayoutProps) {
   })
 
   return (
-    <div className="flex flex-col lg:flex-row bg-white text-black font-sans relative h-[100dvh] overflow-hidden">
+    <div className="flex flex-col lg:flex-row bg-white text-black font-sans relative min-h-[calc(100vh-80px)] lg:h-[calc(100vh-80px)] overflow-hidden">
       {/* Sidebar - Desktop (Fixed) / Mobile (Trigger in Sidebar component) */}
       <AccountSidebar isCollapsed={isCollapsed} onToggle={() => setIsCollapsed(!isCollapsed)} />
 

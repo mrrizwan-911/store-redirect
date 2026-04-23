@@ -24,7 +24,7 @@ export function NotificationTabs() {
     } else {
       params.set("filter", value);
     }
-    router.push(`/admin/notifications?${params.toString()}`);
+    router.push(`/d8f2a1/admin/notifications?${params.toString()}`);
   };
 
   return (

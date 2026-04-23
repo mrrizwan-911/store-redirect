@@ -143,7 +143,7 @@ export function QuotationTable({ quotations }: QuotationTableProps) {
                   </TableCell>
                   <TableCell className="py-4 text-right pr-6">
                     <Link
-                      href={`/admin/quotations/${q.id}`}
+                      href={`/d8f2a1/admin/quotations/${q.id}`}
                       data-testid="view-detail-btn"
                       className={cn(
                         buttonVariants({ variant: "outline", size: "sm" }),

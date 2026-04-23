@@ -1,11 +1,22 @@
-export function orderDeliveredTemplate(name: string, orderNumber: string, pointsEarned: number): string {
+export function orderDeliveredTemplate(name: string, orderNumber: string, pointsEarned: number): { subject: string; html: string; text: string } {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://yourstore.com'
+  const subject = `Your order has arrived — #${orderNumber}`
 
-  const pointsText = pointsEarned > 0
+  const pointsLine = pointsEarned > 0 ? `\nYou earned ${pointsEarned} loyalty points with this purchase!\n` : ''
+  const text = `Hi ${name},
+
+Your order #${orderNumber} has been delivered successfully. We hope you love your new items!
+${pointsLine}
+Write a review: ${appUrl}/account
+Shop again: ${appUrl}
+
+CALNZA LUXURY E-COMMERCE © 2026`.trim()
+
+  const pointsTextHtml = pointsEarned > 0
     ? `<p style="color:#E8D5B0;font-size:16px;margin:0 0 24px;text-align:center;">You earned <strong>${pointsEarned} loyalty points</strong> with this purchase!</p>`
     : ''
 
-  return `
+  const html = `
 <!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;background:#0A0A0A;font-family:Arial,sans-serif;">
@@ -16,7 +27,7 @@ export function orderDeliveredTemplate(name: string, orderNumber: string, points
           <h2 style="color:#E8D5B0;font-size:22px;margin:0 0 8px;">Your order has arrived</h2>
           <p style="color:#888;font-size:14px;margin:0 0 24px;">Hi ${name}, your order #${orderNumber} has been delivered successfully. We hope you love your new items!</p>
 
-          ${pointsText}
+          ${pointsTextHtml}
 
           <div style="text-align:center;margin:32px 0;">
             <a href="${appUrl}/account"
@@ -35,4 +46,6 @@ export function orderDeliveredTemplate(name: string, orderNumber: string, points
   </table>
 </body>
 </html>`.trim()
+
+  return { subject, html, text }
 }

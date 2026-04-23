@@ -4,9 +4,26 @@ interface OrderItem {
   price: any
 }
 
-export function orderConfirmTemplate(name: string, orderNumber: string, items: OrderItem[], total: any): string {
+export function orderConfirmTemplate(name: string, orderNumber: string, items: OrderItem[], total: any): { subject: string; html: string; text: string } {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://yourstore.com'
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? ''
+  const subject = `Order Confirmed — #${orderNumber}`
+
+  const textItems = items.map(item => `- ${item.product.name} x${item.quantity}: PKR ${Number(item.price).toLocaleString('en-PK')}`).join('\n')
+  const text = `Hi ${name},
+
+Your order #${orderNumber} has been confirmed. Thank you for shopping with us!
+
+Items:
+${textItems}
+
+Total: PKR ${Number(total).toLocaleString('en-PK')}
+
+Track your order: ${appUrl}/account
+
+Need help? WhatsApp us: https://wa.me/${whatsappNumber}
+
+CALNZA LUXURY E-COMMERCE © 2026`.trim()
 
   const itemRows = items.map(item => `
     <tr>
@@ -21,7 +38,7 @@ export function orderConfirmTemplate(name: string, orderNumber: string, items: O
     </tr>
   `).join('')
 
-  return `
+  const html = `
 <!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;background:#0A0A0A;font-family:Arial,sans-serif;">
@@ -58,4 +75,6 @@ export function orderConfirmTemplate(name: string, orderNumber: string, items: O
   </table>
 </body>
 </html>`.trim()
+
+  return { subject, html, text }
 }

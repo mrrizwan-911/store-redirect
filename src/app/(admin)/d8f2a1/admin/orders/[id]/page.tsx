@@ -5,12 +5,12 @@ import { OrderStatusUpdater } from '@/components/admin/OrderStatusUpdater'
 
 async function fetchOrder(id: string) {
   const cookieStore = await cookies()
-  const token = cookieStore.get('refreshToken')?.value
+  const token = cookieStore.get('refresh_token')?.value
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
   const res = await fetch(`${baseUrl}/api/admin/orders/${id}`, {
     headers: {
-      ...(token ? { Cookie: `refreshToken=${token}` } : {}),
+      ...(token ? { Cookie: `refresh_token=${token}` } : {}),
     },
     cache: 'no-store'
   })

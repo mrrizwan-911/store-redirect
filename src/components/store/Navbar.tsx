@@ -12,10 +12,11 @@ import {
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { toggleCart } from '@/store/slices/cartSlice'
+import { toggleCart, clearCart } from '@/store/slices/cartSlice'
 import { logout } from '@/store/slices/authSlice'
+import { persistor } from '@/store'
 import { cn } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 
 const NAV_CATEGORIES = [
   {
@@ -43,25 +44,60 @@ const NAV_CATEGORIES = [
 export function Navbar() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [isScrolled, setIsScrolled] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const [isAccountOpen, setIsAccountOpen] = useState(false)
 
   const router = useRouter()
+  const pathname = usePathname()
   const dispatch = useAppDispatch()
   const cartItems = useAppSelector(state => state.cart.items)
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
   const { isAuthenticated, user } = useAppSelector(state => state.auth)
+  const rehydrated = useAppSelector(state => (state as any)._persist?.rehydrated ?? false)
 
-  const dashboardHref = user?.role === 'ADMIN' ? '/admin' : '/account'
+  const dashboardHref = user?.role === 'ADMIN' ? '/d8f2a1/admin' : '/account'
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {
+      // still clear client state even if API call fails
+    } finally {
+      setIsAccountOpen(false);
+      dispatch(logout());
+      dispatch(clearCart());
+      await persistor.purge();
+      router.push('/login');
+    }
+  }
 
   useEffect(() => {
-    setMounted(true)
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50)
     }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        if (pathname === '/search') {
+          const input = document.getElementById('page-search-input')
+          input?.focus()
+        } else {
+          router.push('/search?focus=true')
+        }
+      }
+      if (e.key === '/' && pathname !== '/search' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault()
+        router.push('/search?focus=true')
+      }
+    }
+
     window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [pathname, router])
 
   const navLinkStyles = "relative text-[11px] font-normal uppercase tracking-[0.2em] text-gray-800 hover:text-black transition-colors font-sans after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100"
 
@@ -102,7 +138,17 @@ export function Navbar() {
           {/* Right Icons (No Boxes, Clean Icons) */}
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-6">
-              <Link href="/search" className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100" aria-label="Search">
+              <Link
+                href="/search?focus=true"
+                onClick={(e) => {
+                  if (pathname === '/search') {
+                    e.preventDefault()
+                    document.getElementById('page-search-input')?.focus()
+                  }
+                }}
+                className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100"
+                aria-label="Search"
+              >
                 <Search className="h-5 w-5 stroke-[1.5]" />
               </Link>
               <Link href="/wishlist" className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100" aria-label="Wishlist">
@@ -110,7 +156,7 @@ export function Navbar() {
               </Link>
 
               {/* Dynamic Account Button */}
-              {!mounted ? (
+              {!rehydrated ? (
                 <div className="text-gray-600 h-5 w-5 stroke-[1.5]"><User className="h-5 w-5" /></div>
               ) : isAuthenticated ? (
                 <div
@@ -127,6 +173,21 @@ export function Navbar() {
                       <User className="h-5 w-5 stroke-[1.5]" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48 bg-[#F8F8F8] border border-neutral-200 shadow-xl rounded-none py-1.5 px-1.5">
+                      {user?.role === 'ADMIN' && (
+                        <>
+                          <DropdownMenuItem
+                            className="px-4 py-2.5 text-[11px] uppercase tracking-[0.15em] font-bold cursor-pointer text-black focus:bg-neutral-200/50 focus:text-black flex items-center gap-3 transition-all rounded-none outline-none"
+                            onClick={() => {
+                              setIsAccountOpen(false);
+                              router.push('/d8f2a1/admin');
+                            }}
+                          >
+                            <LayoutDashboard className="w-4 h-4 stroke-[1.5]" />
+                            Admin Panel
+                          </DropdownMenuItem>
+                          <div className="h-px bg-neutral-200 my-1" />
+                        </>
+                      )}
                       <DropdownMenuItem
                         className="px-4 py-2.5 text-[11px] uppercase tracking-[0.15em] font-bold cursor-pointer text-neutral-600 hover:text-black focus:bg-neutral-200/50 focus:text-black flex items-center gap-3 transition-all rounded-none outline-none"
                         onClick={() => {
@@ -140,11 +201,7 @@ export function Navbar() {
                       <div className="h-px bg-neutral-200 my-1" />
                       <DropdownMenuItem
                         className="px-4 py-2.5 text-[11px] uppercase tracking-[0.15em] font-bold cursor-pointer text-red-500 hover:text-red-700 focus:bg-red-50 focus:text-red-700 flex items-center gap-3 transition-all rounded-none outline-none"
-                        onClick={() => {
-                          setIsAccountOpen(false);
-                          dispatch(logout());
-                          router.push('/login');
-                        }}
+                        onClick={handleLogout}
                       >
                         <LogOut className="w-4 h-4 stroke-[1.5]" />
                         Logout
@@ -165,10 +222,10 @@ export function Navbar() {
               <button
                 onClick={() => dispatch(toggleCart())}
                 className="relative text-gray-600 hover:text-black transition-all after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100"
-                aria-label={`Cart with ${mounted ? cartCount : 0} items`}
+                aria-label={`Cart with ${rehydrated ? cartCount : 0} items`}
               >
                 <ShoppingBag className="h-5 w-5 stroke-[1.5]" />
-                {mounted && cartCount > 0 && (
+                {rehydrated && cartCount > 0 && (
                   <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center bg-black text-[8px] font-bold text-white rounded-none">
                     {cartCount}
                   </span>
@@ -225,10 +282,7 @@ export function Navbar() {
                             <User className="w-4 h-4" /> Dashboard
                           </Link>
                           <button
-                            onClick={() => {
-                              dispatch(logout());
-                              router.push('/login');
-                            }}
+                            onClick={handleLogout}
                             className="flex items-center gap-3 text-sm font-medium uppercase tracking-widest text-red-600 text-left"
                           >
                             <LogOut className="w-4 h-4" /> Logout

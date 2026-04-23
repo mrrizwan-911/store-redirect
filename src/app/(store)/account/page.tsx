@@ -32,11 +32,15 @@ interface DashboardData {
 }
 
 export default function AccountOverview() {
-  const { user: reduxUser } = useAppSelector((state) => state.auth)
+  const { user: reduxUser, isAuthenticated } = useAppSelector((state) => state.auth)
   const [data, setData] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setIsLoading(false)
+      return
+    }
     async function fetchDashboardData() {
       try {
         const [profileRes, ordersRes, addressesRes] = await Promise.all([
@@ -63,7 +67,7 @@ export default function AccountOverview() {
     }
 
     fetchDashboardData()
-  }, [])
+  }, [isAuthenticated])
 
   if (isLoading) {
     return (

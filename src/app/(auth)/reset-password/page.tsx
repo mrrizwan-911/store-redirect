@@ -1,27 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAppSelector } from '@/store/hooks';
 import AuthLayout from '@/components/store/auth/AuthLayout';
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
-
-  // Redirect if already authenticated
-  React.useEffect(() => {
-    if (isAuthenticated && user) {
-      const redirectPath = user.role === 'ADMIN' ? '/admin' : '/account';
-      router.push(redirectPath);
-    }
-  }, [isAuthenticated, user, router]);
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
 
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -39,6 +30,11 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!token) {
+      toast.error('Invalid reset link');
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
       return;
@@ -47,15 +43,21 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token,
+          password: formData.password,
+        }),
+      });
 
-      // In a real app:
-      // await fetch('/api/auth/reset-password', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ password: formData.password }),
-      // });
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast.error(result.error || 'Something went wrong. Please try again.');
+        return;
+      }
 
       toast.success('Password updated successfully!');
       router.push('/login');
@@ -65,6 +67,25 @@ export default function ResetPasswordPage() {
       setIsLoading(false);
     }
   };
+
+  if (!token) {
+    return (
+      <AuthLayout title="Invalid Link" subtitle="EXPIRED">
+        <div className="text-center space-y-6">
+          <p className="text-[15px] text-neutral-500 leading-relaxed">
+            This reset link is invalid or has expired.
+          </p>
+          <Button
+            asChild
+            variant="outline"
+            className="w-full border-neutral-200 hover:bg-neutral-50 text-black uppercase tracking-[0.2em] text-[13px] font-bold rounded-[12px] h-[60px] transition-all"
+          >
+            <Link href="/forgot-password">Request New Link</Link>
+          </Button>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout title="Update" subtitle="NEW PASSWORD">
@@ -158,5 +179,17 @@ export default function ResetPasswordPage() {
         </p>
       </div>
     </AuthLayout>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

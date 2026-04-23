@@ -21,6 +21,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { logout } from '@/store/slices/authSlice'
+import { clearCart } from '@/store/slices/cartSlice'
+import { persistor } from '@/store'
 import {
   Sheet,
   SheetContent,
@@ -62,9 +64,16 @@ export function AccountSidebar({ isCollapsed, onToggle }: AccountSidebarProps) {
     setMounted(true)
   }, [])
 
-  const handleLogout = (e: React.MouseEvent) => {
+  const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault()
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch {
+      // still clear client state even if API call fails
+    }
     dispatch(logout())
+    dispatch(clearCart())
+    await persistor.purge()
     router.push('/login')
   }
 
@@ -163,7 +172,7 @@ export function AccountSidebar({ isCollapsed, onToggle }: AccountSidebarProps) {
     <>
       {/* Desktop Sidebar */}
       <aside className={cn(
-        "hidden lg:block border-r border-neutral-100 overflow-hidden transition-all duration-300 bg-white sticky top-[140px] h-[calc(100vh-140px)]",
+        "hidden lg:flex flex-col border-r border-neutral-100 overflow-hidden transition-all duration-300 bg-white h-full",
         isCollapsed ? "w-20" : "w-72"
       )}>
         <NavContent />

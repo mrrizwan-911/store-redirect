@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { signAccessToken, signRefreshToken } from '@/lib/auth/jwt'
+import { sendWelcomeEmail } from '@/lib/services/email/welcome'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -42,6 +43,12 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(`${appUrl}/login?error=oauth_no_email`)
     }
 
+    // Check if user exists before upsert to detect new signups
+    const existingUser = await db.user.findUnique({
+      where: { email: profile.email },
+      select: { id: true }
+    })
+
     // Upsert user — Google already verified their email
     const user = await db.user.upsert({
       where: { email: profile.email },
@@ -55,21 +62,32 @@ export async function GET(req: NextRequest) {
       },
     })
 
+    // Send welcome email for new users
+    if (!existingUser) {
+      // Fire and forget welcome email
+      sendWelcomeEmail(user.email, user.name).catch(err => {
+        logger.error('Failed to trigger welcome email after OAuth', err, { userId: user.id })
+      })
+    }
+
     const tokenPayload = { userId: user.id, email: user.email, role: user.role }
     const accessToken = signAccessToken(tokenPayload)
     const refreshToken = signRefreshToken(tokenPayload)
 
-    await db.refreshToken.create({
-      data: {
-        userId: user.id,
-        token: refreshToken,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      },
-    })
+    await db.$transaction([
+      db.refreshToken.deleteMany({ where: { userId: user.id } }),
+      db.refreshToken.create({
+        data: {
+          userId: user.id,
+          token: refreshToken,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      }),
+    ])
 
     logger.auth('Google OAuth login', { userId: user.id, email: user.email })
 
-    const redirectPath = user.role === 'ADMIN' ? '/admin' : '/'
+    const redirectPath = user.role === 'ADMIN' ? '/d8f2a1/admin' : '/account'
     const response = NextResponse.redirect(`${appUrl}${redirectPath}`)
 
     response.cookies.set('refresh_token', refreshToken, {

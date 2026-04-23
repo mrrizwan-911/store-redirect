@@ -115,7 +115,7 @@ export function OutfitBuilder({ initialData }: { initialData?: any }) {
         throw new Error(data.error || 'Failed to save outfit')
       }
 
-      router.push('/admin/outfits')
+      router.push('/d8f2a1/admin/outfits')
       router.refresh()
     } catch (err: any) {
       setError(err.message)

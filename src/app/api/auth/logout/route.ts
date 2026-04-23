@@ -1,14 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
+import jwt from 'jsonwebtoken'
 import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 
 export async function POST(req: NextRequest) {
-  const refreshToken = req.cookies.get('refresh_token')?.value
+  const accessToken = req.cookies.get('access_token')?.value
 
-  if (refreshToken) {
-    // Silently delete — already expired tokens won't be found, that's fine
-    await db.refreshToken.deleteMany({ where: { token: refreshToken } })
-    logger.auth('User logged out, refresh token deleted')
+  if (accessToken) {
+    try {
+      // decode without verification so expired tokens still yield userId
+      const payload = jwt.decode(accessToken) as { userId?: string } | null
+      if (payload?.userId) {
+        await db.refreshToken.deleteMany({ where: { userId: payload.userId } })
+        logger.auth('User logged out, all refresh tokens deleted', { userId: payload.userId })
+      }
+    } catch {
+      // malformed token — still clear cookies below
+    }
   }
 
   const response = NextResponse.json({ success: true })

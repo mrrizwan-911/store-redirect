@@ -75,7 +75,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   }
 
   // Fetch data
-  const [products, total, categories] = await Promise.all([
+  const [products, total, categories, featuredProducts] = await Promise.all([
     db.product.findMany({
       where,
       include: {
@@ -93,12 +93,23 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       select: { name: true, slug: true },
       orderBy: { sortOrder: 'asc' },
     }),
+    // Curated suggestions if no products found
+    db.product.findMany({
+      where: { isActive: true, isFeatured: true },
+      include: {
+        images: { where: { isPrimary: true }, take: 1 },
+        category: { select: { name: true, slug: true } },
+        variants: { select: { size: true, color: true, stock: true } },
+        reviews: { select: { rating: true } },
+      },
+      take: 8,
+    })
   ])
 
   // Process products
-  const enrichedProducts = products.map((p) => {
+  const enrich = (list: any[]) => list.map((p) => {
     const avgRating =
-      p.reviews.length > 0 ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length : null
+      p.reviews.length > 0 ? p.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / p.reviews.length : null
     return {
       ...p,
       avgRating,
@@ -109,6 +120,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     }
   })
 
+  const enrichedProducts = enrich(products)
+  const enrichedFeatured = enrich(featuredProducts)
+
   return (
     <ProductListingClient
       initialProducts={enrichedProducts}
@@ -116,6 +130,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
       categories={categories}
       title={query ? `Search: ${query}` : 'Search'}
       subtitle={query ? `Found ${total} results for "${query}"` : 'Explore our collection'}
+      featuredProducts={enrichedFeatured}
     />
   )
 }

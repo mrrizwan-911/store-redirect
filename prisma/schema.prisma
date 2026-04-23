@@ -7,16 +7,17 @@ datasource db {
 }
 
 model User {
-  id           String          @id @default(cuid())
-  email        String          @unique
-  passwordHash String?
-  name         String
-  phone        String?
-  role         Role            @default(CUSTOMER)
-  isVerified   Boolean         @default(false)
-  googleId     String?         @unique
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id            String          @id @default(cuid())
+  email         String          @unique
+  passwordHash  String?
+  name          String
+  phone         String?
+  role          Role            @default(CUSTOMER)
+  isVerified    Boolean         @default(false)
+  googleId      String?         @unique
+  wishlistToken String?         @unique @default(cuid())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   addresses    Address[]
   cart         Cart?
   loyalty      LoyaltyAccount?
@@ -26,6 +27,7 @@ model User {
   sessions     RefreshToken[]
   reviews      Review[]
   wishlist     WishlistItem[]
+  passwordResetTokens PasswordResetToken[]
 
   @@index([email])
   @@index([role])
@@ -415,4 +417,14 @@ enum LoyaltyTier {
   SILVER
   GOLD
   PLATINUM
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

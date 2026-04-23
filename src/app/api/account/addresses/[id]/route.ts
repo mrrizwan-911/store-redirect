@@ -6,7 +6,7 @@ import { logger } from '@/lib/utils/logger'
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getUserSession()
@@ -14,7 +14,7 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await context.params
     const body = await req.json()
     const parsed = addressSchema.safeParse(body)
 
@@ -68,7 +68,7 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getUserSession()
@@ -76,7 +76,7 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await context.params
 
     // Check ownership
     const existing = await db.address.findFirst({

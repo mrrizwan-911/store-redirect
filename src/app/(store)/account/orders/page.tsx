@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { useAppSelector } from '@/store/hooks'
 
 interface Order {
   id: string
@@ -33,10 +34,15 @@ export default function OrdersHistoryPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [pagination, setPagination] = useState({ page: 1, pages: 1 })
+  const { isAuthenticated } = useAppSelector((state) => state.auth)
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setIsLoading(false)
+      return
+    }
     fetchOrders(1)
-  }, [])
+  }, [isAuthenticated])
 
   async function fetchOrders(page: number) {
     setIsLoading(true)

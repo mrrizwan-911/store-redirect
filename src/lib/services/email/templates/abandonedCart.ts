@@ -3,8 +3,24 @@ interface CartItem {
   quantity: number
 }
 
-export function abandonedCartTemplate(name: string, items: CartItem[]): string {
+export function abandonedCartTemplate(name: string, items: CartItem[]): { subject: string; html: string; text: string } {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://yourstore.com'
+  const subject = 'You left something behind — Calnza'
+
+  const textItems = items.map(item => `- ${item.product.name} x${item.quantity}: PKR ${Number(item.product.basePrice).toLocaleString('en-PK')}`).join('\n')
+  const text = `Hi ${name},
+
+You left some items in your cart. They're waiting for you!
+
+${textItems}
+
+Complete your purchase: ${appUrl}/cart
+
+Items in your cart are not reserved and may sell out.
+
+Unsubscribe: ${appUrl}/unsubscribe
+
+CALNZA LUXURY E-COMMERCE © 2026`.trim()
 
   const itemRows = items.map(item => `
     <tr>
@@ -19,7 +35,7 @@ export function abandonedCartTemplate(name: string, items: CartItem[]): string {
     </tr>
   `).join('')
 
-  return `
+  const html = `
 <!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;background:#0A0A0A;font-family:Arial,sans-serif;">
@@ -51,4 +67,6 @@ export function abandonedCartTemplate(name: string, items: CartItem[]): string {
   </table>
 </body>
 </html>`.trim()
+
+  return { subject, html, text }
 }

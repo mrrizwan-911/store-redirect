@@ -12,11 +12,14 @@ export async function sendOtpEmail(email: string, name: string, code: string): P
     return
   }
 
+  const { subject, html, text } = otpEmailTemplate(name, code)
+
   const { error } = await resend.emails.send({
-    from: 'noreply@yourdomain.com',
+    from: process.env.RESEND_FROM_EMAIL || 'Calnza <noreply@calnza.com>',
     to: email,
-    subject: `Your verification code: ${code}`,
-    html: otpEmailTemplate(name, code),
+    subject,
+    html,
+    text,
   })
 
   if (error) {

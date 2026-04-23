@@ -3,7 +3,7 @@ import { verifyRefreshToken } from './jwt';
 
 export async function getUserSession() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('refreshToken')?.value;
+  const token = cookieStore.get('refresh_token')?.value;
 
   if (!token) {
     return null;

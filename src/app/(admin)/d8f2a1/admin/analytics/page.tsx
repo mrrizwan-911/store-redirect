@@ -6,14 +6,14 @@ import { PaymentMethodChart } from '@/components/admin/PaymentMethodChart'
 
 async function fetchAnalyticsData(endpoint: string) {
   const cookieStore = await cookies()
-  const token = cookieStore.get('refreshToken')?.value
+  const token = cookieStore.get('refresh_token')?.value
 
   // Use a relative or absolute URL based on environment. In server components, absolute is required.
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
   const res = await fetch(`${baseUrl}/api/admin/analytics/${endpoint}`, {
     headers: {
-      ...(token ? { Cookie: `refreshToken=${token}` } : {}),
+      ...(token ? { Cookie: `refresh_token=${token}` } : {}),
     },
     cache: 'no-store'
   })

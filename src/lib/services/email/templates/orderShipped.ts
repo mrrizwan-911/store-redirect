@@ -1,7 +1,18 @@
-export function orderShippedTemplate(name: string, orderNumber: string, trackingNumber: string): string {
+export function orderShippedTemplate(name: string, orderNumber: string, trackingNumber: string): { subject: string; html: string; text: string } {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://yourstore.com'
+  const subject = `Your order is on its way! — #${orderNumber}`
 
-  return `
+  const text = `Hi ${name},
+
+Your order #${orderNumber} has been shipped!
+
+Tracking Number: ${trackingNumber}
+
+Track your order: ${appUrl}/account
+
+CALNZA LUXURY E-COMMERCE © 2026`.trim()
+
+  const html = `
 <!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;background:#0A0A0A;font-family:Arial,sans-serif;">
@@ -29,4 +40,6 @@ export function orderShippedTemplate(name: string, orderNumber: string, tracking
   </table>
 </body>
 </html>`.trim()
+
+  return { subject, html, text }
 }

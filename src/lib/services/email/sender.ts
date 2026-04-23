@@ -8,6 +8,7 @@ interface SendEmailParams {
   to: string
   subject: string
   html: string
+  text?: string
   type: string
   userId?: string
 }
@@ -27,10 +28,11 @@ export async function sendEmail(
     }
 
     await resend.emails.send({
-      from: 'store@yourdomain.com', // In production, this must be a verified domain on Resend
+      from: process.env.RESEND_FROM_EMAIL || 'Calnza <noreply@calnza.com>',
       to: params.to,
       subject: params.subject,
       html: params.html,
+      text: params.text,
     })
 
     await db.emailLog.create({

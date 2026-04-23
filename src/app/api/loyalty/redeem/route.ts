@@ -5,7 +5,7 @@ import { verifyAccessToken, verifyRefreshToken } from '@/lib/auth/jwt'
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization')?.replace('Bearer ', '')
-    const cookieToken = req.cookies.get('refreshToken')?.value
+    const cookieToken = req.cookies.get('refresh_token')?.value
     const token = authHeader || cookieToken
 
     if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

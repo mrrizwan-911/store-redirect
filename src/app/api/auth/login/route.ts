@@ -46,13 +46,16 @@ export async function POST(req: NextRequest) {
     const accessToken = signAccessToken(tokenPayload)
     const refreshToken = signRefreshToken(tokenPayload)
 
-    await db.refreshToken.create({
-      data: {
-        userId: user.id,
-        token: refreshToken,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      },
-    })
+    await db.$transaction([
+      db.refreshToken.deleteMany({ where: { userId: user.id } }),
+      db.refreshToken.create({
+        data: {
+          userId: user.id,
+          token: refreshToken,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      }),
+    ])
 
     logger.auth('User logged in', { userId: user.id, email: user.email, role: user.role })
 

@@ -29,7 +29,7 @@ export default function RegisterPage() {
   // Redirect if already authenticated
   React.useEffect(() => {
     if (isAuthenticated && user) {
-      const redirectPath = user.role === 'ADMIN' ? '/admin' : '/account';
+      const redirectPath = user.role === 'ADMIN' ? '/d8f2a1/admin' : '/account';
       router.push(redirectPath);
     }
   }, [isAuthenticated, user, router]);
