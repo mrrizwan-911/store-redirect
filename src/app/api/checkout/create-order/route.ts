@@ -105,6 +105,28 @@ export async function POST(req: NextRequest) {
 
     const total = subtotal + shippingCost - discount
 
+    // Pre-checkout: validate all variants have sufficient stock
+    for (const item of lineItems) {
+      if (item.variantId) {
+        const variant = await db.productVariant.findUnique({
+          where: { id: item.variantId },
+          select: { stock: true, title: true }
+        })
+        if (!variant) {
+          return NextResponse.json(
+            { success: false, error: `Product variant not found` },
+            { status: 400 }
+          )
+        }
+        if (variant.stock < item.quantity) {
+          return NextResponse.json(
+            { success: false, error: `Insufficient stock for "${variant.title || 'item'}" — only ${variant.stock} left` },
+            { status: 400 }
+          )
+        }
+      }
+    }
+
     // 4. Create Order in Transaction
     const result = await db.$transaction(async (tx) => {
       // Create the order
@@ -150,6 +172,16 @@ export async function POST(req: NextRequest) {
           where: { code: couponCode.toUpperCase() },
           data: { usedCount: { increment: 1 } },
         })
+      }
+
+      // Atomically decrement stock for each variant
+      for (const item of lineItems) {
+        if (item.variantId) {
+          await tx.productVariant.update({
+            where: { id: item.variantId },
+            data: { stock: { decrement: item.quantity } },
+          })
+        }
       }
 
       // Clear cart if logged in
