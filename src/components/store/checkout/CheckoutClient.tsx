@@ -25,7 +25,7 @@ export function CheckoutClient() {
   // Form State matching CreateOrderInput
   const [selectedAddressId, setSelectedAddressId] = useState<string>('')
   const [guestAddress, setGuestAddress] = useState<AddressInput>({
-    label: 'Home', line1: '', line2: '', city: '', province: '', postalCode: '', isDefault: false
+    firstName: '', lastName: '', label: 'Home', line1: '', line2: '', city: '', province: '', postalCode: '', country: 'Pakistan', company: '', isDefault: false
   })
   const [guestInfo, setGuestInfo] = useState({ name: '', email: '', phone: '' })
 
@@ -116,49 +116,79 @@ export function CheckoutClient() {
           ))}
         </div>
 
-        <div className="bg-white p-8 border border-[#E5E5E5] shadow-sm min-h-[400px]">
+        <div className="bg-white p-8 border border-neutral-200 rounded-lg shadow-sm min-h-[400px]">
            <h2 className="font-playfair text-2xl font-bold capitalize mb-6">{currentStep}</h2>
 
            {currentStep === "address" && (
-             <div className="space-y-6">
+             <div className="space-y-8">
                {!isAuthenticated && (
-                 <div className="grid grid-cols-2 gap-4 mb-6">
-                   <div>
-                     <label className="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">Full Name</label>
-                     <input type="text" value={guestInfo.name} onChange={e => setGuestInfo({...guestInfo, name: e.target.value})} className="w-full border border-[#E5E5E5] p-3 text-sm focus:border-black outline-none" />
-                   </div>
-                   <div>
-                     <label className="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">Email</label>
-                     <input type="email" value={guestInfo.email} onChange={e => setGuestInfo({...guestInfo, email: e.target.value})} className="w-full border border-[#E5E5E5] p-3 text-sm focus:border-black outline-none" />
-                   </div>
-                   <div className="col-span-2">
-                     <label className="block text-xs font-bold uppercase tracking-widest text-neutral-500 mb-2">Phone</label>
-                     <input type="tel" value={guestInfo.phone} onChange={e => setGuestInfo({...guestInfo, phone: e.target.value})} className="w-full border border-[#E5E5E5] p-3 text-sm focus:border-black outline-none" />
+                 <div>
+                   <h3 className="text-lg font-playfair font-bold mb-4">Contact</h3>
+                   <div className="space-y-4">
+                     <div>
+                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Email</label>
+                       <input type="email" value={guestInfo.email} onChange={e => setGuestInfo({...guestInfo, email: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+                     </div>
+                     <div>
+                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Phone</label>
+                       <input type="tel" value={guestInfo.phone} onChange={e => setGuestInfo({...guestInfo, phone: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+                     </div>
                    </div>
                  </div>
                )}
 
-               {isAuthenticated && (
-                 <p className="text-sm text-neutral-500 mb-4">Please enter your shipping address below.</p>
-               )}
+               <div>
+                 <h3 className="text-lg font-playfair font-bold mb-4">Shipping Address</h3>
+                 <div className="space-y-4">
+                   <div className="grid grid-cols-2 gap-4">
+                     <div>
+                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">First Name</label>
+                       <input type="text" value={guestAddress.firstName} onChange={e => setGuestAddress({...guestAddress, firstName: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+                     </div>
+                     <div>
+                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Last Name</label>
+                       <input type="text" value={guestAddress.lastName} onChange={e => setGuestAddress({...guestAddress, lastName: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+                     </div>
+                   </div>
 
-               <div className="space-y-4">
-                 <input type="text" placeholder="Address Line 1" value={guestAddress.line1} onChange={e => setGuestAddress({...guestAddress, line1: e.target.value})} className="w-full border border-[#E5E5E5] p-3 text-sm focus:border-black outline-none" />
-                 <input type="text" placeholder="Address Line 2 (Optional)" value={guestAddress.line2 || ""} onChange={e => setGuestAddress({...guestAddress, line2: e.target.value})} className="w-full border border-[#E5E5E5] p-3 text-sm focus:border-black outline-none" />
-                 
-                 <div className="grid grid-cols-2 gap-4">
-                   <select value={guestAddress.city} onChange={e => setGuestAddress({...guestAddress, city: e.target.value})} className="w-full border border-[#E5E5E5] p-3 text-sm focus:border-black outline-none bg-white">
-                     <option value="">Select City</option>
-                     {["Karachi", "Lahore", "Islamabad", "Rawalpindi", "Peshawar", "Quetta", "Faisalabad", "Multan", "Sialkot"].map(c => (
-                       <option key={c} value={c}>{c}</option>
-                     ))}
-                   </select>
-                   <select value={guestAddress.province} onChange={e => setGuestAddress({...guestAddress, province: e.target.value})} className="w-full border border-[#E5E5E5] p-3 text-sm focus:border-black outline-none bg-white">
-                     <option value="">Select Province</option>
-                     {["Sindh", "Punjab", "KPK", "Balochistan", "Islamabad Capital Territory"].map(p => (
-                       <option key={p} value={p}>{p}</option>
-                     ))}
-                   </select>
+                   <div>
+                     <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Company (Optional)</label>
+                     <input type="text" value={guestAddress.company || ""} onChange={e => setGuestAddress({...guestAddress, company: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+                   </div>
+
+                   <div>
+                     <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Address</label>
+                     <input type="text" value={guestAddress.line1} onChange={e => setGuestAddress({...guestAddress, line1: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+                   </div>
+
+                   <div>
+                     <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Apartment, suite, etc. (Optional)</label>
+                     <input type="text" value={guestAddress.line2 || ""} onChange={e => setGuestAddress({...guestAddress, line2: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-4">
+                     <div>
+                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">City</label>
+                       <input type="text" value={guestAddress.city} onChange={e => setGuestAddress({...guestAddress, city: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+                     </div>
+                     <div>
+                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Province</label>
+                       <input type="text" value={guestAddress.province} onChange={e => setGuestAddress({...guestAddress, province: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+                     </div>
+                   </div>
+
+                   <div className="grid grid-cols-2 gap-4">
+                     <div>
+                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Postal Code</label>
+                       <input type="text" value={guestAddress.postalCode} onChange={e => setGuestAddress({...guestAddress, postalCode: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+                     </div>
+                     <div>
+                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Country</label>
+                       <select value={guestAddress.country} onChange={e => setGuestAddress({...guestAddress, country: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none bg-white">
+                         <option value="Pakistan">Pakistan</option>
+                       </select>
+                     </div>
+                   </div>
                  </div>
                </div>
              </div>
@@ -166,9 +196,25 @@ export function CheckoutClient() {
 
            {currentStep === "shipping" && (
              <div className="space-y-4">
-               <div 
+               {/* Review Information Block */}
+               <div className="border border-neutral-200 rounded-md p-4 mb-6 flex justify-between items-start">
+                 <div>
+                   <p className="text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1">Contact</p>
+                   <p className="text-sm text-black">{guestInfo.email || user?.email}</p>
+                 </div>
+                 <button onClick={() => setCurrentStep('address')} className="text-[10px] uppercase tracking-widest font-bold text-black underline">Change</button>
+               </div>
+               <div className="border border-neutral-200 rounded-md p-4 mb-6 flex justify-between items-start">
+                 <div>
+                   <p className="text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1">Ship to</p>
+                   <p className="text-sm text-black">{guestAddress.line1}, {guestAddress.city}</p>
+                 </div>
+                 <button onClick={() => setCurrentStep('address')} className="text-[10px] uppercase tracking-widest font-bold text-black underline">Change</button>
+               </div>
+
+               <div
                  onClick={() => subtotal < 3000 ? setShippingMethod("standard") : null}
-                 className={`border p-4 cursor-pointer flex justify-between items-center transition-colors ${shippingMethod === "standard" ? "border-black bg-neutral-50" : "border-[#E5E5E5] hover:border-black/30"} ${subtotal >= 3000 ? "opacity-50 cursor-not-allowed" : ""}`}
+                 className={`border rounded-md p-4 cursor-pointer flex justify-between items-center transition-colors ${shippingMethod === "standard" ? "border-black bg-neutral-50" : "border-neutral-200 hover:border-black/30"} ${subtotal >= 3000 ? "opacity-50 cursor-not-allowed" : ""}`}
                >
                  <div>
                    <h4 className="font-bold text-sm">Standard Delivery</h4>
@@ -177,9 +223,9 @@ export function CheckoutClient() {
                  <span className="font-bold text-sm">PKR 200</span>
                </div>
 
-               <div 
+               <div
                  onClick={() => setShippingMethod("express")}
-                 className={`border p-4 cursor-pointer flex justify-between items-center transition-colors ${shippingMethod === "express" ? "border-black bg-neutral-50" : "border-[#E5E5E5] hover:border-black/30"}`}
+                 className={`border rounded-md p-4 cursor-pointer flex justify-between items-center transition-colors ${shippingMethod === "express" ? "border-black bg-neutral-50" : "border-neutral-200 hover:border-black/30"}`}
                >
                  <div>
                    <h4 className="font-bold text-sm">Express Delivery</h4>
@@ -189,9 +235,9 @@ export function CheckoutClient() {
                </div>
 
                {subtotal >= 3000 && (
-                 <div 
+                 <div
                    onClick={() => setShippingMethod("free")}
-                   className={`border p-4 cursor-pointer flex justify-between items-center transition-colors ${shippingMethod === "free" ? "border-black bg-neutral-50" : "border-[#E5E5E5] hover:border-black/30"}`}
+                   className={`border rounded-md p-4 cursor-pointer flex justify-between items-center transition-colors ${shippingMethod === "free" ? "border-black bg-neutral-50" : "border-neutral-200 hover:border-black/30"}`}
                  >
                    <div>
                      <h4 className="font-bold text-sm">Free Shipping</h4>
@@ -205,38 +251,54 @@ export function CheckoutClient() {
 
            {currentStep === "payment" && (
              <div className="space-y-6">
+               {/* Review Information Block */}
+               <div className="border border-neutral-200 rounded-md p-4 mb-6 flex justify-between items-start">
+                 <div>
+                   <p className="text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1">Contact</p>
+                   <p className="text-sm text-black">{guestInfo.email || user?.email}</p>
+                 </div>
+                 <button onClick={() => setCurrentStep('address')} className="text-[10px] uppercase tracking-widest font-bold text-black underline">Change</button>
+               </div>
+               <div className="border border-neutral-200 rounded-md p-4 mb-6 flex justify-between items-start">
+                 <div>
+                   <p className="text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1">Ship to</p>
+                   <p className="text-sm text-black">{guestAddress.line1}, {guestAddress.city}</p>
+                 </div>
+                 <button onClick={() => setCurrentStep('address')} className="text-[10px] uppercase tracking-widest font-bold text-black underline">Change</button>
+               </div>
+
                <div className="space-y-3">
                  {["COD", "JAZZCASH", "EASYPAISA", "BANK_TRANSFER", "CARD"].map((method) => (
-                   <div 
+                   <div
                      key={method}
                      onClick={() => setPaymentMethod(method as any)}
-                     className={`border p-4 cursor-pointer flex items-center gap-4 transition-colors ${paymentMethod === method ? "border-black bg-neutral-50" : "border-[#E5E5E5] hover:border-black/30"}`}
+                     className={`border rounded-md p-4 cursor-pointer flex items-center gap-4 transition-colors ${paymentMethod === method ? "border-black bg-neutral-50" : "border-neutral-200 hover:border-black/30"}`}
                    >
                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${paymentMethod === method ? "border-black" : "border-neutral-300"}`}>
                        {paymentMethod === method && <div className="w-2 h-2 bg-black rounded-full" />}
                      </div>
                      <span className="font-bold text-sm">
-                       {method === "COD" ? "Cash on Delivery" : 
-                        method === "BANK_TRANSFER" ? "Bank Transfer" : 
-                        method === "CARD" ? "Credit / Debit Card" : 
+                       {method === "COD" ? "Cash on Delivery" :
+                        method === "BANK_TRANSFER" ? "Bank Transfer" :
+                        method === "CARD" ? "Credit / Debit Card" :
                         method}
                      </span>
                    </div>
                  ))}
                </div>
 
-               <div className="border-t border-[#E5E5E5] pt-6 mt-6">
+               <div className="border-t border-neutral-200 pt-6 mt-6">
                  <label className="flex items-center gap-2 cursor-pointer mb-4">
                    <input type="checkbox" checked={isGift} onChange={(e) => setIsGift(e.target.checked)} className="accent-black w-4 h-4" />
                    <span className="text-sm font-bold">This order is a gift</span>
                  </label>
-                 
+
                  {isGift && (
-                   <textarea 
+                   <textarea
                      placeholder="Enter a gift message (optional)..."
                      value={giftMessage}
                      onChange={(e) => setGiftMessage(e.target.value)}
-                     className="w-full border border-[#E5E5E5] p-3 text-sm focus:border-black outline-none resize-none h-24"
+                     className="w-full border border-neutral-200 rounded-md p-3 text-sm focus:border-black outline-none resize-none h-24"
                    />
                  )}
                </div>
@@ -256,20 +318,20 @@ export function CheckoutClient() {
            )}
 
            {/* Navigation Buttons */}
-           <div className="mt-10 flex justify-between border-t border-[#E5E5E5] pt-6">
-             {stepIndex > 0 ? (
-               <button onClick={() => setCurrentStep(steps[stepIndex - 1])} className="text-xs uppercase tracking-widest font-bold text-neutral-500 hover:text-black transition-colors">
-                 Back
-               </button>
-             ) : <div />}
-
+           <div className="mt-10 flex flex-col gap-4 border-t border-neutral-200 pt-6">
              {stepIndex < 3 ? (
-               <button onClick={() => setCurrentStep(steps[stepIndex + 1])} className="bg-black text-white px-8 py-3 text-xs uppercase tracking-widest font-bold hover:bg-[#262626] transition-colors">
+               <button onClick={() => setCurrentStep(steps[stepIndex + 1])} className="w-full bg-black text-white rounded-md h-12 text-xs uppercase tracking-widest font-bold hover:bg-neutral-800 transition-colors">
                  Continue to {steps[stepIndex + 1]}
                </button>
              ) : (
-               <button onClick={handlePlaceOrder} disabled={isLoading} className="bg-[#E8D5B0] text-black px-8 py-3 text-xs uppercase tracking-widest font-bold hover:bg-[#d6c19a] transition-colors disabled:opacity-50">
+               <button onClick={handlePlaceOrder} disabled={isLoading} className="w-full bg-black text-white rounded-md h-12 text-xs uppercase tracking-widest font-bold hover:bg-neutral-800 transition-colors disabled:opacity-50">
                  {isLoading ? 'Processing...' : 'Place Order'}
+               </button>
+             )}
+
+             {stepIndex > 0 && (
+               <button onClick={() => setCurrentStep(steps[stepIndex - 1])} className="text-xs uppercase tracking-widest font-bold text-neutral-500 hover:text-black transition-colors text-center w-full">
+                 Back
                </button>
              )}
            </div>
