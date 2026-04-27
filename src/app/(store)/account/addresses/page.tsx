@@ -32,6 +32,12 @@ export default function AddressBookPage() {
   const { isAuthenticated } = useAppSelector((state) => state.auth)
 
   const [formData, setFormData] = useState<AddressInput>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    country: 'Pakistan',
+    company: '',
     label: '',
     line1: '',
     line2: '',
@@ -71,6 +77,12 @@ export default function AddressBookPage() {
 
   const resetForm = () => {
     setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      country: 'Pakistan',
+      company: '',
       label: '',
       line1: '',
       line2: '',
@@ -135,6 +147,12 @@ export default function AddressBookPage() {
   const handleEdit = (address: Address) => {
     setEditingAddress(address)
     setFormData({
+      firstName: address.firstName,
+      lastName: address.lastName,
+      email: address.email || '',
+      phone: address.phone,
+      country: address.country,
+      company: address.company || '',
       label: address.label,
       line1: address.line1,
       line2: address.line2 || '',
@@ -179,6 +197,74 @@ export default function AddressBookPage() {
             </DialogHeader>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">First Name</label>
+                  <input
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Last Name</label>
+                  <input
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Email</label>
+                  <input
+                    name="email"
+                    type="email"
+                    value={formData.email || ''}
+                    onChange={handleInputChange}
+                    className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Phone</label>
+                  <input
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] uppercase tracking-widest font-bold text-black">Company (Optional)</label>
+                <input
+                  name="company"
+                  value={formData.company || ''}
+                  onChange={handleInputChange}
+                  className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] uppercase tracking-widest font-bold text-black">Country</label>
+                <input
+                  name="country"
+                  value={formData.country}
+                  onChange={handleInputChange}
+                  className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
+                  required
+                />
+              </div>
+
               <div className="space-y-1.5">
                 <label className="text-[10px] uppercase tracking-widest font-bold text-black">Address Label</label>
                 <input
