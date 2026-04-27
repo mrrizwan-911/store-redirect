@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
         expiresAt: { gt: new Date() },
       },
       orderBy: { createdAt: 'desc' },
+      include: { user: true },
     })
 
     if (!otp || otp.code !== code) {
@@ -34,10 +35,16 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Mark OTP used and user verified in a transaction
+    // Mark OTP used and user verified (and upgrade guest) in a transaction
     await db.$transaction([
       db.otpToken.update({ where: { id: otp.id }, data: { used: true } }),
-      db.user.update({ where: { id: userId }, data: { isVerified: true } }),
+      db.user.update({
+        where: { id: userId },
+        data: {
+          isVerified: true,
+          ...(otp.user.role === 'GUEST' ? { role: 'CUSTOMER' } : {})
+        }
+      }),
     ])
 
     // Send welcome email (fire and forget)

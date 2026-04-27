@@ -22,9 +22,34 @@ export async function POST(req: NextRequest) {
 
     const existingUser = await db.user.findUnique({ where: { email } })
     if (existingUser) {
+      if (existingUser.role !== 'GUEST') {
+        // Only GUEST accounts can be upgraded — block all other existing accounts
+        return NextResponse.json(
+          { success: false, error: 'Email already registered' },
+          { status: 409 }
+        )
+      }
+
+      // GUEST upgrade path: hash new password, store temporarily, send OTP
+      const passwordHash = await bcrypt.hash(password, 12)
+      await db.user.update({
+        where: { id: existingUser.id },
+        data: { name: finalName, passwordHash },
+      })
+
+      const code = Math.floor(100000 + Math.random() * 900000).toString()
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
+
+      await db.otpToken.create({
+        data: { userId: existingUser.id, code, expiresAt },
+      })
+
+      await sendOtpEmail(email, finalName, code)
+      logger.auth('Guest upgrade OTP sent', { userId: existingUser.id, email })
+
       return NextResponse.json(
-        { success: false, error: 'Email already registered' },
-        { status: 409 }
+        { success: true, data: { userId: existingUser.id, message: 'OTP sent to email' } },
+        { status: 200 }
       )
     }
 
