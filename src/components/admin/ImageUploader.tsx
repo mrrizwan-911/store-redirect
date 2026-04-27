@@ -72,6 +72,7 @@ export function ImageUploader({ productId, images, onUploadSuccess, onRemoveImag
     accept: { 'image/jpeg': [], 'image/png': [], 'image/webp': [] },
     maxSize: 5 * 1024 * 1024, // 5MB
     maxFiles: 8,
+    multiple: true,
   })
 
   return (
