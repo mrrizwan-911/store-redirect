@@ -73,7 +73,7 @@ export function CartDrawer() {
                       </div>
 
                       <p className="text-[11px] text-neutral-500 uppercase tracking-widest mb-2">
-                        {item.size && `Size: ${item.size}`} {item.color && `| Color: ${item.color}`}
+                        {item.variantTitle}
                       </p>
 
                       <div className="mt-auto flex items-center justify-between">

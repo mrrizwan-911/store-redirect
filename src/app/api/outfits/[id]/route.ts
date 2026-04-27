@@ -19,7 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
                 images: true,
                 description: true,
                 variants: {
-                  select: { id: true, size: true, color: true, price: true, stock: true }
+                  select: { id: true, title: true, optionValues: true,  price: true, stock: true }
                 }
               }
             }

@@ -31,7 +31,7 @@ export default async function ProductPage({ params }: Props) {
     include: {
       category: { select: { id: true, name: true, slug: true } },
       images: { orderBy: { sortOrder: 'asc' } },
-      variants: { orderBy: [{ color: 'asc' }, { size: 'asc' }] },
+      variants: { orderBy: { title: 'asc' } },
       reviews: {
         include: { user: { select: { name: true } } },
         orderBy: { createdAt: 'desc' },

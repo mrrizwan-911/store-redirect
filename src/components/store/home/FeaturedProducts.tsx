@@ -1,17 +1,34 @@
-'use client'
-
 import { ProductCard } from '../shared/ProductCard'
-import { MOCK_PRODUCTS } from '@/lib/utils/mockData'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
-export function FeaturedProducts() {
-  const featured = MOCK_PRODUCTS.slice(0, 8)
+interface ProductCardData {
+  id: string
+  name: string
+  slug: string
+  imageUrl: string
+  secondaryImageUrl?: string
+  price: number
+  salePrice?: number
+  category: string
+  avgRating?: number
+  reviewCount?: number
+  isBadgeNew?: boolean
+  isBadgeSale?: boolean
+  isLowStock?: boolean
+  stockCount?: number
+}
+
+interface FeaturedProductsProps {
+  products: ProductCardData[]
+}
+
+export function FeaturedProducts({ products }: FeaturedProductsProps) {
+  if (products.length === 0) return null
 
   return (
     <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        {/* Editorial Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
           <div className="space-y-4 max-w-2xl">
             <span className="text-[10px] uppercase tracking-[0.4em] text-neutral-400 font-bold block ml-1">
@@ -30,9 +47,8 @@ export function FeaturedProducts() {
           </Link>
         </div>
 
-        {/* Refined Grid Layout */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
-          {featured.map((product) => (
+          {products.map((product) => (
             <ProductCard key={product.id} {...product} />
           ))}
         </div>

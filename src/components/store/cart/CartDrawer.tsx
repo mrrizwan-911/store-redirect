@@ -24,8 +24,8 @@ export function CartDrawer() {
     dispatch(removeItem({ productId, variantId }))
   }
 
-  const handleMoveToWishlist = (item: { productId: string; variantId?: string; size?: string; color?: string }) => {
-    dispatch(addToWishlist({ productId: item.productId, variantId: item.variantId, size: item.size, color: item.color }))
+  const handleMoveToWishlist = (item: { productId: string; variantId?: string; variantTitle?: string }) => {
+    dispatch(addToWishlist({ productId: item.productId, variantId: item.variantId, variantTitle: item.variantTitle }))
     dispatch(removeItem({ productId: item.productId, variantId: item.variantId }))
   }
 
@@ -93,9 +93,9 @@ export function CartDrawer() {
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                    {item.size || item.color ? (
+                    {item.variantTitle ? (
                       <p className="text-[11px] text-neutral-500 mt-1 font-medium">
-                        Variant: {[item.size, item.color].filter(Boolean).join(' / ')}
+                        Variant: {item.variantTitle}
                       </p>
                     ) : null}
                     <p className="mt-2 font-bold text-[12px] tracking-tight">PKR {item.price.toLocaleString()}</p>

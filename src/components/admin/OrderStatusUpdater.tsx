@@ -6,6 +6,7 @@ interface OrderStatusUpdaterProps {
   orderId: string
   currentStatus: string
   trackingNumber?: string | null
+  carrier?: string | null
   notes?: string | null
 }
 
@@ -19,9 +20,10 @@ const STATUS_OPTIONS = [
   'REFUNDED'
 ]
 
-export function OrderStatusUpdater({ orderId, currentStatus, trackingNumber, notes }: OrderStatusUpdaterProps) {
+export function OrderStatusUpdater({ orderId, currentStatus, trackingNumber, carrier, notes }: OrderStatusUpdaterProps) {
   const [status, setStatus] = useState(currentStatus)
   const [tracking, setTracking] = useState(trackingNumber || '')
+  const [carrierName, setCarrierName] = useState(carrier || '')
   const [internalNotes, setInternalNotes] = useState(notes || '')
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState('')
@@ -36,6 +38,7 @@ export function OrderStatusUpdater({ orderId, currentStatus, trackingNumber, not
         body: JSON.stringify({
           status,
           trackingNumber: tracking,
+          carrier: carrierName,
           notes: internalNotes
         })
       })
@@ -75,9 +78,25 @@ export function OrderStatusUpdater({ orderId, currentStatus, trackingNumber, not
           type="text"
           value={tracking}
           onChange={(e) => setTracking(e.target.value)}
-          placeholder="e.g. TCS-12345678"
+          placeholder="e.g. 12345678"
           className="border border-black p-2 bg-white text-sm focus:outline-none focus:ring-1 focus:ring-black rounded-none"
         />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-xs font-bold text-neutral-500 uppercase">Carrier</label>
+        <select
+          value={carrierName}
+          onChange={(e) => setCarrierName(e.target.value)}
+          className="border border-black p-2 bg-white text-sm focus:outline-none focus:ring-1 focus:ring-black rounded-none"
+        >
+          <option value="">Select Carrier</option>
+          <option value="TCS">TCS</option>
+          <option value="Leopards">Leopards</option>
+          <option value="Trax">Trax</option>
+          <option value="M&P">M&P</option>
+          <option value="Other">Other</option>
+        </select>
       </div>
 
       <div className="flex flex-col gap-1">

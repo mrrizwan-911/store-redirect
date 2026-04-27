@@ -71,8 +71,8 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
     const inventoryItems = variants.map((v) => ({
       id: v.id,
       sku: v.sku,
-      size: v.size,
-      color: v.color,
+      title: v.title,
+      optionValues: v.optionValues,
       stock: v.stock,
       product: {
         id: v.product.id,

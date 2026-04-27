@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
             select: { id: true, name: true, slug: true, basePrice: true, salePrice: true,
                        images: { where: { isPrimary: true }, take: 1 } },
           },
-          variant: { select: { id: true, size: true, color: true, price: true } },
+          variant: { select: { id: true, title: true, optionValues: true,  price: true } },
         },
       },
     },

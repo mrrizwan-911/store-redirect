@@ -37,6 +37,12 @@ model Address {
   id         String  @id @default(cuid())
   userId     String
   label      String
+  firstName  String   @default("")
+  lastName   String   @default("")
+  email      String?
+  phone      String   @default("")
+  country    String   @default("")
+  company    String?
   line1      String
   line2      String?
   city       String
@@ -87,6 +93,7 @@ model Category {
   parent      Category?  @relation("SubCategories", fields: [parentId], references: [id])
   children    Category[] @relation("SubCategories")
   products    Product[]
+  sizeGuide   SizeGuide?
 
   @@index([slug])
   @@index([parentId])
@@ -105,6 +112,7 @@ model Product {
   isActive         Boolean          @default(true)
   isFeatured       Boolean          @default(false)
   tags             String[]
+  variantOptions   Json?            @default("[]")
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
   cartItems        CartItem[]
@@ -124,8 +132,8 @@ model Product {
 model ProductVariant {
   id         String      @id @default(cuid())
   productId  String
-  size       String?
-  color      String?
+  title      String      @default("")
+  optionValues Json?
   stock      Int         @default(0)
   sku        String      @unique
   price      Decimal?    @db.Decimal(10, 2)
@@ -137,13 +145,14 @@ model ProductVariant {
 }
 
 model ProductImage {
-  id        String  @id @default(cuid())
-  productId String
-  url       String
-  altText   String?
-  isPrimary Boolean @default(false)
-  sortOrder Int     @default(0)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id                 String  @id @default(cuid())
+  productId          String
+  url                String
+  cloudinaryPublicId String?
+  altText            String?
+  isPrimary          Boolean @default(false)
+  sortOrder          Int     @default(0)
+  product            Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
 }
@@ -203,6 +212,7 @@ model Order {
   total          Decimal     @db.Decimal(10, 2)
   couponCode     String?
   trackingNumber String?
+  carrier        String?
   notes          String?
   isGift         Boolean     @default(false)
   giftMessage    String?
@@ -428,4 +438,16 @@ model PasswordResetToken {
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SizeGuide {
+  id         String   @id @default(cuid())
+  title      String
+  content    String   @db.Text
+  categoryId String?  @unique
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+
+  @@index([categoryId])
 }

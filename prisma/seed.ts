@@ -13,6 +13,61 @@ const db = new PrismaClient({ adapter })
 async function main() {
   console.log('Starting seed...')
 
+  // 0. Cleanup test categories
+  console.log('Cleaning up test data...')
+
+  // First, unprotect everything that's not a core root category to allow deletion
+  await db.category.updateMany({
+    where: {
+      slug: { notIn: ['clothes', 'shoes', 'apparel', 'accessories'] },
+    },
+    data: { isProtected: false },
+  })
+
+  // Delete identified test root categories
+  const categoriesToDelete = await db.category.findMany({
+    where: {
+      parentId: null,
+      slug: {
+        notIn: ['clothes', 'shoes', 'apparel', 'accessories'],
+      },
+    },
+    select: { id: true },
+  })
+  const categoryIdsToDelete = categoriesToDelete.map((c) => c.id)
+
+  if (categoryIdsToDelete.length > 0) {
+    const productsToDelete = await db.product.findMany({
+      where: { categoryId: { in: categoryIdsToDelete } },
+      select: { id: true },
+    })
+    const productIdsToDelete = productsToDelete.map((p) => p.id)
+
+    if (productIdsToDelete.length > 0) {
+      // Delete dependent items first to avoid FK constraint issues
+      await db.wishlistItem.deleteMany({ where: { productId: { in: productIdsToDelete } } })
+      await db.cartItem.deleteMany({ where: { productId: { in: productIdsToDelete } } })
+      await db.outfitItem.deleteMany({ where: { productId: { in: productIdsToDelete } } })
+      await db.product.deleteMany({ where: { id: { in: productIdsToDelete } } })
+    }
+
+    await db.category.deleteMany({
+      where: { id: { in: categoryIdsToDelete } },
+    })
+  }
+
+  // Cleanup old 'casual' and 'formal' subcategories from Clothes if they exist
+  // This prevents duplicates after slug renaming
+  const clothesRoot = await db.category.findUnique({ where: { slug: 'clothes' } })
+  if (clothesRoot) {
+    await db.category.deleteMany({
+      where: {
+        parentId: clothesRoot.id,
+        slug: { in: ['casual', 'formal'] },
+      },
+    })
+  }
+
   // 1. Create Users
   const adminPassword = await bcrypt.hash('Admin@123', 12)
   await db.user.upsert({
@@ -49,8 +104,8 @@ async function main() {
         { name: 'Tops', slug: 'tops' },
         { name: 'Bottoms', slug: 'bottoms' },
         { name: 'Outerwear', slug: 'outerwear' },
-        { name: 'Formal', slug: 'formal' },
-        { name: 'Casual', slug: 'casual' },
+        { name: 'Formal Wear', slug: 'clothes-formal' },
+        { name: 'Casual Wear', slug: 'clothes-casual' },
       ],
     },
     {
@@ -110,11 +165,11 @@ async function main() {
     }
   }
 
-  // 3. Set Protected Status for Roots
+  // 3. Set Protected Status for the 4 known root categories only
   console.log('Protecting root categories...')
   await db.category.updateMany({
-    where: { parentId: null },
-    data: { isProtected: true }
+    where: { slug: { in: ['clothes', 'shoes', 'apparel', 'accessories'] } },
+    data: { isProtected: true },
   })
 
   // 4. Create Sample Products
@@ -125,7 +180,7 @@ async function main() {
     { name: 'Slim Fit Denim', slug: 'slim-denim', price: 3500, cat: 'bottoms', sku: 'CL-BOT-001' },
     { name: 'Chino Trousers', slug: 'chino-trousers', price: 3200, cat: 'bottoms', sku: 'CL-BOT-002' },
     { name: 'Lightweight Trench Coat', slug: 'trench-coat', price: 12000, cat: 'outerwear', sku: 'CL-OUT-001' },
-    { name: 'Classic Navy Suit', slug: 'navy-suit', price: 25000, cat: 'formal', sku: 'CL-FOR-001' },
+    { name: 'Classic Navy Suit', slug: 'navy-suit', price: 25000, cat: 'clothes-formal', sku: 'CL-FOR-001' },
 
     // Shoes
     { name: 'Classic White Sneakers', slug: 'classic-white-sneakers', price: 5500, cat: 'sneakers', sku: 'SH-SNE-001' },
@@ -172,11 +227,15 @@ async function main() {
             { url: `https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800`, isPrimary: false },
           ]
         },
+        variantOptions: [
+          { name: 'Color', values: ['Default'] },
+          { name: 'Size', values: ['S', 'M', 'L'] }
+        ],
         variants: {
           create: [
-            { size: 'S', color: 'Default', stock: 10, sku: `${p.sku}-S` },
-            { size: 'M', color: 'Default', stock: 15, sku: `${p.sku}-M` },
-            { size: 'L', color: 'Default', stock: 5, sku: `${p.sku}-L` },
+            { title: 'Default / S', optionValues: { Color: 'Default', Size: 'S' }, stock: 10, sku: `${p.sku}-S` },
+            { title: 'Default / M', optionValues: { Color: 'Default', Size: 'M' }, stock: 15, sku: `${p.sku}-M` },
+            { title: 'Default / L', optionValues: { Color: 'Default', Size: 'L' }, stock: 5, sku: `${p.sku}-L` },
           ]
         }
       }

@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -10,11 +10,19 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Ruler, Info } from 'lucide-react'
+import { Ruler, Info, Loader2 } from 'lucide-react'
 
 interface SizeGuideModalProps {
-  category?: string
+  categoryId?: string
+  categorySlug?: string
+  categoryName?: string
   trigger?: React.ReactNode
+}
+
+interface DBSizeGuide {
+  id: string
+  title: string
+  content: string
 }
 
 const CLOTHING_SIZES = [
@@ -35,8 +43,31 @@ const SHOE_SIZES = [
   { uk: '11', eu: '45', us: '12', cm: '29.6' },
 ]
 
-export function SizeGuideModal({ category = 'clothes', trigger }: SizeGuideModalProps) {
-  const defaultTab = category.toLowerCase().includes('shoe') ? 'shoes' : 'clothes'
+export function SizeGuideModal({ categoryId, categorySlug, categoryName = 'clothes', trigger }: SizeGuideModalProps) {
+  const [dbGuide, setDbGuide] = useState<DBSizeGuide | null>(null)
+  const [loading, setLoading] = useState(false)
+  const defaultTab = categoryName.toLowerCase().includes('shoe') ? 'shoes' : 'clothes'
+
+  useEffect(() => {
+    const fetchGuide = async () => {
+      if (!categoryId && !categoryName) return
+      setLoading(true)
+      try {
+        const query = categoryId ? `categoryId=${categoryId}` : `title=${encodeURIComponent(categoryName)}`
+        const res = await fetch(`/api/size-guides?${query}`)
+        const data = await res.json()
+        if (data.success) {
+          setDbGuide(data.data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch size guide:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchGuide()
+  }, [categoryId, categoryName])
 
   return (
     <Dialog>
@@ -51,15 +82,32 @@ export function SizeGuideModal({ category = 'clothes', trigger }: SizeGuideModal
       <DialogContent className="max-w-2xl bg-white border-none rounded-none p-0 overflow-hidden shadow-2xl">
         <DialogHeader className="p-8 pb-4 bg-neutral-50 border-b border-neutral-100">
           <DialogTitle className="font-display text-3xl tracking-tight uppercase flex items-center gap-3">
-            Size Guide
+            {dbGuide?.title || 'Size Guide'}
+            {loading && <Loader2 className="w-4 h-4 animate-spin text-neutral-300" />}
           </DialogTitle>
           <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-bold mt-1">
             Find your perfect fit with our detailed measurement chart
           </p>
         </DialogHeader>
 
-        <div className="p-8">
-          <Tabs defaultValue={defaultTab} className="w-full">
+        <div className="p-8 max-h-[70vh] overflow-y-auto">
+          {dbGuide ? (
+            <div className="prose prose-neutral max-w-none">
+              <div className="whitespace-pre-wrap text-sm leading-relaxed text-neutral-600 font-sans">
+                {dbGuide.content}
+              </div>
+              <div className="mt-8 pt-8 border-t border-neutral-100 flex items-start gap-4 p-4 bg-neutral-50 border border-neutral-100">
+                <Info className="w-4 h-4 text-neutral-400 mt-0.5 shrink-0" />
+                <div className="space-y-2">
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-black">Note</p>
+                  <p className="text-xs text-neutral-500 leading-relaxed">
+                    Measurements are provided as a general guide. Actual fit may vary slightly depending on the style and fabric.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-neutral-100 p-1 rounded-none h-12 mb-8">
               <TabsTrigger
                 value="clothes"
@@ -146,6 +194,7 @@ export function SizeGuideModal({ category = 'clothes', trigger }: SizeGuideModal
               </div>
             </TabsContent>
           </Tabs>
+          )}
         </div>
 
         <div className="p-8 pt-0 flex justify-end">

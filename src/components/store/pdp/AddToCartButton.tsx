@@ -17,8 +17,7 @@ interface AddToCartButtonProps {
   }
   selectedVariant: {
     id: string
-    size?: string | null
-    color?: string | null
+    title: string
     stock: number
     price?: number | null
   } | null
@@ -53,8 +52,7 @@ export default function AddToCartButton({
           price: Number(selectedVariant.price || product.salePrice || product.basePrice),
           quantity: quantity,
           imageUrl: product.images[0]?.url || '',
-          size: selectedVariant.size || undefined,
-          color: selectedVariant.color || undefined,
+          variantTitle: selectedVariant.title,
         })
       )
       dispatch(openCart())

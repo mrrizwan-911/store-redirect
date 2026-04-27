@@ -35,8 +35,8 @@ export function CartPage() {
     setDiscount({ amount, code })
   }
 
-  const handleMoveToWishlist = (item: { productId: string; variantId?: string; size?: string; color?: string }) => {
-    dispatch(addToWishlist({ productId: item.productId, variantId: item.variantId, size: item.size, color: item.color }))
+  const handleMoveToWishlist = (item: { productId: string; variantId?: string; variantTitle?: string }) => {
+    dispatch(addToWishlist({ productId: item.productId, variantId: item.variantId, variantTitle: item.variantTitle }))
     dispatch(removeItem({ productId: item.productId, variantId: item.variantId }))
   }
 
@@ -47,8 +47,7 @@ export function CartPage() {
     const url = generateWhatsAppCartUrl(
       items.map(i => ({
         name: i.name,
-        size: i.size,
-        color: i.color,
+        variantTitle: i.variantTitle,
         quantity: i.quantity,
         price: i.price,
       })),
@@ -129,9 +128,9 @@ export function CartPage() {
                   </div>
                   <div>
                     <h4 className="font-serif text-[17px] leading-tight font-bold pr-2">{item.name}</h4>
-                    {item.size || item.color ? (
+                    {item.variantTitle ? (
                       <p className="text-[13px] text-[#737373] mt-1 font-medium">
-                        Variant: {[item.size, item.color].filter(Boolean).join(' / ')}
+                        Variant: {item.variantTitle}
                       </p>
                     ) : null}
                     <button

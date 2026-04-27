@@ -29,8 +29,8 @@ export default async function EditProductPage(context: { params: Promise<{ id: s
     basePrice: Number(product.basePrice),
     salePrice: product.salePrice ? Number(product.salePrice) : null,
     variants: product.variants.map((v) => ({
-      size: v.size || undefined,
-      color: v.color || undefined,
+      title: v.title,
+      optionValues: v.optionValues,
       stock: v.stock,
       sku: v.sku,
       price: v.price ? Number(v.price) : null,

@@ -167,9 +167,9 @@ export default function AddressBookPage() {
           if (!open) resetForm()
         }}>
           <DialogTrigger asChild>
-            <button className="rounded-[12px] h-14 px-8 bg-black text-white hover:bg-neutral-900 uppercase tracking-widest text-[10px] font-bold transition-all flex items-center gap-3 shadow-xl">
+            <div role="button" tabIndex={0} className="rounded-[12px] h-14 px-8 bg-black text-white hover:bg-neutral-900 uppercase tracking-widest text-[10px] font-bold transition-all flex items-center gap-3 shadow-xl cursor-pointer">
               <Plus className="w-4 h-4 stroke-[2]" /> Add New Address
-            </button>
+            </div>
           </DialogTrigger>
           <DialogContent className="max-w-md rounded-[12px] border-none p-8 bg-white shadow-2xl">
             <DialogHeader className="mb-6">

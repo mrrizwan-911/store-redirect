@@ -49,6 +49,7 @@ interface QuotationDetailProps {
 export function QuotationDetail({ quotation }: QuotationDetailProps) {
   const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
   const [status, setStatus] = useState<QuotationStatus>(quotation.status);
   const [aiDraft, setAiDraft] = useState(quotation.aiDraft || "");
 
@@ -71,6 +72,28 @@ export function QuotationDetail({ quotation }: QuotationDetailProps) {
       toast.error("Failed to update quotation");
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleApproveAndSend = async () => {
+    setIsApproving(true);
+    const toastId = toast.loading("Generating PDF and sending email...");
+    try {
+      const res = await fetch(`/api/admin/quotations/${quotation.id}/approve`, {
+        method: "POST",
+      });
+
+      const result = await res.json();
+      if (result.success) {
+        toast.success("Quotation approved and email sent", { id: toastId });
+        router.refresh();
+      } else {
+        throw new Error(result.error || "Failed to approve and send");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred", { id: toastId });
+    } finally {
+      setIsApproving(false);
     }
   };
 
@@ -272,25 +295,31 @@ export function QuotationDetail({ quotation }: QuotationDetailProps) {
 
             <div className="space-y-3">
               <Button
-                className="w-full bg-black hover:bg-neutral-800 text-white rounded-none uppercase font-display tracking-widest"
-                onClick={showNotImplemented}
+                className="w-full bg-[#E8D5B0] hover:bg-[#d4c19d] text-black rounded-none uppercase font-display tracking-widest py-6 flex items-center gap-2 shadow-sm"
+                onClick={handleApproveAndSend}
+                disabled={isApproving}
               >
-                Generate PDF
+                {isApproving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                Approve & Send Formal Quotation
               </Button>
-              <Button
-                variant="outline"
-                className="w-full rounded-none border-black uppercase font-display tracking-widest"
-                disabled={!quotation.pdfUrl}
-                onClick={showNotImplemented}
-              >
-                <FileDown className="w-4 h-4 mr-2" /> Download PDF
-              </Button>
-              <Button
-                className="w-full bg-[#E8D5B0] hover:bg-[#d4c19d] text-black rounded-none uppercase font-display tracking-widest"
-                onClick={showNotImplemented}
-              >
-                <Send className="w-4 h-4 mr-2" /> Send Email
-              </Button>
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  variant="outline"
+                  className="rounded-none border-black uppercase font-display tracking-widest text-[10px]"
+                  onClick={showNotImplemented}
+                >
+                  Regenerate PDF
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-none border-black uppercase font-display tracking-widest text-[10px]"
+                  disabled={!quotation.pdfUrl}
+                  onClick={showNotImplemented}
+                >
+                  <FileDown className="w-3 h-3 mr-1" /> Download
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

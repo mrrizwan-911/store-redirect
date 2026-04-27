@@ -25,16 +25,18 @@ export function proxy(req: NextRequest) {
 
   // 1. Get token from cookies or authorization header
   const authHeader = req.headers.get('authorization')
-  let token = authHeader?.replace('Bearer ', '')
+  let token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null
+
   if (!token) {
-    token = req.cookies.get('access_token')?.value
+    const cookie = req.cookies.get('access_token')
+    token = cookie?.value || null
   }
 
   // 2. Define protected routes
   const isAdminRoute = pathname.startsWith('/d8f2a1/admin')
   const isProtectedUserRoute = pathname.startsWith('/account') || pathname.startsWith('/checkout')
 
-  // 4. Protection for /admin routes
+  // 3. Protection for /admin routes
   if (isAdminRoute) {
     if (!token) {
       logger.auth('Proxy: No token for admin route', { pathname })
@@ -47,9 +49,9 @@ export function proxy(req: NextRequest) {
     }
   }
 
-  // 4.1 Explicitly block access to the old /admin path
-  if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/')) {
-     return NextResponse.redirect(new URL('/', req.url))
+  // 4. Redirect /admin to the actual admin dashboard
+  if (pathname === '/admin' || pathname === '/admin/') {
+     return NextResponse.redirect(new URL('/d8f2a1/admin', req.url))
   }
 
   // 5. Protection for /account and /checkout routes

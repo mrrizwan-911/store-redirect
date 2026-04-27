@@ -1,17 +1,22 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   BarChart2, Package, ShoppingBag, Users, FileText,
   Archive, Tag, Zap, Shirt, Star, Mail, Settings, LogOut,
   ExternalLink, FolderTree
 } from 'lucide-react'
+import { useAppDispatch } from '@/store/hooks'
+import { logout } from '@/store/slices/authSlice'
+import { clearCart } from '@/store/slices/cartSlice'
+import { persistor } from '@/store'
 
 const navItems = [
   { icon: BarChart2, label: 'Analytics', route: '/d8f2a1/admin/analytics' },
   { icon: Package, label: 'Products', route: '/d8f2a1/admin/products' },
   { icon: FolderTree, label: 'Categories', route: '/d8f2a1/admin/categories' },
+  { icon: FileText, label: 'Size Guides', route: '/d8f2a1/admin/size-guides' },
   { icon: ShoppingBag, label: 'Orders', route: '/d8f2a1/admin/orders' },
   { icon: Users, label: 'Customers', route: '/d8f2a1/admin/customers' },
   { icon: FileText, label: 'Quotations', route: '/d8f2a1/admin/quotations' },
@@ -26,6 +31,21 @@ const navItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const dispatch = useAppDispatch()
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch {
+      // still clear client state even if API call fails
+    } finally {
+      dispatch(logout())
+      dispatch(clearCart())
+      await persistor.purge()
+      router.push('/login')
+    }
+  }
 
   return (
     <aside className="w-60 bg-white border-r border-black flex flex-col h-full font-sans">
@@ -75,10 +95,7 @@ export function AdminSidebar() {
           </div>
         </div>
         <button
-          onClick={() => {
-            // Logout logic will be hooked up later
-            window.location.href = '/login'
-          }}
+          onClick={handleLogout}
           className="flex items-center gap-2 text-sm text-neutral-600 hover:text-black transition-colors"
         >
           <LogOut className="w-4 h-4" />

@@ -29,8 +29,11 @@ export default function LoginPage() {
   // Redirect if already authenticated
   React.useEffect(() => {
     if (isAuthenticated && user) {
-      const redirectPath = user.role === 'ADMIN' ? '/d8f2a1/admin' : '/account';
-      router.push(redirectPath);
+      if (user.role === 'ADMIN') {
+        router.push('/d8f2a1/admin');
+      } else {
+        router.push('/account');
+      }
     }
   }, [isAuthenticated, user, router]);
 
@@ -75,8 +78,11 @@ export default function LoginPage() {
       toast.success('Welcome back!');
 
       // Role-based redirection
-      const redirectPath = result.data.user.role === 'ADMIN' ? '/d8f2a1/admin' : '/account';
-      router.push(redirectPath);
+      if (result.data.user.role === 'ADMIN') {
+        router.push('/d8f2a1/admin');
+      } else {
+        router.push('/account');
+      }
     } catch (error) {
       if (error instanceof ZodError) {
         toast.error(error.issues[0].message);

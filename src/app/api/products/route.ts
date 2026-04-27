@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
         include: {
           images: { where: { isPrimary: true }, take: 1 },
           category: { select: { name: true, slug: true } },
-          variants: { select: { size: true, color: true, stock: true } },
+          variants: { select: { title: true, optionValues: true,  stock: true } },
           reviews: { select: { rating: true } },
         },
         orderBy: { [sortField]: sortDir },

@@ -3,6 +3,13 @@ import { db } from '@/lib/db/client'
 import { requireAdmin } from '@/lib/utils/adminAuth'
 import { productSchema, generateSlug } from '@/lib/validations/admin'
 import { logger } from '@/lib/utils/logger'
+import { v2 as cloudinary } from 'cloudinary'
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+})
 
 export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -90,6 +97,20 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       where: { productId: (await context.params).id },
     })
 
+    const existingImages = await db.productImage.findMany({
+      where: { productId: (await context.params).id },
+      select: { cloudinaryPublicId: true },
+    })
+    await db.productImage.deleteMany({
+      where: { productId: (await context.params).id },
+    })
+
+    // Fire-and-forget Cloudinary cleanup — don't block the response on it
+    const toDestroy = existingImages.map((img) => img.cloudinaryPublicId).filter(Boolean) as string[]
+    if (toDestroy.length > 0) {
+      Promise.all(toDestroy.map((pid) => cloudinary.uploader.destroy(pid))).catch(() => {})
+    }
+
     const product = await db.product.update({
       where: { id: (await context.params).id },
       data: {
@@ -104,12 +125,21 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
         isActive: data.isActive,
         isFeatured: data.isFeatured,
         tags: data.tags,
+        images: {
+          create: data.images?.map((img: any) => ({
+            url: img.url,
+            cloudinaryPublicId: img.publicId || null,
+            isPrimary: img.isPrimary,
+            sortOrder: img.sortOrder,
+          })) || [],
+        },
         variants: {
           create: data.variants,
         },
       },
       include: {
         variants: true,
+        images: true,
       },
     })
 
@@ -129,11 +159,24 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
       return userId
     }
 
-    // Soft delete: deactivate product
+    const productId = (await context.params).id
+
+    // Fetch images before soft-deleting so we have publicIds
+    const imagesToDelete = await db.productImage.findMany({
+      where: { productId },
+      select: { cloudinaryPublicId: true },
+    })
+
     const product = await db.product.update({
-      where: { id: (await context.params).id },
+      where: { id: productId },
       data: { isActive: false },
     })
+
+    // Fire-and-forget — don't block the response
+    const publicIds = imagesToDelete.map((img) => img.cloudinaryPublicId).filter(Boolean) as string[]
+    if (publicIds.length > 0) {
+      Promise.all(publicIds.map((pid) => cloudinary.uploader.destroy(pid))).catch(() => {})
+    }
 
     logger.info('Deactivated product', { productId: product.id })
 

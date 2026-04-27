@@ -3,9 +3,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { Heart, Plus, Star } from 'lucide-react'
-import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { useAppDispatch } from '@/store/hooks'
 import { addItem, openCart } from '@/store/slices/cartSlice'
-import { toggleWishlist } from '@/store/slices/wishlistSlice'
+import { useWishlist } from '@/hooks/useWishlist'
 import { cn } from '@/lib/utils'
 import { useState, useEffect } from 'react'
 
@@ -43,9 +43,9 @@ export function ProductCard({
   stockCount,
 }: ProductCardProps) {
   const dispatch = useAppDispatch()
-  const wishlist = useAppSelector(state => state.wishlist.productIds)
+  const { isInWishlist, toggle: handleWishlistToggle } = useWishlist(id)
   const [mounted, setMounted] = useState(false)
-  const isInWishlist = mounted && wishlist.includes(id)
+  const isWishlisted = mounted && isInWishlist
   const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export function ProductCard({
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault()
-    dispatch(toggleWishlist(id))
+    handleWishlistToggle()
   }
 
   return (
@@ -108,11 +108,11 @@ export function ProductCard({
             onClick={handleWishlist}
             className={cn(
               "h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors",
-              isInWishlist && "border-black text-black"
+              isWishlisted && "border-black text-black"
             )}
-            aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
           >
-            <Heart className={cn("w-3.5 h-3.5", isInWishlist && "fill-current")} />
+            <Heart className={cn("w-3.5 h-3.5", isWishlisted && "fill-current")} />
             <span className="hidden sm:inline">Save</span>
           </button>
           <button

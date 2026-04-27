@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
+import Link from "next/link"
 import {
   Table,
   TableBody,
@@ -19,8 +20,8 @@ import { Edit2Icon } from "lucide-react"
 export interface InventoryItem {
   id: string; // Variant ID
   sku: string;
-  size: string | null;
-  color: string | null;
+  title: string;
+  optionValues: any;
   stock: number;
   product: {
     id: string;
@@ -113,8 +114,8 @@ export function InventoryTable({ initialItems }: InventoryTableProps) {
           <TableRow className="border-b border-[#E5E5E5] hover:bg-transparent">
             <TableHead className="w-[300px] font-display text-black font-medium py-4">Product</TableHead>
             <TableHead className="font-display text-black font-medium">SKU</TableHead>
-            <TableHead className="font-display text-black font-medium">Size</TableHead>
-            <TableHead className="font-display text-black font-medium">Color</TableHead>
+            <TableHead className="font-display text-black font-medium">Variant</TableHead>
+            <TableHead className="font-display text-black font-medium">Options</TableHead>
             <TableHead className="font-display text-black font-medium">Stock</TableHead>
             <TableHead className="font-display text-black font-medium">Status</TableHead>
             <TableHead className="text-right font-display text-black font-medium pr-6">Actions</TableHead>
@@ -158,10 +159,10 @@ export function InventoryTable({ initialItems }: InventoryTableProps) {
                     {item.sku}
                   </TableCell>
                   <TableCell className="font-body text-sm text-neutral-600 uppercase">
-                    {item.size || "—"}
+                    {item.title || "—"}
                   </TableCell>
-                  <TableCell className="font-body text-sm text-neutral-600 uppercase">
-                    {item.color || "—"}
+                  <TableCell className="font-body text-sm text-neutral-600">
+                    {item.optionValues ? Object.entries(item.optionValues).map(([k,v]) => `${k}: ${v}`).join(', ') : "—"}
                   </TableCell>
                   <TableCell className="font-body text-sm">
                     <div className="flex items-center gap-2 group cursor-pointer">
@@ -187,9 +188,12 @@ export function InventoryTable({ initialItems }: InventoryTableProps) {
                     {getStatusBadge(item.stock)}
                   </TableCell>
                   <TableCell className="text-right pr-6">
-                    <button className="text-xs font-display font-medium text-neutral-400 hover:text-black underline underline-offset-4 transition-colors">
+                    <Link
+                      href={`/d8f2a1/admin/products/${item.product.id}/variants-matrix`}
+                      className="text-xs font-display font-medium text-neutral-400 hover:text-black underline underline-offset-4 transition-colors"
+                    >
                       View Details
-                    </button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               )

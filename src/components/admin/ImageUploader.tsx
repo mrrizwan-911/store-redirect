@@ -6,19 +6,22 @@ import { UploadCloud, X, Star } from 'lucide-react'
 import Image from 'next/image'
 
 interface ProductImage {
-  id: string
+  id?: string
   url: string
-  isPrimary: boolean
-  sortOrder: number
+  publicId?: string
+  isPrimary?: boolean
+  sortOrder?: number
 }
 
 interface ImageUploaderProps {
-  productId: string
+  productId?: string
   images: ProductImage[]
   onUploadSuccess: (image: ProductImage) => void
+  onRemoveImage?: (id: string) => void
+  onSetPrimary?: (id: string) => void
 }
 
-export function ImageUploader({ productId, images, onUploadSuccess }: ImageUploaderProps) {
+export function ImageUploader({ productId, images, onUploadSuccess, onRemoveImage, onSetPrimary }: ImageUploaderProps) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -27,15 +30,14 @@ export function ImageUploader({ productId, images, onUploadSuccess }: ImageUploa
       setUploading(true)
       setError(null)
       try {
-        for (const file of acceptedFiles) {
+        const uploadPromises = acceptedFiles.map(async (file, index) => {
           const formData = new FormData()
           formData.append('file', file)
-          // If this is the first image being uploaded, set it as primary
-          if (images.length === 0) {
-            formData.append('isPrimary', 'true')
-          }
 
-          const res = await fetch(`/api/admin/products/${productId}/images`, {
+          // If images list is empty and this is the first file in the batch, make it primary
+          const isPrimary = images.length === 0 && index === 0
+
+          const res = await fetch(`/api/admin/upload`, {
             method: 'POST',
             body: formData,
           })
@@ -45,15 +47,24 @@ export function ImageUploader({ productId, images, onUploadSuccess }: ImageUploa
             throw new Error(data.error || 'Upload failed')
           }
 
-          onUploadSuccess(data.data)
-        }
+          return {
+            id: Math.random().toString(36).substring(7),
+            url: data.data.url,
+            publicId: data.data.publicId,
+            isPrimary,
+            sortOrder: images.length + index,
+          }
+        })
+
+        const results = await Promise.all(uploadPromises)
+        results.forEach(img => onUploadSuccess(img))
       } catch (err: any) {
         setError(err.message)
       } finally {
         setUploading(false)
       }
     },
-    [productId, images.length, onUploadSuccess]
+    [images.length, onUploadSuccess]
   )
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -85,12 +96,32 @@ export function ImageUploader({ productId, images, onUploadSuccess }: ImageUploa
       {images.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {images.map((img) => (
-            <div key={img.id} className="relative group border border-[#E5E5E5] aspect-square">
+            <div key={img.id || img.url} className="relative group border border-[#E5E5E5] aspect-square">
               <Image src={img.url} alt="Product image" fill className="object-cover" />
-              {img.isPrimary && (
-                <div className="absolute top-2 left-2 bg-black text-white p-1 rounded-full shadow">
+              {img.isPrimary ? (
+                <div className="absolute top-2 left-2 bg-black text-white p-1 rounded-full shadow z-10">
                   <Star className="h-4 w-4 fill-current" />
                 </div>
+              ) : (
+                onSetPrimary && (
+                  <button
+                    type="button"
+                    onClick={() => onSetPrimary(img.id || img.url)}
+                    className="absolute top-2 left-2 bg-white/80 text-gray-400 p-1 rounded-full shadow opacity-0 group-hover:opacity-100 hover:text-black hover:bg-white transition-all z-10"
+                    title="Set as Thumbnail"
+                  >
+                    <Star className="h-4 w-4" />
+                  </button>
+                )
+              )}
+              {onRemoveImage && (
+                <button
+                  type="button"
+                  onClick={() => onRemoveImage(img.id as string)}
+                  className="absolute top-2 right-2 bg-white/80 p-1 rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+                >
+                  <X className="h-4 w-4 text-[#EF4444]" />
+                </button>
               )}
             </div>
           ))}

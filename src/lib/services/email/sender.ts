@@ -4,6 +4,11 @@ import { logger } from '@/lib/utils/logger'
 
 const resend = new Resend(process.env.RESEND_API_KEY || 'mock_key')
 
+interface EmailAttachment {
+  filename: string
+  content: Buffer | string
+}
+
 interface SendEmailParams {
   to: string
   subject: string
@@ -11,6 +16,7 @@ interface SendEmailParams {
   text?: string
   type: string
   userId?: string
+  attachments?: EmailAttachment[]
 }
 
 export async function sendEmail(
@@ -28,11 +34,12 @@ export async function sendEmail(
     }
 
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'Calnza <noreply@calnza.com>',
+      from: process.env.RESEND_FROM_EMAIL || 'Antigravity Atelier <noreply@antigravity.com>',
       to: params.to,
       subject: params.subject,
       html: params.html,
       text: params.text,
+      attachments: params.attachments,
     })
 
     await db.emailLog.create({

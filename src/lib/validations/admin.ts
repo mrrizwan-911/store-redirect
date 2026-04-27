@@ -9,6 +9,20 @@ export function generateSlug(name: string): string {
     .trim()
 }
 
+export const variantOptionSchema = z.object({
+  name: z.string(),
+  values: z.array(z.string()),
+})
+
+export const productVariantSchema = z.object({
+  id: z.string().optional(),
+  title: z.string(),
+  optionValues: z.record(z.string(), z.string()).optional(),
+  stock: z.number().int().min(0),
+  sku: z.string(),
+  price: z.number().positive().optional().nullable(),
+})
+
 export const productSchema = z.object({
   name: z.string().min(2, 'Product name required'),
   slug: z.string().optional(),  // auto-generated if not provided
@@ -18,16 +32,19 @@ export const productSchema = z.object({
   basePrice: z.number().positive('Price must be positive'),
   salePrice: z.number().positive().optional().nullable(),
   sku: z.string().min(2, 'SKU required'),
+  baseStock: z.number().int().min(0).optional().default(0),
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
   tags: z.array(z.string()).default([]),
-  variants: z.array(z.object({
-    size: z.string().optional(),
-    color: z.string().optional(),
-    stock: z.number().int().min(0),
-    sku: z.string(),
-    price: z.number().positive().optional().nullable(),
-  })).default([]),
+  images: z.array(z.object({
+    id: z.string().optional(),
+    url: z.string().url(),
+    publicId: z.string().optional(),
+    isPrimary: z.boolean().optional().default(false),
+    sortOrder: z.number().optional().default(0),
+  })).optional().default([]),
+  variantOptions: z.array(variantOptionSchema).optional().default([]),
+  variants: z.array(productVariantSchema).default([]),
 })
 
 export const flashSaleSchema = z.object({

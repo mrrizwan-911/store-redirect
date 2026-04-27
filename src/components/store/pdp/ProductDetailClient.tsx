@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Link from 'next/link'
 import ImageGallery from './ImageGallery'
 import VariantSelector from './VariantSelector'
 import AddToCartButton from './AddToCartButton'
 import ReviewsSection from './ReviewsSection'
 import { ProductCard } from '../shared/ProductCard'
+import { SizeGuideModal } from '../shared/SizeGuideModal'
+import { useWishlist } from '@/hooks/useWishlist'
 import { cn } from '@/lib/utils'
 import {
   ChevronRight,
@@ -16,7 +18,10 @@ import {
   Truck,
   ShieldCheck,
   Plus,
-  Minus
+  Minus,
+  Share2,
+  Copy,
+  Check
 } from 'lucide-react'
 
 interface Product {
@@ -38,10 +43,11 @@ interface Product {
     altText?: string | null
     isPrimary: boolean
   }[]
+  variantOptions: any
   variants: {
     id: string
-    size?: string | null
-    color?: string | null
+    title: string
+    optionValues: any
     stock: number
     price?: any | null
     sku: string
@@ -57,20 +63,31 @@ interface ProductDetailClientProps {
 }
 
 export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
-  const [selectedColor, setSelectedColor] = useState<string | null>(
-    product.variants.find(v => v.color)?.color || null
-  )
-  const [selectedSize, setSelectedSize] = useState<string | null>(null)
+  const { isInWishlist, toggle: handleWishlistToggle } = useWishlist(product.id)
+  const [mounted, setMounted] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const isWishlisted = mounted && isInWishlist
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
+    if (product.variants && product.variants.length > 0) {
+      return product.variants[0].optionValues || {}
+    }
+    return {}
+  })
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState<'description' | 'reviews' | 'shipping'>('description')
 
   const selectedVariant = useMemo(() => {
-    return product.variants.find(
-      (v) =>
-        (!selectedColor || v.color === selectedColor) &&
-        (!selectedSize || v.size === selectedSize)
-    ) || null
-  }, [product.variants, selectedColor, selectedSize])
+    if (product.variants.length === 0) return null
+    return product.variants.find((v) => {
+      const vOpts = v.optionValues || {}
+      return Object.keys(selectedOptions).every(k => vOpts[k] === selectedOptions[k])
+    }) || null
+  }, [product.variants, selectedOptions])
 
   const currentPrice = Number(selectedVariant?.price || product.salePrice || product.basePrice)
   const originalPrice = product.salePrice ? Number(product.basePrice) : null
@@ -88,11 +105,53 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
     const message = encodeURIComponent(
       `Hi! I'm interested in the ${product.name}.\n` +
       `URL: ${window.location.origin}/products/${product.slug}\n` +
-      (selectedColor ? `Color: ${selectedColor}\n` : '') +
-      (selectedSize ? `Size: ${selectedSize}\n` : '') +
+      (Object.keys(selectedOptions).length > 0 ? Object.entries(selectedOptions).map(([k,v]) => `${k}: ${v}`).join('\n') + '\n' : '') +
       `Quantity: ${quantity}`
     )
     window.open(`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+923000000000'}?text=${message}`, '_blank')
+  }
+
+  const handleWhatsAppShare = () => {
+    const text = encodeURIComponent(
+      `Check out ${product.name} on our store!\n${window.location.href}`
+    )
+    window.open(`https://wa.me/?text=${text}`, '_blank')
+  }
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // fallback for older browsers
+      const input = document.createElement('input')
+      input.value = window.location.href
+      document.body.appendChild(input)
+      input.select()
+      document.execCommand('copy')
+      document.body.removeChild(input)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/products/${product.slug}`
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product.name,
+          text: product.shortDescription || product.description,
+          url: url,
+        })
+      } catch (err) {
+        console.log('Error sharing', err)
+      }
+    } else {
+      navigator.clipboard.writeText(url)
+      alert('Link copied to clipboard!')
+    }
   }
 
   return (
@@ -158,12 +217,18 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           </p>
 
           <VariantSelector
+            variantOptions={product.variantOptions || []}
             variants={product.variants}
-            selectedColor={selectedColor}
-            selectedSize={selectedSize}
-            onColorChange={setSelectedColor}
-            onSizeChange={setSelectedSize}
+            selectedOptions={selectedOptions}
+            onOptionsChange={setSelectedOptions}
           />
+
+          <div className="flex justify-end">
+            <SizeGuideModal
+              categoryName={product.category.name}
+              categorySlug={product.category.slug}
+            />
+          </div>
 
           <div className="space-y-6 pt-4">
             {/* Quantity Stepper */}
@@ -213,23 +278,87 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                 selectedVariant={selectedVariant}
                 quantity={quantity}
               />
-              <button
-                onClick={handleWhatsAppOrder}
-                className="w-full h-12 border border-black flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold hover:bg-neutral-50 transition-colors"
-              >
-                <MessageCircle className="w-4 h-4" />
-                WhatsApp Order
-              </button>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={handleWhatsAppOrder}
+                  className="flex-1 h-12 border border-black flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold hover:bg-neutral-50 transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4 shrink-0" />
+                  <span className="truncate">WhatsApp Order</span>
+                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleWhatsAppShare}
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-[#E5E5E5] text-[#737373] hover:text-[#000000] hover:border-[#000000] px-4 py-3 transition-colors text-sm"
+                    title="Share on WhatsApp"
+                  >
+                    <Share2 className="h-4 w-4 shrink-0" />
+                    Share
+                  </button>
+                  <button
+                    onClick={handleCopyLink}
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-[#E5E5E5] text-[#737373] hover:text-[#000000] hover:border-[#000000] px-4 py-3 transition-colors text-sm min-w-[105px]"
+                    title="Copy link"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-4 w-4 text-[#10B981] shrink-0" />
+                        <span className="text-[#10B981]">Copied!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4 shrink-0" />
+                        Link
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div className="flex justify-center gap-8 pt-2">
-              <button className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] font-bold hover:opacity-60 transition-opacity">
-                <Heart className="w-3.5 h-3.5" />
-                Add to Wishlist
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  handleWishlistToggle()
+                }}
+                className={cn(
+                  "flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] font-bold transition-all",
+                  isWishlisted ? "text-black" : "text-text-secondary hover:text-black"
+                )}
+              >
+                <Heart className={cn("w-3.5 h-3.5", isWishlisted && "fill-current")} />
+                {isWishlisted ? "In Wishlist" : "Add to Wishlist"}
               </button>
-              <button className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] font-bold hover:opacity-60 transition-opacity">
+              <button className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] font-bold text-text-secondary hover:text-black transition-all">
                 <RefreshCcw className="w-3.5 h-3.5" />
                 Compare
+              </button>
+            </div>
+
+            {/* Social Share */}
+            <div className="flex justify-center gap-4 pt-6 mt-6 border-t border-border">
+              <span className="text-[10px] uppercase tracking-widest font-bold text-text-secondary self-center">Share:</span>
+              <button
+                onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/products/' + product.slug)}`, '_blank')}
+                className="p-2 text-text-secondary hover:text-black transition-colors"
+                aria-label="Share on Facebook"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+              </button>
+              <button
+                onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.origin + '/products/' + product.slug)}&text=${encodeURIComponent(product.name)}`, '_blank')}
+                className="p-2 text-text-secondary hover:text-black transition-colors"
+                aria-label="Share on Twitter"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+              </button>
+              <button
+                onClick={handleShare}
+                className="p-2 text-text-secondary hover:text-black transition-colors"
+                aria-label="Copy Link"
+              >
+                <Share2 className="w-4 h-4" />
               </button>
             </div>
           </div>

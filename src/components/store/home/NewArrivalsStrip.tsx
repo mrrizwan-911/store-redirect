@@ -2,19 +2,39 @@
 
 import { useRef } from 'react'
 import { ProductCard } from '../shared/ProductCard'
-import { MOCK_PRODUCTS } from '@/lib/utils/mockData'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-export function NewArrivalsStrip() {
+interface ProductCardData {
+  id: string
+  name: string
+  slug: string
+  imageUrl: string
+  secondaryImageUrl?: string
+  price: number
+  salePrice?: number
+  category: string
+  avgRating?: number
+  reviewCount?: number
+  isBadgeNew?: boolean
+  isBadgeSale?: boolean
+  isLowStock?: boolean
+  stockCount?: number
+}
+
+interface NewArrivalsStripProps {
+  products: ProductCardData[]
+}
+
+export function NewArrivalsStrip({ products }: NewArrivalsStripProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const arrivals = MOCK_PRODUCTS.slice(0, 8)
+
+  if (products.length === 0) return null
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
-      const scrollAmount = 400
       scrollContainerRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
+        left: direction === 'left' ? -400 : 400,
+        behavior: 'smooth',
       })
     }
   }
@@ -53,16 +73,12 @@ export function NewArrivalsStrip() {
         ref={scrollContainerRef}
         className="flex gap-8 md:gap-12 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-12 scroll-smooth"
       >
-        {/* Padding Spacer for start */}
         <div className="min-w-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))] h-1" />
-
-        {arrivals.map((product) => (
+        {products.map((product) => (
           <div key={product.id} className="min-w-[280px] sm:min-w-[320px] md:min-w-[380px] snap-start">
             <ProductCard {...product} />
           </div>
         ))}
-
-        {/* Padding Spacer for end */}
         <div className="min-w-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))] h-1" />
       </div>
     </section>

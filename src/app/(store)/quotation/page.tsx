@@ -1,35 +1,55 @@
-import React from "react";
-import { Metadata } from "next";
-import { QuotationForm } from "@/components/store/QuotationForm";
+import { Metadata } from 'next'
+import { QuotationForm } from '@/components/store/QuotationForm'
 
 export const metadata: Metadata = {
-  title: "Request a Quotation | B2B Portal",
-  description: "Get custom pricing for bulk orders, corporate gifting, and wholesale apparel.",
-};
+  title: 'B2B Quotation Portal | Antigravity Atelier',
+  description: 'Request bulk quotations for premium luxury apparel and corporate solutions.',
+}
 
 export default function QuotationPage() {
   return (
-    <main className="min-h-screen bg-white pb-20">
+    <div className="bg-white min-h-screen">
       {/* Hero Section */}
-      <section className="py-16 md:py-24 border-b border-gray-100 mb-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-6xl font-serif mb-6 leading-tight">
-              Corporate & Bulk <br /> Quotation Portal
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed">
-              Elevate your business with our premium apparel. Whether you're looking for corporate uniforms,
-              wholesale inventory, or custom-branded merchandise, our B2B team is here to assist with
-              volume-based pricing and tailored logistics.
-            </p>
-          </div>
+      <div className="bg-black text-white py-16 md:py-24 px-4">
+        <div className="max-w-7xl mx-auto text-center space-y-6">
+          <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tight uppercase">B2B & Bulk Orders</h1>
+          <p className="text-neutral-400 max-w-2xl mx-auto text-xs md:text-sm uppercase tracking-[0.3em] font-bold">
+            Elevating Corporate Gifting & Wholesale Partnerships
+          </p>
+          <div className="w-16 h-px bg-[#E8D5B0] mx-auto" />
         </div>
-      </section>
+      </div>
 
       {/* Form Section */}
-      <section className="container mx-auto px-4">
-        <QuotationForm />
-      </section>
-    </main>
-  );
+      <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="bg-white border border-neutral-100 p-8 md:p-12">
+          <QuotationForm />
+        </div>
+      </div>
+
+      {/* Trust Bar */}
+      <div className="border-t border-neutral-100 py-16 bg-neutral-50/50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 text-center text-black">
+            <div className="space-y-2">
+              <p className="text-3xl font-serif font-bold italic tracking-tighter">50+</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-black text-neutral-500">Corporate Clients</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-3xl font-serif font-bold italic tracking-tighter">24h</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-black text-neutral-500">Quote Turnaround</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-3xl font-serif font-bold italic tracking-tighter">100%</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-black text-neutral-500">Quality Assured</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-3xl font-serif font-bold italic tracking-tighter">PK</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] font-black text-neutral-500">Nationwide Delivery</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }

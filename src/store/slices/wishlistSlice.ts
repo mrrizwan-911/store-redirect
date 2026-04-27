@@ -3,8 +3,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 export interface WishlistItem {
   productId: string
   variantId?: string
-  size?: string
-  color?: string
+  variantTitle?: string
 }
 
 interface WishlistState {

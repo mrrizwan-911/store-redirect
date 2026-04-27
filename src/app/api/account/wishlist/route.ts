@@ -95,7 +95,10 @@ export async function DELETE(req: NextRequest) {
     })
 
     return NextResponse.json({ success: true, data: { productId } })
-  } catch (error) {
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      return NextResponse.json({ success: false, error: 'Item not found' }, { status: 404 })
+    }
     logger.error('[API_WISHLIST_DELETE]', error)
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 })
   }

@@ -109,12 +109,36 @@ export async function POST(req: Request) {
         isActive: data.isActive,
         isFeatured: data.isFeatured,
         tags: data.tags,
+        variantOptions: data.variantOptions || [],
+        images: {
+          create: data.images?.map((img: any) => ({
+            url: img.url,
+            cloudinaryPublicId: img.publicId || null,
+            isPrimary: img.isPrimary ?? false,
+            sortOrder: img.sortOrder ?? 0,
+          })) || [],
+        },
         variants: {
-          create: data.variants,
+          create: data.variants && data.variants.length > 0
+            ? data.variants.map((v: any) => ({
+                title: v.title,
+                optionValues: v.optionValues || {},
+                stock: v.stock,
+                sku: v.sku,
+                price: v.price,
+              }))
+            : [{
+                title: 'Default',
+                optionValues: {},
+                stock: data.baseStock || 0,
+                sku: data.sku,
+                price: data.basePrice,
+              }],
         },
       },
       include: {
         variants: true,
+        images: true,
       },
     })
 

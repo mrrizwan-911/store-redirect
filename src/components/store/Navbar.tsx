@@ -124,8 +124,8 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
       "sticky top-0 z-50 w-full transition-all duration-500 bg-white border-b-2 border-[#EEEEEE]",
       isScrolled ? "py-1" : "py-3"
     )}>
-      <div className="mx-auto max-w-7xl px-8">
-        <div className="flex h-[32px] items-center justify-between gap-12">
+      <div className="mx-auto max-w-7xl px-4 md:px-8">
+        <div className="flex h-[32px] items-center justify-between gap-4 md:gap-12">
 
           {/* Logo Area */}
           <Link href="/" className="shrink-0 group cursor-pointer flex items-center">
@@ -217,65 +217,22 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
               {/* Dynamic Account Button */}
               {!rehydrated ? (
                 <div className="text-gray-600 h-5 w-5 stroke-[1.5]"><User className="h-5 w-5" /></div>
-              ) : isAuthenticated ? (
-                <div
-                  className="relative"
-                  onMouseEnter={() => setIsAccountOpen(true)}
-                  onMouseLeave={() => setIsAccountOpen(false)}
-                >
-                  <DropdownMenu open={isAccountOpen} onOpenChange={setIsAccountOpen}>
-                    <DropdownMenuTrigger
-                      onClick={() => router.push(dashboardHref)}
-                      className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100 outline-none"
-                      aria-label="Account Menu"
-                    >
-                      <User className="h-5 w-5 stroke-[1.5]" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 bg-[#F8F8F8] border border-neutral-200 shadow-xl rounded-none py-1.5 px-1.5">
-                      {user?.role === 'ADMIN' && (
-                        <>
-                          <DropdownMenuItem
-                            className="px-4 py-2.5 text-[11px] uppercase tracking-[0.15em] font-bold cursor-pointer text-black focus:bg-neutral-200/50 focus:text-black flex items-center gap-3 transition-all rounded-none outline-none"
-                            onClick={() => {
-                              setIsAccountOpen(false);
-                              router.push('/d8f2a1/admin');
-                            }}
-                          >
-                            <LayoutDashboard className="w-4 h-4 stroke-[1.5]" />
-                            Admin Panel
-                          </DropdownMenuItem>
-                          <div className="h-px bg-neutral-200 my-1" />
-                        </>
-                      )}
-                      <DropdownMenuItem
-                        className="px-4 py-2.5 text-[11px] uppercase tracking-[0.15em] font-bold cursor-pointer text-neutral-600 hover:text-black focus:bg-neutral-200/50 focus:text-black flex items-center gap-3 transition-all rounded-none outline-none"
-                        onClick={() => {
-                          setIsAccountOpen(false);
-                          router.push(dashboardHref);
-                        }}
-                      >
-                        <LayoutDashboard className="w-4 h-4 stroke-[1.5]" />
-                        Dashboard
-                      </DropdownMenuItem>
-                      <div className="h-px bg-neutral-200 my-1" />
-                      <DropdownMenuItem
-                        className="px-4 py-2.5 text-[11px] uppercase tracking-[0.15em] font-bold cursor-pointer text-red-500 hover:text-red-700 focus:bg-red-50 focus:text-red-700 flex items-center gap-3 transition-all rounded-none outline-none"
-                        onClick={handleLogout}
-                      >
-                        <LogOut className="w-4 h-4 stroke-[1.5]" />
-                        Logout
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
               ) : (
-                <Link
-                  href="/login"
-                  className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100"
-                  aria-label="Login"
+                <button
+                  onClick={() => {
+                    if (!isAuthenticated) {
+                      router.push('/login');
+                    } else if (user?.role === 'ADMIN') {
+                      router.push('/d8f2a1/admin');
+                    } else {
+                      router.push('/account');
+                    }
+                  }}
+                  className="text-gray-600 hover:text-black transition-all relative after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100 outline-none"
+                  aria-label="Account"
                 >
                   <User className="h-5 w-5 stroke-[1.5]" />
-                </Link>
+                </button>
               )}
 
               <button

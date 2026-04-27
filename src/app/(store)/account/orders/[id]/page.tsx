@@ -31,6 +31,7 @@ interface OrderDetail {
   shippingCost: number
   discount: number
   trackingNumber: string | null
+  carrier: string | null
   createdAt: string
   address: {
     label: string
@@ -100,6 +101,17 @@ export default function OrderDetailPage() {
 
   const currentStepIndex = statusSteps.indexOf(order.status)
   const isCancelled = order.status === 'CANCELLED' || order.status === 'REFUNDED'
+
+  const getTrackingUrl = (carrier: string, trackingNumber: string) => {
+    const c = carrier.toUpperCase();
+    if (c === 'TCS') return `https://www.tcsexpress.com/tracking/tracking-results?trackingNo=${trackingNumber}`;
+    if (c.includes('LEOPARD')) return `https://www.leopardscourier.com/leopards-tracking?track-number=${trackingNumber}`;
+    if (c === 'TRAX') return `https://trax.pk/tracking/?tracking_number=${trackingNumber}`;
+    if (c === 'M&P' || c === 'MNP') return `https://www.mulphilog.com/tracking-details?tracking_number=${trackingNumber}`;
+    return null;
+  };
+
+  const trackingUrl = order.carrier && order.trackingNumber ? getTrackingUrl(order.carrier, order.trackingNumber) : null;
 
   return (
     <div className="space-y-12 animate-in fade-in duration-700 pb-20 text-black">
@@ -232,13 +244,24 @@ export default function OrderDetailPage() {
                     <Truck className="w-5 h-5 text-black stroke-[2]" />
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Tracking Number</p>
+                    <p className="text-[10px] uppercase tracking-widest font-bold text-neutral-500">
+                      {order.carrier ? `${order.carrier} Tracking` : 'Tracking Number'}
+                    </p>
                     <p className="text-sm font-mono font-bold uppercase text-black">{order.trackingNumber}</p>
                   </div>
                 </div>
-                <Button variant="link" className="text-black font-bold uppercase tracking-widest text-[10px] flex items-center gap-2 hover:gap-3 transition-all">
-                  Track Package <ExternalLink className="w-3 h-3 stroke-[2.5]" />
-                </Button>
+                {trackingUrl && (
+                  <Button variant="link" asChild className="text-black font-bold uppercase tracking-widest text-[10px] flex items-center gap-2 hover:gap-3 transition-all">
+                    <a href={trackingUrl} target="_blank" rel="noopener noreferrer">
+                      Track on {order.carrier} <ExternalLink className="w-3 h-3 stroke-[2.5]" />
+                    </a>
+                  </Button>
+                )}
+                {!trackingUrl && (
+                  <Button variant="link" className="text-black font-bold uppercase tracking-widest text-[10px] flex items-center gap-2 hover:gap-3 transition-all">
+                    Track Package <ExternalLink className="w-3 h-3 stroke-[2.5]" />
+                  </Button>
+                )}
               </div>
             </div>
           )}
