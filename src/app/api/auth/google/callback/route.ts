@@ -43,31 +43,39 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(`${appUrl}/login?error=oauth_no_email`)
     }
 
-    // Check if user exists before upsert to detect new signups
+    // Check if user already exists and what role they have
     const existingUser = await db.user.findUnique({
       where: { email: profile.email },
-      select: { id: true }
+      select: { id: true, role: true, name: true }
     })
 
-    // Upsert user — Google already verified their email
-    const user = await db.user.upsert({
-      where: { email: profile.email },
-      update: { googleId: profile.sub },
-      create: {
-        email: profile.email,
-        name: profile.name ?? profile.email.split('@')[0],
-        googleId: profile.sub,
-        role: 'CUSTOMER',
-        isVerified: true, // Google verified the email
-      },
-    })
-
-    // Send welcome email for new users
-    if (!existingUser) {
-      // Fire and forget welcome email
-      sendWelcomeEmail(user.email, user.name).catch(err => {
-        logger.error('Failed to trigger welcome email after OAuth', err, { userId: user.id })
+    let user
+    if (existingUser) {
+      // Upgrade GUEST to CUSTOMER, leave CUSTOMER/ADMIN roles untouched
+      const updateData: any = { googleId: profile.sub }
+      if (existingUser.role === 'GUEST') {
+        updateData.role = 'CUSTOMER'
+        updateData.isVerified = true
+      }
+      user = await db.user.update({
+        where: { id: existingUser.id },
+        data: updateData,
       })
+    } else {
+      // New user — create as CUSTOMER
+      user = await db.user.create({
+        data: {
+          email: profile.email,
+          name: profile.name ?? profile.email.split('@')[0],
+          googleId: profile.sub,
+          role: 'CUSTOMER',
+          isVerified: true,
+        },
+      })
+      // Fire welcome email for genuinely new users only
+      sendWelcomeEmail(user.email, user.name).catch(err =>
+        logger.error('Failed to trigger welcome email after OAuth', err, { userId: user.id })
+      )
     }
 
     const tokenPayload = { userId: user.id, email: user.email, role: user.role }
