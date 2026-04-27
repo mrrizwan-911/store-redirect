@@ -31,8 +31,6 @@ export const productFilterSchema = z
       .optional()
       .transform((val) => (val ? Number(val) : undefined))
       .pipe(z.number().min(0).optional()),
-    size: z.string().optional(),
-    color: z.string().optional(),
     rating: z
       .string()
       .optional()

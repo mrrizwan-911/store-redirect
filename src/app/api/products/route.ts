@@ -19,8 +19,6 @@ export async function GET(req: NextRequest) {
     category,
     minPrice = 0,
     maxPrice = 999999,
-    size,
-    color,
     rating,
     sort = 'createdAt_desc',
     search,
@@ -38,17 +36,7 @@ export async function GET(req: NextRequest) {
     ...(featured && { isFeatured: true }),
     ...(category && { category: { slug: category } }),
     basePrice: { gte: minPrice, lte: maxPrice },
-    ...(size || color
-      ? {
-          variants: {
-            some: {
-              ...(size && { size: { in: size.split(',') } }),
-              ...(color && { color: { in: color.split(',') } }),
-              stock: { gt: 0 }
-            }
-          }
-        }
-      : {}),
+    variants: { some: { stock: { gt: 0 } } },
     ...(search && {
       OR: [
         { name: { contains: search, mode: 'insensitive' as const } },
