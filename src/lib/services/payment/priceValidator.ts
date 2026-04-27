@@ -11,7 +11,7 @@ export async function getValidatedPrice(productId: string): Promise<number> {
   })
 
   if (!product) {
-    throw new Error(`Product with ID ${productId} not found`)
+    return null as any
   }
 
   const now = new Date()
@@ -54,35 +54,45 @@ export async function getValidatedCartTotal(
     quantity: number
   }[]
 }> {
-  const lineItems = await Promise.all(
-    items.map(async (item) => {
-      let unitPrice: number
+    const lineItems = await Promise.all(
+      items.map(async (item) => {
+        let unitPrice: number
 
-      if (item.variantId) {
-        const variant = await db.productVariant.findUnique({
-          where: { id: item.variantId },
-          select: { price: true },
-        })
+        if (item.variantId) {
+          const variant = await db.productVariant.findUnique({
+            where: { id: item.variantId },
+            select: { price: true, stock: true },
+          })
 
-        if (variant?.price) {
-          // Variant price override exists — use it (variants typically don't have flash sales)
-          unitPrice = Number(variant.price)
+          if (!variant) return null as any
+
+          if (variant.stock < 1) {
+            throw Object.assign(new Error('OUT_OF_STOCK'), { variantId: item.variantId, status: 400 })
+          }
+
+          if (variant?.price) {
+            // Variant price override exists — use it (variants typically don't have flash sales)
+            unitPrice = Number(variant.price)
+          } else {
+            // No variant override — use base product's validated price
+            unitPrice = await getValidatedPrice(item.productId)
+          }
         } else {
-          // No variant override — use base product's validated price
           unitPrice = await getValidatedPrice(item.productId)
         }
-      } else {
-        unitPrice = await getValidatedPrice(item.productId)
-      }
 
-      return {
-        productId: item.productId,
-        variantId: item.variantId,
-        validatedPrice: unitPrice,
-        quantity: item.quantity,
-      }
-    })
-  )
+        if (unitPrice === null) {
+          throw Object.assign(new Error('STALE_CART_ITEM'), { productId: item.productId, status: 400 })
+        }
+
+        return {
+          productId: item.productId,
+          variantId: item.variantId,
+          validatedPrice: unitPrice,
+          quantity: item.quantity,
+        }
+      })
+    )
 
   const subtotal = lineItems.reduce(
     (sum, item) => sum + item.validatedPrice * item.quantity,

@@ -211,8 +211,11 @@ export async function POST(req: NextRequest) {
         nextStep: paymentMethod === 'COD' ? 'confirm_cod' : 'redirect_to_gateway',
       },
     })
-  } catch (error) {
-    logger.error('Failed to create order', { error })
+  } catch (error: any) {
+    if (error.status === 400) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 400 })
+    }
+    logger.error('Failed to create order', error)
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

@@ -26,6 +26,16 @@ function format(level: string, message: string, data?: unknown): string {
   return `${base}\n${JSON.stringify(data, null, 2)}`
 }
 
+function serializeError(error: unknown): Record<string, unknown> {
+  if (error instanceof Error) {
+    return Object.getOwnPropertyNames(error).reduce((acc, key) => {
+      acc[key] = (error as any)[key]
+      return acc
+    }, {} as Record<string, unknown>)
+  }
+  return { raw: String(error) }
+}
+
 export const logger = {
   /** General information — shown in both modes */
   info(message: string, data?: unknown) {
@@ -47,7 +57,10 @@ export const logger = {
   /** Errors — always logged; stack trace + full data in dev, message only in prod */
   error(message: string, error?: unknown, data?: unknown) {
     if (isDev) {
-      console.error(format('ERROR', message, { error, data }))
+      console.error(format('ERROR', message, {
+        error: serializeError(error),
+        ...(data ? { data } : {})
+      }))
     } else {
       // In production: log message only — no stack traces, no payloads
       const msg = error instanceof Error ? error.message : String(error ?? '')
