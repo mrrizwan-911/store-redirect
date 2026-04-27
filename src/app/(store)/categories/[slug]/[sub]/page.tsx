@@ -43,8 +43,7 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
   // Parse search params
   const minPrice = Number(resolvedSearchParams.minPrice) || 0
   const maxPrice = Number(resolvedSearchParams.maxPrice) || 20000
-  const size = (resolvedSearchParams.size as string) || undefined
-  const color = (resolvedSearchParams.color as string) || undefined
+  const filterParam = (resolvedSearchParams.filter as string) || undefined
   const sort = (resolvedSearchParams.sort as string) || 'createdAt_desc'
   const rating = Number(resolvedSearchParams.rating) || undefined
   let [sortField, sortDir] = sort.split('_') as [string, 'asc' | 'desc']
@@ -61,17 +60,18 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
       parent: { slug: slug }
     },
     basePrice: { gte: minPrice, lte: maxPrice },
-    ...(size || color
+    ...(filterParam
       ? {
           variants: {
             some: {
-              ...(size && { size: { in: size.split(',') } }),
-              ...(color && { color: { in: color.split(',') } }),
               stock: { gt: 0 },
+              optionValues: { path: [], string_contains: filterParam.split(',')[0] },
             },
           },
         }
-      : {}),
+      : {
+          variants: { some: { stock: { gt: 0 } } },
+        }),
   }
 
   // Filter by rating if provided
