@@ -134,7 +134,21 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
           })) || [],
         },
         variants: {
-          create: data.variants,
+          create: data.variants && data.variants.length > 0
+            ? data.variants.map((v: any) => ({
+                title: v.title,
+                optionValues: v.optionValues || {},
+                stock: v.stock,
+                sku: v.sku,
+                price: v.price,
+              }))
+            : [{
+                title: 'Default',
+                optionValues: {},
+                stock: data.baseStock || 0,
+                sku: data.sku,
+                price: data.basePrice,
+              }],
         },
       },
       include: {

@@ -1,6 +1,6 @@
 import { db } from '@/lib/db/client'
 import { notFound } from 'next/navigation'
-import { VariantsMatrixClient } from '@/components/admin/VariantsMatrixClient'
+import { VariantsMatrixClient } from '@/components/admin/products/VariantsMatrixClient'
 
 export const dynamic = 'force-dynamic'
 

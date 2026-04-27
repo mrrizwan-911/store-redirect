@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, User, Mail, Phone, MapPin, CreditCard, Package, Clock, Calendar, Hash } from 'lucide-react'
 import { db } from '@/lib/db/client'
-import { OrderStatusUpdater } from '@/components/admin/OrderStatusUpdater'
+import { OrderStatusUpdater } from '@/components/admin/orders/OrderStatusUpdater'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Image from 'next/image'
@@ -110,11 +110,11 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
                           </div>
                           <div className="flex flex-col justify-center">
                             <p className="font-bold text-black uppercase text-[11px] tracking-widest mb-1">{item.product.name}</p>
-                            <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-tighter">
-                              {item.variant?.color && `Color: ${item.variant.color}`}
-                              {item.variant?.size && item.variant?.color && ' | '}
-                              {item.variant?.size && `Size: ${item.variant.size}`}
-                            </p>
+                            {item.variant?.optionValues && typeof item.variant.optionValues === 'object' && Object.keys(item.variant.optionValues as any).length > 0 && (
+                              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-tighter">
+                                {Object.entries(item.variant.optionValues as any).map(([k, v]) => `${k}: ${v}`).join(' | ')}
+                              </p>
+                            )}
                             <p className="text-[9px] font-mono text-neutral-400 mt-1">SKU: {item.variant?.sku || 'N/A'}</p>
                           </div>
                         </div>

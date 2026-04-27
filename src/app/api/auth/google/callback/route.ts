@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
       select: { id: true, role: true, name: true }
     })
 
-    let user
+    let user: any
     if (existingUser) {
       // Upgrade GUEST to CUSTOMER, leave CUSTOMER/ADMIN roles untouched
       const updateData: any = { googleId: profile.sub }

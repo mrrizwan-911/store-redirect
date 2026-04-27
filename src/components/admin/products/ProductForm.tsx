@@ -651,7 +651,7 @@ export function ProductForm({ initialData, categories: _categories }: ProductFor
           <ImageUploader
             productId={initialData?.id}
             images={images}
-            onUploadSuccess={(img) => setImages([...images, img])}
+            onUploadSuccess={(img) => setImages((prev) => [...prev, img])}
             onRemoveImage={(id) => setImages(images.filter((img) => img.id !== id))}
             onSetPrimary={(id) => setImages(images.map((img) => ({ ...img, isPrimary: img.id === id || img.url === id })))}
           />

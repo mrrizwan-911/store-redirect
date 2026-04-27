@@ -25,7 +25,7 @@ export function CheckoutClient() {
   // Form State matching CreateOrderInput
   const [selectedAddressId, setSelectedAddressId] = useState<string>('')
   const [guestAddress, setGuestAddress] = useState<AddressInput>({
-    firstName: '', lastName: '', label: 'Home', line1: '', line2: '', city: '', province: '', postalCode: '', country: 'Pakistan', company: '', isDefault: false
+    firstName: '', lastName: '', label: 'Home', line1: '', line2: '', city: '', province: '', postalCode: '', country: 'Pakistan', company: '', isDefault: false, email: '', phone: ''
   })
   const [guestInfo, setGuestInfo] = useState({ name: '', email: '', phone: '' })
 
@@ -60,7 +60,11 @@ export function CheckoutClient() {
     try {
       const orderPayload: CreateOrderInput = {
         addressId: isAuthenticated && selectedAddressId ? selectedAddressId : undefined,
-        guestAddress: !isAuthenticated || !selectedAddressId ? guestAddress : undefined,
+        guestAddress: !isAuthenticated || !selectedAddressId ? {
+          ...guestAddress,
+          email: guestInfo.email || undefined,
+          phone: guestInfo.phone || ''
+        } : undefined,
         guestName: !isAuthenticated ? guestInfo.name : undefined,
         guestEmail: !isAuthenticated ? guestInfo.email : undefined,
         guestPhone: !isAuthenticated ? guestInfo.phone : undefined,
@@ -348,7 +352,7 @@ export function CheckoutClient() {
               {items.map((item) => (
                 <div key={`${item.productId}-${item.variantId}`} className="flex gap-4">
                   <div className="w-16 h-20 bg-neutral-100 relative shrink-0 rounded-md overflow-hidden">
-                    <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full" />
+                    <img src={item.imageUrl || '/placeholder.png'} alt={item.name} className="object-cover w-full h-full" />
                   </div>
                   <div className="flex-1 text-sm">
                     <p className="font-bold">{item.name}</p>

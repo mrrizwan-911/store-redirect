@@ -1,7 +1,7 @@
 import { db } from '@/lib/db/client'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
-import { ProductActions } from '@/components/admin/ProductActions'
+import { ProductActions } from '@/components/admin/products/ProductActions'
 
 export const dynamic = 'force-dynamic'
 

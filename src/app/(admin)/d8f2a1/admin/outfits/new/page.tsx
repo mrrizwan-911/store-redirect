@@ -1,4 +1,4 @@
-import { OutfitBuilder } from '@/components/admin/OutfitBuilder'
+import { OutfitBuilder } from '@/components/admin/outfits/OutfitBuilder'
 
 export default function NewOutfitPage() {
   return (

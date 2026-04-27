@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db/client';
 import { getUserSession } from '@/lib/auth/session';
-import LoyaltyStats from '@/components/admin/LoyaltyStats';
-import LoyaltyFilters from '@/components/admin/LoyaltyFilters';
-import { LoyaltyTable } from '@/components/admin/LoyaltyTable';
+import LoyaltyStats from '@/components/admin/loyalty/LoyaltyStats';
+import LoyaltyFilters from '@/components/admin/loyalty/LoyaltyFilters';
+import { LoyaltyTable } from '@/components/admin/loyalty/LoyaltyTable';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,8 +1,8 @@
 import { db } from "@/lib/db/client";
 import { getUserSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
-import { QuotationTabs } from "@/components/admin/QuotationTabs";
-import { QuotationTable } from "@/components/admin/QuotationTable";
+import { QuotationTabs } from '@/components/admin/quotations/QuotationTabs';
+import { QuotationTable } from '@/components/admin/quotations/QuotationTable';
 import { logger } from "@/lib/utils/logger";
 import { QuotationStatus } from "@prisma/client";
 

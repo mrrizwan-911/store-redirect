@@ -1,5 +1,5 @@
 import { db } from '@/lib/db/client'
-import { ProductForm } from '@/components/admin/ProductForm'
+import { ProductForm } from '@/components/admin/products/ProductForm'
 
 export const dynamic = 'force-dynamic'
 

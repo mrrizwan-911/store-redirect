@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Heart, Plus, Star } from 'lucide-react'
 import { useAppDispatch } from '@/store/hooks'
 import { addItem, openCart } from '@/store/slices/cartSlice'
@@ -42,6 +43,7 @@ export function ProductCard({
   isLowStock,
   stockCount,
 }: ProductCardProps) {
+  const router = useRouter()
   const dispatch = useAppDispatch()
   const { isInWishlist, toggle: handleWishlistToggle } = useWishlist(id)
   const [mounted, setMounted] = useState(false)
@@ -54,14 +56,7 @@ export function ProductCard({
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
-    dispatch(addItem({
-      productId: id,
-      name,
-      price: salePrice || price,
-      quantity: 1,
-      imageUrl,
-    }))
-    dispatch(openCart())
+    router.push(`/products/${slug}`)
   }
 
   const handleWishlist = (e: React.MouseEvent) => {
@@ -79,7 +74,7 @@ export function ProductCard({
       <div className="relative aspect-[4/5] overflow-hidden bg-[#FAFAFA] rounded-t-[12px]">
         <Link href={`/products/${slug}`} className="block h-full w-full relative">
           <Image
-            src={(isHovered && secondaryImageUrl) ? secondaryImageUrl : imageUrl}
+            src={(isHovered && secondaryImageUrl) ? secondaryImageUrl : (imageUrl || '/placeholder.png')}
             alt={name}
             fill
             unoptimized
@@ -118,10 +113,10 @@ export function ProductCard({
           <button
             onClick={handleAddToCart}
             className="h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors"
-            aria-label="Add to cart"
+            aria-label="View Details"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Add</span>
+            <span className="hidden sm:inline">View</span>
           </button>
         </div>
 
@@ -130,7 +125,7 @@ export function ProductCard({
           onClick={handleAddToCart}
           className="absolute bottom-0 left-0 right-0 bg-white text-black py-3.5 text-[10px] font-bold uppercase tracking-[0.18em] transition-transform duration-500 translate-y-full group-hover:translate-y-0 border-t border-[#E5E5E5] hover:bg-black hover:text-white z-20"
         >
-          Quick Add — PKR {(salePrice || price).toLocaleString()}
+          View Details
         </button>
       </div>
 

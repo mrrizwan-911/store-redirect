@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { verifyRefreshToken } from '@/lib/auth/jwt'
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
+import { AdminSidebar } from '@/components/admin/layout/AdminSidebar'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()

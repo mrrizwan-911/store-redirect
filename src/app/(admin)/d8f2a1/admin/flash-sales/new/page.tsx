@@ -1,5 +1,5 @@
 import { db } from '@/lib/db/client'
-import { FlashSaleForm } from '@/components/admin/FlashSaleForm'
+import { FlashSaleForm } from '@/components/admin/promotions/FlashSaleForm'
 
 export const dynamic = 'force-dynamic'
 

@@ -1,8 +1,8 @@
 import { cookies } from 'next/headers'
-import { KpiCard } from '@/components/admin/KpiCard'
-import { RevenueChart } from '@/components/admin/RevenueChart'
-import { OrderStatusChart } from '@/components/admin/OrderStatusChart'
-import { PaymentMethodChart } from '@/components/admin/PaymentMethodChart'
+import { KpiCard } from '@/components/admin/dashboard/KpiCard'
+import { RevenueChart } from '@/components/admin/dashboard/RevenueChart'
+import { OrderStatusChart } from '@/components/admin/dashboard/OrderStatusChart'
+import { PaymentMethodChart } from '@/components/admin/dashboard/PaymentMethodChart'
 
 async function fetchAnalyticsData(endpoint: string) {
   const cookieStore = await cookies()

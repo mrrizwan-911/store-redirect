@@ -1,4 +1,4 @@
-import { OutfitBuilder } from '@/components/admin/OutfitBuilder'
+import { OutfitBuilder } from '@/components/admin/outfits/OutfitBuilder'
 import { db } from '@/lib/db/client'
 import { notFound } from 'next/navigation'
 

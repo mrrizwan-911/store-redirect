@@ -1,8 +1,8 @@
 import { db } from "@/lib/db/client";
 import { getUserSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
-import { InventoryFilters } from "@/components/admin/InventoryFilters";
-import { InventoryTable } from "@/components/admin/InventoryTable";
+import { InventoryFilters } from '@/components/admin/inventory/InventoryFilters';
+import { InventoryTable } from '@/components/admin/inventory/InventoryTable';
 import { logger } from "@/lib/utils/logger";
 
 export const dynamic = "force-dynamic";

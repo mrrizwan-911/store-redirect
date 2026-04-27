@@ -1,8 +1,8 @@
 import { db } from "@/lib/db/client";
 import { getUserSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
-import { NotificationTabs } from "@/components/admin/NotificationTabs";
-import { EmailLogTable } from "@/components/admin/EmailLogTable";
+import { NotificationTabs } from '@/components/admin/notifications/NotificationTabs';
+import { EmailLogTable } from '@/components/admin/notifications/EmailLogTable';
 import { logger } from "@/lib/utils/logger";
 
 export const dynamic = "force-dynamic";

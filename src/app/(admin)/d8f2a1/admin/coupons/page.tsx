@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db/client';
 import { getUserSession } from '@/lib/auth/session';
-import CouponsClient from '@/components/admin/CouponsClient';
+import CouponsClient from '@/components/admin/promotions/CouponsClient';
 
 export const metadata = {
   title: 'Coupons | Admin',

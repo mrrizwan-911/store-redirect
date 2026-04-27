@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { SimpleImageUploader } from './SimpleImageUploader'
+import { SimpleImageUploader } from '../products/SimpleImageUploader'
 import { GripVertical, X, CheckCircle2 } from 'lucide-react'
 
 export function OutfitBuilder({ initialData }: { initialData?: any }) {

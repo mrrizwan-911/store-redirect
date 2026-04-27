@@ -1,7 +1,7 @@
 import { db } from "@/lib/db/client";
 import { getUserSession } from "@/lib/auth/session";
 import { notFound, redirect } from "next/navigation";
-import { QuotationDetail } from "@/components/admin/QuotationDetail";
+import { QuotationDetail } from '@/components/admin/quotations/QuotationDetail';
 import { logger } from "@/lib/utils/logger";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";

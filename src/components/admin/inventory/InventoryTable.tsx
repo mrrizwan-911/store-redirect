@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { StockUpdatePopover } from "./StockUpdatePopover"
+import { StockUpdatePopover } from './StockUpdatePopover'
 import { logger } from "@/lib/utils/logger"
 import { cn } from "@/lib/utils"
 import { Edit2Icon } from "lucide-react"
