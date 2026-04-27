@@ -20,6 +20,7 @@ export function CheckoutClient() {
   const [mounted, setMounted] = useState(false)
   const [currentStep, setCurrentStep] = useState<CheckoutStep>('address')
   const [isLoading, setIsLoading] = useState(false)
+  const [showPromo, setShowPromo] = useState(false)
 
   // Form State matching CreateOrderInput
   const [selectedAddressId, setSelectedAddressId] = useState<string>('')
@@ -96,21 +97,21 @@ export function CheckoutClient() {
   const stepIndex = steps.indexOf(currentStep)
 
   return (
-    <div className="max-w-7xl mx-auto px-4 lg:px-8 flex flex-col lg:flex-row gap-12">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-7xl mx-auto px-4 lg:px-8 py-12">
 
       {/* Left Column - Forms */}
-      <div className="flex-1">
+      <div className="lg:col-span-7">
         {/* Step Indicator */}
         <div className="flex items-center gap-2 mb-10 overflow-x-auto pb-4">
           {['Address', 'Shipping', 'Payment', 'Confirm'].map((label, idx) => (
             <div key={label} className="flex items-center">
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${idx <= stepIndex ? 'bg-[#E8D5B0] text-black' : 'bg-neutral-200 text-neutral-500'}`}>
+              <div className={`flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${idx <= stepIndex ? 'bg-black text-white' : 'bg-neutral-100 text-neutral-400'}`}>
                 {idx < stepIndex ? <Check className="w-4 h-4" /> : idx + 1}
               </div>
               <span className={`ml-2 text-xs uppercase tracking-widest font-bold ${idx <= stepIndex ? 'text-black' : 'text-neutral-400'}`}>
                 {label}
               </span>
-              {idx < 3 && <div className={`w-8 h-px mx-3 ${idx < stepIndex ? 'bg-[#E8D5B0]' : 'bg-neutral-200'}`} />}
+              {idx < 3 && <div className={`w-8 h-px mx-3 ${idx < stepIndex ? 'bg-black' : 'bg-neutral-200'}`} />}
             </div>
           ))}
         </div>
@@ -276,37 +277,52 @@ export function CheckoutClient() {
       </div>
 
       {/* Right Column - Order Summary */}
-      <div className="lg:w-[400px]">
-        <div className="bg-white p-6 border border-[#E5E5E5] sticky top-8">
-          <h3 className="font-playfair text-xl font-bold mb-6">Order Summary</h3>
+      <div className="lg:col-span-5">
+        <div className="sticky top-24 space-y-4">
+          <div className="bg-white border border-neutral-200 rounded-lg p-6 space-y-6">
+            <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-black">Order Summary</h3>
 
-          <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto pr-2">
-            {items.map((item) => (
-              <div key={`${item.productId}-${item.variantId}`} className="flex gap-4">
-                <div className="w-16 h-20 bg-neutral-100 relative shrink-0">
-                  <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full" />
+            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
+              {items.map((item) => (
+                <div key={`${item.productId}-${item.variantId}`} className="flex gap-4">
+                  <div className="w-16 h-20 bg-neutral-100 relative shrink-0 rounded-md overflow-hidden">
+                    <img src={item.imageUrl} alt={item.name} className="object-cover w-full h-full" />
+                  </div>
+                  <div className="flex-1 text-sm">
+                    <p className="font-bold">{item.name}</p>
+                    <p className="text-neutral-500 text-xs mt-1">Qty: {item.quantity}</p>
+                  </div>
+                  <p className="font-bold text-sm">PKR {(item.price * item.quantity).toLocaleString()}</p>
                 </div>
-                <div className="flex-1 text-sm">
-                  <p className="font-bold">{item.name}</p>
-                  <p className="text-neutral-500 text-xs mt-1">Qty: {item.quantity}</p>
+              ))}
+            </div>
+
+            <div className="border-t border-neutral-200 pt-6">
+              {showPromo ? (
+                <div className="flex gap-2">
+                  <input type="text" placeholder="Promo code" className="flex-1 border border-neutral-200 rounded-md px-3 py-2 text-sm outline-none focus:border-black" />
+                  <button className="bg-black text-white px-4 py-2 rounded-md text-sm font-bold hover:bg-neutral-800 transition-colors">Apply</button>
                 </div>
-                <p className="font-bold text-sm">PKR {(item.price * item.quantity).toLocaleString()}</p>
+              ) : (
+                <button onClick={() => setShowPromo(true)} className="text-sm text-neutral-500 hover:text-black transition-colors underline">
+                  Add promotion code
+                </button>
+              )}
+            </div>
+
+            <div className="space-y-3 text-sm border-t border-neutral-200 pt-6">
+              <div className="flex justify-between text-neutral-600">
+                <span>Subtotal</span>
+                <span>PKR {subtotal.toLocaleString()}</span>
               </div>
-            ))}
-          </div>
-
-          <div className="space-y-3 text-sm border-t border-[#E5E5E5] pt-6">
-            <div className="flex justify-between text-neutral-600">
-              <span>Subtotal</span>
-              <span>PKR {subtotal.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between text-neutral-600">
-              <span>Shipping</span>
-              <span>{shippingCost === 0 ? 'Free' : `PKR ${shippingCost.toLocaleString()}`}</span>
-            </div>
-            <div className="flex justify-between font-bold text-base mt-4 border-t border-[#E5E5E5] pt-4">
-              <span>Total</span>
-              <span>PKR {total.toLocaleString()}</span>
+              <div className="flex justify-between text-neutral-600">
+                <span>Shipping</span>
+                <span>{shippingCost === 0 ? 'Free' : `PKR ${shippingCost.toLocaleString()}`}</span>
+              </div>
+              <div className="flex justify-between font-bold text-base mt-4 border-t border-neutral-200 pt-4">
+                <span>Total</span>
+                <span>PKR {total.toLocaleString()}</span>
+              </div>
             </div>
           </div>
         </div>
