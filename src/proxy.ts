@@ -34,7 +34,7 @@ export function proxy(req: NextRequest) {
 
   // 2. Define protected routes
   const isAdminRoute = pathname.startsWith('/d8f2a1/admin')
-  const isProtectedUserRoute = pathname.startsWith('/account') || pathname.startsWith('/checkout')
+  const isProtectedUserRoute = pathname.startsWith('/account')
 
   // 3. Protection for /admin routes
   if (isAdminRoute) {
