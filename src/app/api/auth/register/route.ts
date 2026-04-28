@@ -4,6 +4,7 @@ import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { registerSchema } from '@/lib/validations/auth'
 import { sendOtpEmail } from '@/lib/services/email/otp'
+import { isAdminEmail } from '@/lib/auth/admin'
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,6 +19,14 @@ export async function POST(req: NextRequest) {
     }
 
     const { name, full_name, fullName, email, password } = parsed.data
+
+    if (isAdminEmail(email)) {
+      return NextResponse.json(
+        { success: false, error: 'Registration not allowed for this email' },
+        { status: 403 }
+      )
+    }
+
     const finalName = name || full_name || fullName || 'User'
 
     const existingUser = await db.user.findUnique({ where: { email } })

@@ -3,6 +3,7 @@ import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { signAccessToken, signRefreshToken } from '@/lib/auth/jwt'
 import { sendWelcomeEmail } from '@/lib/services/email/welcome'
+import { isAdminEmail } from '@/lib/auth/admin'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
@@ -48,6 +49,10 @@ export async function GET(req: NextRequest) {
       where: { email: profile.email },
       select: { id: true, role: true, name: true }
     })
+
+    if (isAdminEmail(profile.email) && !existingUser) {
+      return NextResponse.redirect(`${appUrl}/login?error=admin_email_reserved`)
+    }
 
     let user: any
     if (existingUser) {

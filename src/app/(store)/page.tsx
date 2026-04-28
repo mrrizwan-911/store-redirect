@@ -40,7 +40,7 @@ export default async function Homepage() {
       id: p.id,
       name: p.name,
       slug: p.slug,
-      imageUrl: primaryImage?.url ?? '/placeholder-product.jpg',
+      imageUrl: primaryImage?.url ?? '/placeholder.png',
       secondaryImageUrl: secondaryImage?.url,
       price: Number(p.basePrice),
       salePrice: p.salePrice ? Number(p.salePrice) : undefined,

@@ -138,6 +138,7 @@ export default function ProfilePage() {
                 <input
                   name="name"
                   type="text"
+                  autoComplete="name"
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Your name"
@@ -155,8 +156,9 @@ export default function ProfilePage() {
               <input
                 type="email"
                 value={formData.email}
-                disabled
-                className="input-underline w-full h-10 text-[15px] outline-none cursor-not-allowed border-neutral-300"
+                readOnly
+                autoComplete="email"
+                className="input-underline w-full h-10 text-[15px] outline-none cursor-not-allowed border-neutral-300 bg-neutral-50"
               />
               <p className="text-[9px] text-neutral-500 uppercase tracking-widest mt-1 font-bold">Email cannot be changed</p>
             </div>
@@ -170,6 +172,7 @@ export default function ProfilePage() {
               <input
                 name="phone"
                 type="tel"
+                autoComplete="tel"
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="03XXXXXXXXX"
@@ -195,6 +198,7 @@ export default function ProfilePage() {
               <input
                 name="password"
                 type={showCurrentPassword ? 'text' : 'password'}
+                autoComplete="current-password"
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
@@ -219,6 +223,7 @@ export default function ProfilePage() {
                 <input
                   name="newPassword"
                   type={showNewPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
                   value={formData.newPassword}
                   onChange={handleChange}
                   placeholder="••••••••"
@@ -241,6 +246,7 @@ export default function ProfilePage() {
               <input
                 name="confirmNewPassword"
                 type="password"
+                autoComplete="new-password"
                 value={formData.confirmNewPassword}
                 onChange={handleChange}
                 placeholder="••••••••"

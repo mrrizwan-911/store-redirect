@@ -68,7 +68,7 @@ export default function DashboardWishlistPage() {
               id={item.product.id}
               name={item.product.name}
               slug={item.product.slug}
-              imageUrl={item.product.images[0]?.url || '/images/placeholder.jpg'}
+              imageUrl={item.product.images[0]?.url || '/placeholder.png'}
               price={Number(item.product.basePrice)}
               salePrice={item.product.salePrice ? Number(item.product.salePrice) : undefined}
               category={item.product.category?.name || 'Category'}

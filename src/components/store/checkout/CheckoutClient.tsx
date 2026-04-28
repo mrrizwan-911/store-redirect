@@ -89,7 +89,11 @@ export function CheckoutClient() {
       if (!res.ok) throw new Error(data.error || 'Failed to place order')
 
       dispatch(clearCart())
-      router.push(`/account/orders/${data.data.orderId}`)
+      if (isAuthenticated) {
+        router.push(`/account/orders/${data.data.orderId}`)
+      } else {
+        router.push(`/order-confirmation/${data.data.orderId}`)
+      }
     } catch (err: any) {
       alert(err.message)
     } finally {
@@ -129,6 +133,10 @@ export function CheckoutClient() {
                  <div>
                    <h3 className="text-lg font-playfair font-bold mb-4">Contact</h3>
                    <div className="space-y-4">
+                     <div>
+                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Full Name</label>
+                       <input type="text" value={guestInfo.name} onChange={e => setGuestInfo({...guestInfo, name: e.target.value})} placeholder="Your full name" className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" required />
+                     </div>
                      <div>
                        <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Email</label>
                        <input type="email" value={guestInfo.email} onChange={e => setGuestInfo({...guestInfo, email: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
@@ -204,6 +212,7 @@ export function CheckoutClient() {
                <div className="border border-neutral-200 rounded-md p-4 mb-6 flex justify-between items-start">
                  <div>
                    <p className="text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1">Contact</p>
+                   <p className="text-sm font-bold text-black">{guestInfo.name}</p>
                    <p className="text-sm text-black">{guestInfo.email || user?.email}</p>
                  </div>
                  <button onClick={() => setCurrentStep('address')} className="text-[10px] uppercase tracking-widest font-bold text-black underline">Change</button>
@@ -259,6 +268,7 @@ export function CheckoutClient() {
                <div className="border border-neutral-200 rounded-md p-4 mb-6 flex justify-between items-start">
                  <div>
                    <p className="text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1">Contact</p>
+                   <p className="text-sm font-bold text-black">{guestInfo.name}</p>
                    <p className="text-sm text-black">{guestInfo.email || user?.email}</p>
                  </div>
                  <button onClick={() => setCurrentStep('address')} className="text-[10px] uppercase tracking-widest font-bold text-black underline">Change</button>

@@ -69,6 +69,12 @@ export function proxy(req: NextRequest) {
       loginUrl.searchParams.set('from', pathname)
       return NextResponse.redirect(loginUrl)
     }
+
+    // NEW: Prevent ADMIN from accessing /account routes
+    if (payload.role === 'ADMIN') {
+      logger.auth('Proxy: Admin attempting to access /account route, redirecting to admin panel', { pathname })
+      return NextResponse.redirect(new URL('/d8f2a1/admin', req.url))
+    }
   }
 
   return NextResponse.next()

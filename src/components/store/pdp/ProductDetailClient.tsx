@@ -484,7 +484,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                 price={Number(p.basePrice)}
                 salePrice={p.salePrice ? Number(p.salePrice) : undefined}
                 category={p.category.name}
-                imageUrl={p.images[0]?.url || ''}
+                imageUrl={p.images[0]?.url || '/placeholder.png'}
                 avgRating={p.avgRating || undefined}
                 reviewCount={p.reviewCount}
               />

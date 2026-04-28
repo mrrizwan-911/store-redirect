@@ -140,7 +140,7 @@ export function ProductGrid({
                 price={product.basePrice}
                 salePrice={product.salePrice ?? undefined}
                 category={product.category.name}
-                imageUrl={product.images[0]?.url || ''}
+                imageUrl={product.images[0]?.url || '/placeholder.png'}
                 avgRating={product.avgRating ?? undefined}
                 reviewCount={product.reviewCount}
                 isLowStock={product.isLowStock}
@@ -153,7 +153,7 @@ export function ProductGrid({
                   className="w-full md:w-56 lg:w-64 aspect-[4/5] relative overflow-hidden flex-shrink-0 bg-[#FAFAFA]"
                 >
                   <Image
-                    src={product.images[0]?.url || '/images/placeholder.jpg'}
+                    src={product.images[0]?.url || '/placeholder.png'}
                     alt={product.name}
                     fill
                     unoptimized

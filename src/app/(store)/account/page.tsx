@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Package,
   Award,
@@ -32,11 +33,17 @@ interface DashboardData {
 }
 
 export default function AccountOverview() {
+  const router = useRouter()
   const { user: reduxUser, isAuthenticated } = useAppSelector((state) => state.auth)
   const [data, setData] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    if (isAuthenticated && reduxUser?.role === 'ADMIN') {
+      router.push('/d8f2a1/admin')
+      return
+    }
+
     if (!isAuthenticated) {
       setIsLoading(false)
       return

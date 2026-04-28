@@ -239,7 +239,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                         price={Number(product.basePrice)}
                         salePrice={product.salePrice ? Number(product.salePrice) : undefined}
                         category={product.category.name}
-                        imageUrl={product.images[0]?.url || ''}
+                        imageUrl={product.images[0]?.url || '/placeholder.png'}
                       />
                     </div>
                   ))}
