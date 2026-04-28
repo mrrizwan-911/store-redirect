@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
@@ -29,6 +30,9 @@ export async function POST(req: NextRequest) {
 
     const finalName = name || full_name || fullName || 'User'
 
+    const cookieStore = await cookies()
+    const referredBy = cookieStore.get('referral_code')?.value
+
     const existingUser = await db.user.findUnique({ where: { email } })
     if (existingUser) {
       if (existingUser.role !== 'GUEST') {
@@ -43,7 +47,11 @@ export async function POST(req: NextRequest) {
       const passwordHash = await bcrypt.hash(password, 12)
       await db.user.update({
         where: { id: existingUser.id },
-        data: { name: finalName, passwordHash },
+        data: {
+          name: finalName,
+          passwordHash,
+          notes: referredBy ? `Referred by: ${referredBy}` : existingUser.notes
+        },
       })
 
       const code = Math.floor(100000 + Math.random() * 900000).toString()
@@ -56,15 +64,27 @@ export async function POST(req: NextRequest) {
       await sendOtpEmail(email, finalName, code)
       logger.auth('Guest upgrade OTP sent', { userId: existingUser.id, email })
 
-      return NextResponse.json(
+      const response = NextResponse.json(
         { success: true, data: { userId: existingUser.id, message: 'OTP sent to email' } },
         { status: 200 }
       )
+
+      if (referredBy) {
+        response.cookies.delete('referral_code')
+      }
+
+      return response
     }
 
     const passwordHash = await bcrypt.hash(password, 12)
     const user = await db.user.create({
-      data: { name: finalName, email, passwordHash, role: 'CUSTOMER' },
+      data: {
+        name: finalName,
+        email,
+        passwordHash,
+        role: 'CUSTOMER',
+        notes: referredBy ? `Referred by: ${referredBy}` : null
+      },
     })
 
     // 6-digit OTP, valid for 10 minutes
@@ -79,10 +99,16 @@ export async function POST(req: NextRequest) {
 
     logger.auth('User registered', { userId: user.id, email })
 
-    return NextResponse.json(
+    const response = NextResponse.json(
       { success: true, data: { userId: user.id, message: 'OTP sent to email' } },
       { status: 201 }
     )
+
+    if (referredBy) {
+      response.cookies.delete('referral_code')
+    }
+
+    return response
   } catch (err) {
     logger.error('[AUTH_REGISTER]', err)
     return NextResponse.json(

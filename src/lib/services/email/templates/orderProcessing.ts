@@ -23,7 +23,7 @@ Track your order: ${appUrl}/account
 
 Need help? WhatsApp us: https://wa.me/${whatsappNumber}
 
-ANTIGRAVITY ATELIER © 2026`.trim()
+CALNZA © 2026`.trim()
 
   const itemRows = items.map(item => `
     <tr>

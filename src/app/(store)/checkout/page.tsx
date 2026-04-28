@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { CheckoutClient } from '@/components/store/checkout/CheckoutClient'
 
 export const metadata: Metadata = {
-  title: 'Checkout | Store',
+  title: 'Checkout | Calnza',
   description: 'Complete your purchase.',
 }
 

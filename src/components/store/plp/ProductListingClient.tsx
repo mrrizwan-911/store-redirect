@@ -378,7 +378,7 @@ export function ProductListingClient({
               ref={searchContainerRef}
             >
               <h1 className="font-display text-4xl md:text-6xl mb-12 tracking-tighter text-black font-bold">
-                STORE<span className="text-neutral-200"> SEARCH</span>
+                CALNZA<span className="text-neutral-200"> SEARCH</span>
               </h1>
 
               <form onSubmit={handleSearchSubmit} className="relative group w-full max-w-3xl mx-auto">

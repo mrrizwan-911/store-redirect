@@ -44,7 +44,7 @@ export default function AdminOutfitsPage() {
       <div className="flex justify-between items-center border-b border-neutral-100 pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Outfits / Lookbook</h1>
         <Link
-          href="/admin/outfits/new"
+          href="/d8f2a1/admin/outfits/new"
           className="bg-neutral-900 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-800 transition-all flex items-center gap-2 shadow-sm"
         >
           <Plus className="w-3.5 h-3.5" />
@@ -90,7 +90,7 @@ export default function AdminOutfitsPage() {
                 <p className="text-[10px] uppercase font-bold tracking-widest text-neutral-400 mt-1">{outfit.items.length} items</p>
                 <div className="mt-4 flex gap-2 pt-4 border-t border-neutral-50 mt-auto">
                   <Link
-                    href={`/admin/outfits/${outfit.id}/edit`}
+                    href={`/d8f2a1/admin/outfits/${outfit.id}/edit`}
                     className="flex-1 text-center border border-neutral-200 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded-md hover:bg-neutral-50 transition-colors"
                   >
                     Edit

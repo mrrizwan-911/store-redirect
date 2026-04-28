@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!product) return { title: 'Product Not Found' }
 
   return {
-    title: `${product.name} | Clothes Store`,
+    title: `${product.name} | Calnza`,
     description: product.shortDescription || product.description.substring(0, 160)
   }
 }

@@ -129,22 +129,39 @@ export async function POST(req: NextRequest) {
 
     // 4. Create Order in Transaction
     const result = await db.$transaction(async (tx) => {
+      let finalAddressId = addressId
+
+      // If guest checkout, create the address record first
+      if (!finalAddressId && guestAddress && userId) {
+        const addr = await tx.address.create({
+          data: {
+            ...guestAddress,
+            userId,
+          }
+        })
+        finalAddressId = addr.id
+      }
+
+      // Generate a unique tracking number (e.g., AS-12345678)
+      const trackingNumber = `AS-${Math.floor(10000000 + Math.random() * 90000000)}`
+
       // Create the order
       const order = await tx.order.create({
         data: {
           userId,
-          addressId: userId ? addressId : undefined,
+          addressId: finalAddressId,
           status: OrderStatus.PENDING,
           subtotal: subtotal,
           shippingCost: shippingCost,
           discount: discount,
           total: total,
           couponCode: discount > 0 ? couponCode?.toUpperCase() : null,
+          trackingNumber,
           isGift,
           giftMessage,
           // For guest checkout, we might want to store guest info somewhere
           // In this schema, we don't have guest fields in Order, so we log it or use notes
-          notes: !userId ? `Guest: ${guestName} (${guestEmail}, ${guestPhone})` : null,
+          notes: !session?.userId ? `Guest: ${guestName} (${guestEmail}, ${guestPhone})` : null,
           items: {
             create: lineItems.map((item) => ({
               productId: item.productId,

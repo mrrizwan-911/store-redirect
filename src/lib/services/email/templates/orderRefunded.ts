@@ -20,7 +20,7 @@ Total Refund Amount: PKR ${Number(total).toLocaleString('en-PK')}
 
 Need help? WhatsApp us: https://wa.me/${whatsappNumber}
 
-ANTIGRAVITY ATELIER © 2026`.trim()
+CALNZA © 2026`.trim()
 
   const itemRows = items.map(item => `
     <tr>

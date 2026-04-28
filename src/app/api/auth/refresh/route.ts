@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { verifyRefreshToken, signAccessToken, signRefreshToken } from '@/lib/auth/jwt'
+import redis from '@/lib/redis'
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,14 +11,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'No refresh token' }, { status: 401 })
     }
 
+    // 1. Verify token & check DB
+    const payload = verifyRefreshToken(refreshToken)
     const stored = await db.refreshToken.findUnique({ where: { token: refreshToken } })
+
+    // 2. Race condition guard: check if this specific JTI was recently rotated
+    const lockKey = `refresh_lock:${payload.jti}`
+    const alreadyProcessed = await redis.get(lockKey)
+
+    if (alreadyProcessed) {
+      logger.auth('Refresh race condition detected, ignoring duplicate request', { jti: payload.jti })
+      // Return 200 with a flag or just success: true.
+      // The first request already set the cookies, so this one doesn't need to do anything.
+      return NextResponse.json({ success: true, message: 'Already refreshed' })
+    }
+
     if (!stored || stored.expiresAt < new Date()) {
       return NextResponse.json({ success: false, error: 'Invalid refresh token' }, { status: 401 })
     }
 
-    const payload = verifyRefreshToken(refreshToken)
+    // 3. Mark this JTI as being processed (60s TTL covers any client retry/race)
+    await redis.set(lockKey, '1', { ex: 60 })
 
-    // Rotate: delete old, create new
+    // 4. Rotate: delete old, create new
     const newRefreshToken = signRefreshToken({
       userId: payload.userId,
       email: payload.email,

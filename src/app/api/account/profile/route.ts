@@ -20,6 +20,7 @@ export async function GET() {
         email: true,
         phone: true,
         role: true,
+        referralCode: true,
         loyalty: {
           select: {
             points: true,

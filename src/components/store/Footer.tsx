@@ -35,7 +35,7 @@ export function Footer() {
           <div className="space-y-8">
             <Link href="/" className="shrink-0 group cursor-pointer flex flex-col items-start gap-1">
               <span className="font-serif text-2xl font-medium tracking-[0.2em] text-white uppercase transition-all group-hover:tracking-[0.25em] leading-tight">
-                STORE
+                CALNZA
               </span>
               <span className="text-[9px] uppercase tracking-[0.3em] text-white/40 font-sans font-medium">
                 Curated modern wardrobe
@@ -100,7 +100,7 @@ export function Footer() {
                 <Mail className="w-4 h-4 text-white/40 flex-shrink-0 mt-0.5" />
                 <div className="space-y-1">
                    <p className="text-[11px] text-white/30 uppercase tracking-widest font-bold">Concierge</p>
-                   <p className="text-[13px] text-white/60 font-light">concierge@store.pk</p>
+                   <p className="text-[13px] text-white/60 font-light">concierge@calnza.pk</p>
                 </div>
               </li>
               <li className="flex gap-4 items-start">
@@ -118,7 +118,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-16 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10">
           <p className="text-[9px] uppercase tracking-[0.4em] text-white/20 font-medium">
-            © {new Date().getFullYear()} STORE E-COMMERCE. ALL RIGHTS RESERVED.
+            © {new Date().getFullYear()} CALNZA E-COMMERCE. ALL RIGHTS RESERVED.
           </p>
 
           <div className="flex gap-8 items-center">

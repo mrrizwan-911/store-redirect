@@ -24,7 +24,7 @@ Tracking Number: ${trackingNumber}
 
 Track your order: ${trackingUrl}
 
-ANTIGRAVITY ATELIER © 2026`.trim()
+CALNZA © 2026`.trim()
 
   const html = `
 <!DOCTYPE html>

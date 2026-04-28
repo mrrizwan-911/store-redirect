@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import Image from 'next/image'
+import { useAppSelector } from '@/store/hooks'
 import { cn } from '@/lib/utils'
 
 interface OrderDetail {
@@ -40,7 +41,7 @@ interface OrderDetail {
     city: string
     province: string
     postalCode: string
-  }
+  } | null
   payment: {
     method: string
     status: string
@@ -66,6 +67,7 @@ const statusSteps = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED
 export default function OrderDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const { isAuthenticated } = useAppSelector((state) => state.auth)
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -300,11 +302,22 @@ export default function OrderDetailPage() {
               <MapPin className="w-3 h-3 stroke-[2]" /> Shipping Address
             </h3>
             <div className="text-sm text-neutral-700 font-medium leading-relaxed bg-neutral-50/50 p-6 border border-neutral-100 rounded-[12px]">
-              <p className="font-bold text-black uppercase text-[11px] tracking-widest mb-2 border-b border-neutral-200 pb-2 w-fit">{order.address.label}</p>
-              <p>{order.address.line1}</p>
-              {order.address.line2 && <p>{order.address.line2}</p>}
-              <p>{order.address.city}, {order.address.province}</p>
-              <p className="text-black font-bold mt-1">{order.address.postalCode}</p>
+              {order.address ? (
+                <>
+                  <p className="font-bold text-black uppercase text-[11px] tracking-widest mb-2 border-b border-neutral-200 pb-2 w-fit">{order.address.label}</p>
+                  <p>{order.address.line1}</p>
+                  {order.address.line2 && <p>{order.address.line2}</p>}
+                  <p>{order.address.city}, {order.address.province}</p>
+                  <p className="text-black font-bold mt-1">{order.address.postalCode}</p>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-neutral-500 italic">Shipping address details unavailable.</p>
+                  {order.id.startsWith('guest_') || !isAuthenticated ? (
+                    <p className="text-[10px] text-neutral-400">Order placed as Guest</p>
+                  ) : null}
+                </div>
+              )}
             </div>
           </div>
 

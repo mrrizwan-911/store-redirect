@@ -47,7 +47,12 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   // Construct Prisma where clause
   const where = {
     isActive: true,
-    ...(category && { category: { slug: category } }),
+    ...(category && {
+      OR: [
+        { category: { slug: category } },
+        { category: { parent: { slug: category } } }
+      ]
+    }),
     basePrice: { gte: minPrice, lte: maxPrice },
     ...(size || color
       ? {

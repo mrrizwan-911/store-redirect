@@ -13,7 +13,7 @@ export const generateOrderInvoicePDF = (order: any) => {
   // --- HEADER: STORE BRANDING ---
   doc.setFont('times', 'bold');
   doc.setFontSize(24);
-  doc.text('ANTIGRAVITY ATELIER', margin, 30);
+  doc.text('CALNZA', margin, 30);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
@@ -123,7 +123,7 @@ export const generateOrderInvoicePDF = (order: any) => {
   doc.setFont('times', 'italic');
   doc.setFontSize(10);
   doc.setTextColor(100);
-  doc.text('Thank you for choosing Antigravity Atelier.', pageWidth / 2, 280, { align: 'center' });
+  doc.text('Thank you for choosing Calnza.', pageWidth / 2, 280, { align: 'center' });
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   doc.text('This is a computer generated invoice and does not require a physical signature.', pageWidth / 2, 285, { align: 'center' });
@@ -142,7 +142,7 @@ export const generateQuotationPDF = (quotation: any) => {
   // --- HEADER: STORE BRANDING ---
   doc.setFont('times', 'bold');
   doc.setFontSize(24);
-  doc.text('ANTIGRAVITY ATELIER', margin, 30);
+  doc.text('CALNZA', margin, 30);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
@@ -256,7 +256,7 @@ export const generateQuotationPDF = (quotation: any) => {
   doc.setFont('times', 'italic');
   doc.setFontSize(10);
   doc.setTextColor(100);
-  doc.text('Thank you for your interest in a partnership with Antigravity Atelier.', pageWidth / 2, 280, { align: 'center' });
+  doc.text('Thank you for your interest in a partnership with Calnza.', pageWidth / 2, 280, { align: 'center' });
 
   return Buffer.from(doc.output('arraybuffer'));
 };

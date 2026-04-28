@@ -84,7 +84,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                     </td>
                     <td className="p-4 text-center">
                       <Link
-                        href={`/admin/orders/${order.id}`}
+                        href={`/d8f2a1/admin/orders/${order.id}`}
                         className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:text-neutral-900 transition-colors border border-neutral-200 px-3 py-1 rounded-md hover:bg-neutral-50"
                       >
                         View

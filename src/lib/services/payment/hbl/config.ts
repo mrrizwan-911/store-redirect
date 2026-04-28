@@ -21,7 +21,7 @@ export function getHBLConfig(): HBLConfig {
   const apiPassword = process.env.HBL_API_PASSWORD
   const apiBaseUrl = process.env.HBL_API_BASE_URL
   const checkoutJsUrl = process.env.HBL_CHECKOUT_JS_URL
-  const merchantName = process.env.HBL_MERCHANT_NAME || 'E-Commerce Store'
+  const merchantName = process.env.HBL_MERCHANT_NAME || 'Calnza'
   const returnUrl = process.env.HBL_RETURN_URL
   const notificationUrl = process.env.HBL_NOTIFICATION_URL
   const webhookSecret = process.env.HBL_WEBHOOK_SECRET

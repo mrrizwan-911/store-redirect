@@ -119,7 +119,7 @@ export function SizeGuideModal({ categoryId, categorySlug, categoryName = 'cloth
 
         <div className="p-8 pt-0 flex justify-end">
            <p className="text-[9px] uppercase tracking-[0.3em] text-neutral-300 font-bold">
-             STORE LUXURY E-COMMERCE © 2026
+             CALNZA LUXURY E-COMMERCE © 2026
            </p>
         </div>
       </DialogContent>

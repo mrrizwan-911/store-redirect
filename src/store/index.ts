@@ -22,9 +22,15 @@ const createNoopStorage = () => {
 
 const storage = typeof window !== 'undefined' ? createWebStorage('local') : createNoopStorage()
 
+const authPersistConfig = {
+  key: 'auth',
+  storage,
+  blacklist: ['accessToken'],
+}
+
 const rootReducer = combineReducers({
   cart: cartReducer,
-  auth: authReducer,
+  auth: persistReducer(authPersistConfig, authReducer),
   wishlist: wishlistReducer,
 })
 

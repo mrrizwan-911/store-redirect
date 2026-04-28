@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     const bankDetails = {
       bankName: process.env.BANK_NAME || 'Sample Bank Limited',
-      accountName: process.env.BANK_ACCOUNT_NAME || 'E-Commerce Store Pvt Ltd',
+      accountName: process.env.BANK_ACCOUNT_NAME || 'Calnza Pvt Ltd',
       accountNumber: process.env.BANK_ACCOUNT_NUMBER || '0000 0000 0000 0000',
       iban: process.env.BANK_ACCOUNT_IBAN || 'PK00 BANK 0000 0000 0000 0000',
       instructions: 'Please include your Order Number in the transfer description and send a screenshot of the receipt to our WhatsApp support.'

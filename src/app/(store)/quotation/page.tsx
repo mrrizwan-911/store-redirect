@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { QuotationForm } from '@/components/store/QuotationForm'
 
 export const metadata: Metadata = {
-  title: 'B2B Quotation Portal | Antigravity Atelier',
+  title: 'B2B Quotation Portal | Calnza',
   description: 'Request bulk quotations for premium luxury apparel and corporate solutions.',
 }
 

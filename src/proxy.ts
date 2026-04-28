@@ -57,6 +57,13 @@ export function proxy(req: NextRequest) {
   // 5. Protection for /account and /checkout routes
   if (isProtectedUserRoute) {
     if (!token) {
+      // Check if they have a refresh token - if so, let them through
+      // and let client-side fetchWithAuth handle the refresh
+      const refreshToken = req.cookies.get('refresh_token')?.value
+      if (refreshToken) {
+        return NextResponse.next()
+      }
+
       logger.auth('Proxy: No token for protected user route', { pathname })
       const loginUrl = new URL('/login', req.url)
       loginUrl.searchParams.set('from', pathname)
@@ -64,6 +71,12 @@ export function proxy(req: NextRequest) {
     }
     const payload = decodeJwt(token)
     if (!payload) {
+      // If token is invalid but they have a refresh token, let them through
+      const refreshToken = req.cookies.get('refresh_token')?.value
+      if (refreshToken) {
+        return NextResponse.next()
+      }
+
       logger.auth('Proxy: Invalid token for protected route', { pathname })
       const loginUrl = new URL('/login', req.url)
       loginUrl.searchParams.set('from', pathname)

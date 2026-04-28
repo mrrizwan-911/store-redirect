@@ -10,8 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 
 export default function SettingsPage() {
   const [storeInfo, setStoreInfo] = useState({
-    name: "Antigravity Luxury Store",
-    email: "admin@antigravity.com",
+    name: "Calnza Luxury Store",
+    email: "admin@calnza.com",
     whatsapp: "+92 300 1234567"
   })
 

@@ -34,7 +34,7 @@ export async function sendEmail(
     }
 
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'Antigravity Atelier <noreply@antigravity.com>',
+      from: process.env.RESEND_FROM_EMAIL || 'Calnza <noreply@calnza.com>',
       to: params.to,
       subject: params.subject,
       html: params.html,

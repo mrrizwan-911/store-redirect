@@ -400,6 +400,7 @@ export default function AddressBookPage() {
                   {address.line2 && <p>{address.line2}</p>}
                   <p>{address.city}, {address.province}</p>
                   <p>{address.postalCode}</p>
+                  <p className="pt-2 text-xs text-neutral-500 font-bold uppercase tracking-widest">{address.phone}</p>
                 </div>
 
                 <div className="mt-8 flex items-center gap-2 text-neutral-500">

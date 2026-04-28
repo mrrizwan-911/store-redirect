@@ -23,7 +23,9 @@ export function CheckoutClient() {
   const [showPromo, setShowPromo] = useState(false)
 
   // Form State matching CreateOrderInput
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([])
   const [selectedAddressId, setSelectedAddressId] = useState<string>('')
+  const [isAddingNewAddress, setIsAddingNewAddress] = useState(false)
   const [guestAddress, setGuestAddress] = useState<AddressInput>({
     firstName: '', lastName: '', label: 'Home', line1: '', line2: '', city: '', province: '', postalCode: '', country: 'Pakistan', company: '', isDefault: false, email: '', phone: ''
   })
@@ -38,7 +40,29 @@ export function CheckoutClient() {
   useEffect(() => {
     setMounted(true)
     if (subtotal >= 3000) setShippingMethod('free')
-  }, [subtotal])
+
+    // Fetch saved addresses if authenticated
+    if (isAuthenticated) {
+      fetch('/api/account/addresses')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            setSavedAddresses(data.data)
+            const defaultAddr = data.data.find((a: any) => a.isDefault)
+            if (defaultAddr) {
+              setSelectedAddressId(defaultAddr.id)
+            } else if (data.data.length > 0) {
+              setSelectedAddressId(data.data[0].id)
+            } else {
+              setIsAddingNewAddress(true)
+            }
+          }
+        })
+        .catch(err => console.error('Failed to fetch addresses', err))
+    } else {
+      setIsAddingNewAddress(true)
+    }
+  }, [subtotal, isAuthenticated])
 
   if (!mounted) return null
   if (items.length === 0) {
@@ -127,84 +151,132 @@ export function CheckoutClient() {
         <div className="bg-white p-8 border border-neutral-200 rounded-lg shadow-sm min-h-[400px]">
            <h2 className="font-playfair text-2xl font-bold capitalize mb-6">{currentStep}</h2>
 
-           {currentStep === "address" && (
-             <div className="space-y-8">
-               {!isAuthenticated && (
-                 <div>
-                   <h3 className="text-lg font-playfair font-bold mb-4">Contact</h3>
-                   <div className="space-y-4">
-                     <div>
-                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Full Name</label>
-                       <input type="text" value={guestInfo.name} onChange={e => setGuestInfo({...guestInfo, name: e.target.value})} placeholder="Your full name" className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" required />
-                     </div>
-                     <div>
-                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Email</label>
-                       <input type="email" value={guestInfo.email} onChange={e => setGuestInfo({...guestInfo, email: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
-                     </div>
-                     <div>
-                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Phone</label>
-                       <input type="tel" value={guestInfo.phone} onChange={e => setGuestInfo({...guestInfo, phone: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
-                     </div>
-                   </div>
-                 </div>
-               )}
+	           {currentStep === "address" && (
+	             <div className="space-y-8">
+	               {!isAuthenticated && (
+	                 <div>
+	                   <h3 className="text-lg font-playfair font-bold mb-4">Contact</h3>
+	                   <div className="space-y-4">
+	                     <div>
+	                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Full Name</label>
+	                       <input type="text" value={guestInfo.name} onChange={e => setGuestInfo({...guestInfo, name: e.target.value})} placeholder="Your full name" className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" required />
+	                     </div>
+	                     <div>
+	                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Email</label>
+	                       <input type="email" value={guestInfo.email} onChange={e => setGuestInfo({...guestInfo, email: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+	                     </div>
+	                     <div>
+	                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Phone</label>
+	                       <input type="tel" value={guestInfo.phone} onChange={e => setGuestInfo({...guestInfo, phone: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+	                     </div>
+	                   </div>
+	                 </div>
+	               )}
 
-               <div>
-                 <h3 className="text-lg font-playfair font-bold mb-4">Shipping Address</h3>
-                 <div className="space-y-4">
-                   <div className="grid grid-cols-2 gap-4">
-                     <div>
-                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">First Name</label>
-                       <input type="text" value={guestAddress.firstName} onChange={e => setGuestAddress({...guestAddress, firstName: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
-                     </div>
-                     <div>
-                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Last Name</label>
-                       <input type="text" value={guestAddress.lastName} onChange={e => setGuestAddress({...guestAddress, lastName: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
-                     </div>
-                   </div>
+	               {isAuthenticated && savedAddresses.length > 0 && !isAddingNewAddress ? (
+	                 <div className="space-y-6">
+	                   <div className="flex justify-between items-center">
+	                     <h3 className="text-lg font-playfair font-bold">Select Shipping Address</h3>
+	                     <button
+	                       onClick={() => setIsAddingNewAddress(true)}
+	                       className="text-[10px] uppercase tracking-widest font-bold text-neutral-500 hover:text-black underline transition-colors"
+	                     >
+	                       Add New Address
+	                     </button>
+	                   </div>
+	                   <div className="grid grid-cols-1 gap-4">
+	                     {savedAddresses.map((addr) => (
+	                       <div
+	                         key={addr.id}
+	                         onClick={() => setSelectedAddressId(addr.id)}
+	                         className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+	                           selectedAddressId === addr.id ? 'border-black bg-neutral-50 shadow-md' : 'border-neutral-100 hover:border-neutral-200'
+	                         }`}
+	                       >
+	                         <div className="flex justify-between items-start mb-2">
+	                           <p className="text-[10px] uppercase tracking-widest font-black">{addr.label}</p>
+	                           {selectedAddressId === addr.id && <Check className="w-4 h-4" />}
+	                         </div>
+	                         <p className="text-sm font-bold">{addr.firstName} {addr.lastName}</p>
+	                         <p className="text-xs text-neutral-600">{addr.line1}, {addr.city}</p>
+	                         <p className="text-[10px] text-neutral-400 mt-1 uppercase tracking-tighter">{addr.phone}</p>
+	                       </div>
+	                     ))}
+	                   </div>
+	                 </div>
+	               ) : (
+	                 <div>
+	                   <div className="flex justify-between items-center mb-4">
+	                     <h3 className="text-lg font-playfair font-bold">Shipping Address</h3>
+	                     {isAuthenticated && savedAddresses.length > 0 && (
+	                       <button
+	                         onClick={() => setIsAddingNewAddress(false)}
+	                         className="text-[10px] uppercase tracking-widest font-bold text-neutral-500 hover:text-black underline transition-colors"
+	                       >
+	                         Use Saved Address
+	                       </button>
+	                     )}
+	                   </div>
+	                   <div className="space-y-4">
+	                     <div className="grid grid-cols-2 gap-4">
+	                       <div>
+	                         <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">First Name</label>
+	                         <input type="text" value={guestAddress.firstName} onChange={e => setGuestAddress({...guestAddress, firstName: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+	                       </div>
+	                       <div>
+	                         <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Last Name</label>
+	                         <input type="text" value={guestAddress.lastName} onChange={e => setGuestAddress({...guestAddress, lastName: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+	                       </div>
+	                     </div>
 
-                   <div>
-                     <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Company (Optional)</label>
-                     <input type="text" value={guestAddress.company || ""} onChange={e => setGuestAddress({...guestAddress, company: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
-                   </div>
+	                     <div>
+	                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Company (Optional)</label>
+	                       <input type="text" value={guestAddress.company || ""} onChange={e => setGuestAddress({...guestAddress, company: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+	                     </div>
 
-                   <div>
-                     <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Address</label>
-                     <input type="text" value={guestAddress.line1} onChange={e => setGuestAddress({...guestAddress, line1: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
-                   </div>
+	                     <div>
+	                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Address</label>
+	                       <input type="text" value={guestAddress.line1} onChange={e => setGuestAddress({...guestAddress, line1: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+	                     </div>
 
-                   <div>
-                     <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Apartment, suite, etc. (Optional)</label>
-                     <input type="text" value={guestAddress.line2 || ""} onChange={e => setGuestAddress({...guestAddress, line2: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
-                   </div>
+	                     <div>
+	                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Apartment, suite, etc. (Optional)</label>
+	                       <input type="text" value={guestAddress.line2 || ""} onChange={e => setGuestAddress({...guestAddress, line2: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+	                     </div>
 
-                   <div className="grid grid-cols-2 gap-4">
-                     <div>
-                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">City</label>
-                       <input type="text" value={guestAddress.city} onChange={e => setGuestAddress({...guestAddress, city: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
-                     </div>
-                     <div>
-                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Province</label>
-                       <input type="text" value={guestAddress.province} onChange={e => setGuestAddress({...guestAddress, province: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
-                     </div>
-                   </div>
+	                     <div className="grid grid-cols-2 gap-4">
+	                       <div>
+	                         <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">City</label>
+	                         <input type="text" value={guestAddress.city} onChange={e => setGuestAddress({...guestAddress, city: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+	                       </div>
+	                       <div>
+	                         <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Province</label>
+	                         <input type="text" value={guestAddress.province} onChange={e => setGuestAddress({...guestAddress, province: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+	                       </div>
+	                     </div>
 
-                   <div className="grid grid-cols-2 gap-4">
-                     <div>
-                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Postal Code</label>
-                       <input type="text" value={guestAddress.postalCode} onChange={e => setGuestAddress({...guestAddress, postalCode: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
-                     </div>
-                     <div>
-                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Country</label>
-                       <select value={guestAddress.country} onChange={e => setGuestAddress({...guestAddress, country: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none bg-white">
-                         <option value="Pakistan">Pakistan</option>
-                       </select>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-             </div>
-           )}
+	                     <div className="grid grid-cols-2 gap-4">
+	                       <div>
+	                         <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Postal Code</label>
+	                         <input type="text" value={guestAddress.postalCode} onChange={e => setGuestAddress({...guestAddress, postalCode: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+	                       </div>
+	                       <div>
+	                         <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Phone</label>
+	                         <input type="tel" value={guestAddress.phone} onChange={e => setGuestAddress({...guestAddress, phone: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none" />
+	                       </div>
+	                     </div>
+
+	                     <div>
+	                       <label className="text-[10px] uppercase tracking-widest font-bold text-black block mb-1">Country</label>
+	                       <select value={guestAddress.country} onChange={e => setGuestAddress({...guestAddress, country: e.target.value})} className="w-full border border-neutral-200 rounded-md px-4 py-3 text-sm focus:border-black outline-none bg-white">
+	                         <option value="Pakistan">Pakistan</option>
+	                       </select>
+	                     </div>
+	                   </div>
+	                 </div>
+	               )}
+	             </div>
+	           )}
 
            {currentStep === "shipping" && (
              <div className="space-y-4">

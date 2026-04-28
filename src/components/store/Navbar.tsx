@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingBag, Heart, User, Search, Menu, X, LayoutDashboard, LogOut, ChevronDown } from 'lucide-react'
+import { ShoppingBag, Heart, User, Search, Menu, X, LayoutDashboard, LogOut, ChevronDown, Plus } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import {
   DropdownMenu,
@@ -49,12 +49,18 @@ const NAV_CATEGORIES = [
     slug: 'accessories',
     href: '/categories/accessories',
   },
+  {
+    label: 'Lookbook',
+    slug: 'lookbook',
+    href: '/lookbook',
+  },
 ]
 
 export function Navbar({ serverCategories = [] }: NavbarProps) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [isScrolled, setIsScrolled] = useState(false)
   const [isAccountOpen, setIsAccountOpen] = useState(false)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const router = useRouter()
   const pathname = usePathname()
@@ -63,9 +69,7 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
   const getSubcategories = (rootSlug: string) =>
     serverCategories.find(c => c.slug === rootSlug)?.children ?? []
 
-  const FIXED_SLUGS = ['clothes', 'shoes', 'apparel', 'accessories']
-  const extraRoots = serverCategories.filter(c => !FIXED_SLUGS.includes(c.slug) && !c.parentId)
-  const allRootsForMobile = serverCategories.filter(c => !c.parentId)
+  const sideMenuCategories = serverCategories.filter(c => !c.parentId)
 
   const cartItems = useAppSelector(state => state.cart.items)
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
@@ -80,7 +84,7 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
     } catch {
       // still clear client state even if API call fails
     } finally {
-      setIsAccountOpen(false);
+      setIsSidebarOpen(false);
       dispatch(logout());
       dispatch(clearCart());
       await persistor.purge();
@@ -119,6 +123,8 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
 
   const navLinkStyles = "relative text-[11px] font-normal uppercase tracking-[0.2em] text-gray-800 hover:text-black transition-colors font-sans after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100"
 
+  const sidebarLinkStyles = "flex items-center gap-4 py-4 text-sm font-medium uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-all group"
+
   return (
     <header className={cn(
       "sticky top-0 z-50 w-full transition-all duration-500 bg-white border-b-2 border-[#EEEEEE]",
@@ -127,12 +133,143 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
       <div className="mx-auto max-w-7xl px-4 md:px-8">
         <div className="flex h-[32px] items-center justify-between gap-4 md:gap-12">
 
-          {/* Logo Area */}
-          <Link href="/" className="shrink-0 group cursor-pointer flex items-center">
-            <span className="font-display text-xl lg:text-2xl font-bold tracking-tighter text-black uppercase transition-all leading-none">
-              STORE
-            </span>
-          </Link>
+          <div className="flex items-center gap-4">
+            {/* Unified Side Menu Toggle */}
+            <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+              <SheetTrigger>
+                <div role="button" className="text-black hover:opacity-70 transition-opacity cursor-pointer" aria-label="Open menu">
+                  <Menu className="h-6 w-6 stroke-[1.5]" />
+                </div>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-full sm:w-[400px] p-0 bg-[#111111] border-none shadow-2xl">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                <div className="flex flex-col h-full text-white">
+                  {/* Sidebar Header */}
+                  <div className="flex items-center justify-between px-8 py-10">
+                    <Link href="/" onClick={() => setIsSidebarOpen(false)} className="group">
+                      <span className="font-display text-2xl font-bold tracking-tighter text-white uppercase">
+                        CALNZA
+                      </span>
+                      <p className="text-[8px] uppercase tracking-[0.4em] text-zinc-500 mt-1">Your Curated Wardrobe</p>
+                    </Link>
+                    <button onClick={() => setIsSidebarOpen(false)} className="text-zinc-500 hover:text-white transition-colors">
+                      <X className="w-6 h-6 stroke-[1.5]" />
+                    </button>
+                  </div>
+
+                  {/* Sidebar Links */}
+                  <nav className="flex-1 px-8 overflow-y-auto scrollbar-hide space-y-2">
+                    <Link href="/" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
+                      <div className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 group-hover:bg-white group-hover:text-black transition-colors">
+                        <Menu className="w-4 h-4 stroke-[1.5]" />
+                      </div>
+                      Home
+                    </Link>
+                    <Link href="/products" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
+                      <div className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 group-hover:bg-white group-hover:text-black transition-colors">
+                        <ShoppingBag className="w-4 h-4 stroke-[1.5]" />
+                      </div>
+                      Store
+                    </Link>
+                    <Link href="/products?sort=createdAt_desc" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
+                      <div className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 group-hover:bg-white group-hover:text-black transition-colors">
+                        <Plus className="w-4 h-4 stroke-[1.5]" />
+                      </div>
+                      New Arrivals
+                    </Link>
+                    <Link href="/story" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
+                      <div className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 group-hover:bg-white group-hover:text-black transition-colors">
+                        <X className="w-4 h-4 stroke-[1.5]" />
+                      </div>
+                      About
+                    </Link>
+
+                    {/* Divider */}
+                    <div className="h-px bg-zinc-900 my-8" />
+
+                    {/* Dynamic Categories */}
+                    <div className="space-y-1">
+                      <p className="text-[9px] uppercase tracking-[0.4em] text-zinc-600 font-bold mb-4 px-1">Categories</p>
+                      {sideMenuCategories.map(cat => (
+                        <Link
+                          key={cat.id}
+                          href={`/categories/${cat.slug}`}
+                          onClick={() => setIsSidebarOpen(false)}
+                          className="flex items-center justify-between py-3 px-1 text-xs uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors"
+                        >
+                          {cat.name}
+                          <ChevronDown className="w-3 h-3 -rotate-90 opacity-40" />
+                        </Link>
+                      ))}
+                      <Link
+                         href="/categories/sale"
+                         onClick={() => setIsSidebarOpen(false)}
+                         className="flex items-center justify-between py-3 px-1 text-xs uppercase tracking-[0.2em] text-amber-500/80 hover:text-amber-400 transition-colors"
+                       >
+                         Flash Sale
+                         <span className="text-[7px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded-full border border-amber-500/20">LIVE</span>
+                       </Link>
+                    </div>
+
+                    {/* Upcoming */}
+                    <div className="pt-10">
+                      <p className="text-[9px] uppercase tracking-[0.4em] text-zinc-600 font-bold mb-4 px-1">Coming Soon</p>
+                      <div className="space-y-4 opacity-40">
+                         <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-zinc-500">
+                           Home Decor <span className="text-[7px] border border-zinc-800 px-2 py-0.5 rounded-full">JUNE '26</span>
+                         </div>
+                         <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-zinc-500">
+                           Beauty <span className="text-[7px] border border-zinc-800 px-2 py-0.5 rounded-full">AUG '26</span>
+                         </div>
+                      </div>
+                    </div>
+                  </nav>
+
+                  {/* Sidebar Footer */}
+                  <div className="p-8 bg-[#0a0a0a] border-t border-zinc-900 space-y-6">
+                    <div className="flex items-center justify-between">
+                       <button
+                         onClick={() => {
+                           setIsSidebarOpen(false);
+                           isAuthenticated ? router.push(dashboardHref) : router.push('/login');
+                         }}
+                         className="flex items-center gap-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-white transition-colors"
+                       >
+                         <User className="w-4 h-4" /> {isAuthenticated ? 'Account' : 'Sign In'}
+                       </button>
+                       <button
+                         onClick={() => {
+                           setIsSidebarOpen(false);
+                           dispatch(toggleCart());
+                         }}
+                         className="flex items-center gap-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-white transition-colors"
+                       >
+                         <ShoppingBag className="w-4 h-4" /> Cart ({cartCount})
+                       </button>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2 text-zinc-600">
+                       <span className="text-[8px] uppercase tracking-widest">Shipping to:</span>
+                       <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 font-bold">
+                          <span role="img" aria-label="Pakistan">🇵🇰</span> Pakistan
+                       </div>
+                    </div>
+
+                    <div className="pt-4 text-[8px] text-zinc-700 uppercase tracking-widest leading-relaxed">
+                      © {new Date().getFullYear()} CALNZA. All rights reserved.
+                    </div>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            {/* Logo Area */}
+            <Link href="/" className="shrink-0 group cursor-pointer flex items-center">
+              <span className="font-display text-xl lg:text-2xl font-bold tracking-tighter text-black uppercase transition-all leading-none">
+                CALNZA
+              </span>
+            </Link>
+          </div>
 
           {/* Desktop Nav (Pure Text & Minimalist) */}
           <div className="hidden flex-1 justify-center lg:flex">
@@ -164,33 +301,6 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
                   )}
                 </div>
               ))}
-
-              {/* "More" Overflow Dropdown */}
-              {extraRoots.length > 0 && (
-                <div className="relative h-full flex items-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger className={cn(navLinkStyles, "flex items-center gap-1 outline-none uppercase tracking-[0.2em]")}>
-                      More <ChevronDown className="h-3 w-3" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-48 bg-white border border-neutral-200 shadow-xl rounded-none py-2 px-2">
-                      {extraRoots.map(extra => (
-                        <DropdownMenuItem key={extra.id} className="rounded-none p-0 focus:bg-neutral-50">
-                          <Link
-                            href={`/categories/${extra.slug}`}
-                            className="w-full px-4 py-2 text-[11px] uppercase tracking-wider text-neutral-600 hover:text-black outline-none block"
-                          >
-                            {extra.name}
-                          </Link>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              )}
-
-              <Link href="/lookbook" className={navLinkStyles}>
-                Lookbook
-              </Link>
             </nav>
           </div>
 
@@ -247,77 +357,6 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
                   </span>
                 )}
               </button>
-            </div>
-
-            {/* Mobile Menu Trigger */}
-            <div className="flex lg:hidden">
-              <Sheet>
-                <SheetTrigger className="text-black">
-                  <Menu className="h-6 w-6" />
-                </SheetTrigger>
-                <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0 bg-white">
-                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                  <div className="flex flex-col h-full py-8 px-6">
-                    <Link href="/" className="font-display text-2xl font-bold tracking-tighter mb-8">
-                      STORE
-                    </Link>
-                    <nav className="flex flex-col gap-6">
-                      <Link
-                        href="/lookbook"
-                        className="text-sm font-medium uppercase tracking-widest text-black border-b border-black/5 pb-2"
-                      >
-                        Lookbook
-                      </Link>
-                      {allRootsForMobile.map(cat => (
-                        <div key={cat.id} className="flex flex-col gap-3">
-                          <Link
-                            href={`/categories/${cat.slug}`}
-                            className="text-sm font-medium uppercase tracking-widest text-black border-b border-black/5 pb-2"
-                          >
-                            {cat.name}
-                          </Link>
-                          {getSubcategories(cat.slug).length > 0 && (
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-2 pl-2">
-                              {getSubcategories(cat.slug).map(sub => (
-                                <Link
-                                  key={sub.id}
-                                  href={`/categories/${cat.slug}/${sub.slug}`}
-                                  className="text-[12px] text-neutral-500 hover:text-black transition-colors"
-                                >
-                                  {sub.name}
-                                </Link>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </nav>
-
-                    <div className="mt-auto pt-8 border-t border-black/5 flex flex-col gap-4">
-                      {isAuthenticated ? (
-                        <>
-                          <Link href={dashboardHref} className="flex items-center gap-3 text-sm font-medium uppercase tracking-widest text-black">
-                            <User className="w-4 h-4" /> Dashboard
-                          </Link>
-                          <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-3 text-sm font-medium uppercase tracking-widest text-red-600 text-left"
-                          >
-                            <LogOut className="w-4 h-4" /> Logout
-                          </button>
-                        </>
-                      ) : (
-                        <Link href="/login" className="flex items-center gap-3 text-sm font-medium uppercase tracking-widest text-black">
-                          <User className="w-4 h-4" /> Sign In
-                        </Link>
-                      )}
-                      <Link href="/wishlist" className="flex items-center gap-3 text-sm font-medium uppercase tracking-widest text-black">
-                        <Heart className="w-4 h-4" /> Wishlist
-                      </Link>
-                    </div>
-                  </div>
-                </SheetContent>
-              </Sheet>
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ import { aiConfig } from './config';
 import { SearchFilters } from './intent-parser';
 
 const SYSTEM_PROMPT = `
-You are an expert fashion analyst for a premium clothing store in Pakistan.
+You are an expert fashion analyst for Calnza, a premium clothing store in Pakistan.
 You will be provided with an image of a person or a clothing item.
 Your task is to identify the clothing item and extract its attributes into structured JSON.
 

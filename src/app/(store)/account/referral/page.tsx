@@ -1,16 +1,39 @@
 'use client'
 
-import React, { useState } from 'react'
-import { Users, Copy, Share2, Award, Gift, Check } from 'lucide-react'
+import React, { useState, useEffect } from 'react'
+import { Users, Copy, Share2, Award, Gift, Check, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export default function ReferralPage() {
   const [copied, setCopied] = useState(false)
-  const referralLink = "https://store.com/ref/hasan123"
+  const [referralCode, setReferralCode] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const res = await fetch('/api/account/profile')
+        const result = await res.json()
+        if (result.success) {
+          setReferralCode(result.data.referralCode)
+        }
+      } catch (error) {
+        console.error('Failed to load referral code')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchProfile()
+  }, [])
+
+  const referralLink = referralCode
+    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/ref/${referralCode}`
+    : "..."
 
   const handleCopy = () => {
+    if (!referralCode) return
     navigator.clipboard.writeText(referralLink)
     setCopied(true)
     toast.success('Referral link copied to clipboard')
@@ -37,14 +60,24 @@ export default function ReferralPage() {
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <div className="flex-1 bg-white/5 border border-white/20 h-14 flex items-center px-6 text-[12px] sm:text-sm font-mono text-neutral-200 rounded-[12px] overflow-hidden truncate">
-                {referralLink}
+                {isLoading ? 'Generating your unique link...' : referralLink}
               </div>
               <Button
                 onClick={handleCopy}
+                disabled={isLoading || !referralCode}
                 className="rounded-[12px] h-14 px-8 bg-white text-black hover:bg-neutral-200 uppercase tracking-widest text-[10px] font-bold transition-all flex items-center justify-center gap-3 shadow-2xl shrink-0"
               >
-                {copied ? <Check className="w-4 h-4 stroke-[2.5]" /> : <Copy className="w-4 h-4 stroke-[2.5]" />}
-                {copied ? 'Copied' : 'Copy Link'}
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : copied ? (
+                  <>
+                    <Check className="w-4 h-4 stroke-[2.5]" /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 stroke-[2.5]" /> Copy Link
+                  </>
+                )}
               </Button>
             </div>
           </div>

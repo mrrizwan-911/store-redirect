@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 interface OrderStatusUpdaterProps {
   orderId: string
@@ -21,6 +22,7 @@ const STATUS_OPTIONS = [
 ]
 
 export function OrderStatusUpdater({ orderId, currentStatus, trackingNumber, carrier, notes }: OrderStatusUpdaterProps) {
+  const router = useRouter()
   const [status, setStatus] = useState(currentStatus)
   const [tracking, setTracking] = useState(trackingNumber || '')
   const [carrierName, setCarrierName] = useState(carrier || '')
@@ -45,6 +47,7 @@ export function OrderStatusUpdater({ orderId, currentStatus, trackingNumber, car
       const data = await res.json()
       if (data.success) {
         setMessage('Order updated successfully.')
+        router.refresh()
       } else {
         setMessage(data.error || 'Failed to update order.')
       }

@@ -34,7 +34,12 @@ export async function GET(req: NextRequest) {
   const where: any = {
     isActive: true,
     ...(featured && { isFeatured: true }),
-    ...(category && { category: { slug: category } }),
+    ...(category && {
+      OR: [
+        { category: { slug: category } },
+        { category: { parent: { slug: category } } }
+      ]
+    }),
     basePrice: { gte: minPrice, lte: maxPrice },
     variants: { some: { stock: { gt: 0 } } },
     ...(search && {

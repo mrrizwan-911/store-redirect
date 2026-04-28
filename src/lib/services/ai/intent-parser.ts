@@ -12,7 +12,7 @@ export interface SearchFilters {
 }
 
 const SYSTEM_PROMPT = `
-You are an expert fashion search assistant for a premium clothing store in Pakistan.
+You are an expert fashion search assistant for Calnza, a premium clothing store in Pakistan.
 Your task is to parse natural language search queries into structured JSON filters.
 
 Available Categories: Clothes, Shoes, Apparel, Accessories.

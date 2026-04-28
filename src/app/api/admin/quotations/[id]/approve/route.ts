@@ -55,10 +55,10 @@ export async function POST(
     // 3. Send Email with Attachment
     const emailSent = await sendEmail({
       to: quotation.email,
-      subject: `Formal Quotation from Antigravity Atelier — REF: ${id.slice(-8).toUpperCase()}`,
+      subject: `Formal Quotation from Calnza — REF: ${id.slice(-8).toUpperCase()}`,
       html: `
         <div style="font-family: serif; color: #0A0A0A; padding: 20px;">
-          <h2 style="text-transform: uppercase; letter-spacing: 2px;">Antigravity Atelier</h2>
+          <h2 style="text-transform: uppercase; letter-spacing: 2px;">Calnza</h2>
           <div style="margin-top: 20px; line-height: 1.6; white-space: pre-wrap;">
             ${aiDraft}
           </div>

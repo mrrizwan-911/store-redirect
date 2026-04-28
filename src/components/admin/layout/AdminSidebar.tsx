@@ -91,7 +91,7 @@ export function AdminSidebar() {
           </div>
           <div>
             <p className="text-[11px] font-bold text-neutral-900">Admin User</p>
-            <p className="text-[9px] text-neutral-400">admin@store.com</p>
+            <p className="text-[9px] text-neutral-400">admin@calnza.com</p>
           </div>
         </div>
         <button

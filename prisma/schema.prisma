@@ -16,6 +16,8 @@ model User {
   isVerified    Boolean         @default(false)
   googleId      String?         @unique
   wishlistToken String?         @unique @default(cuid())
+  referralCode  String?         @unique @default(cuid())
+  notes         String?
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   addresses    Address[]

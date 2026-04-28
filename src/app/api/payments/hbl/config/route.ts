@@ -7,7 +7,7 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   return NextResponse.json({
     checkoutJsUrl: process.env.HBL_CHECKOUT_JS_URL || 'https://hblpay.hbl.com/checkout/version/56/checkout.js',
-    merchantName: process.env.HBL_MERCHANT_NAME || 'E-Commerce Store',
+    merchantName: process.env.HBL_MERCHANT_NAME || 'Calnza',
     mode: process.env.HBL_MODE || 'test',
   })
 }
