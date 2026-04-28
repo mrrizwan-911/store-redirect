@@ -44,61 +44,62 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="max-w-6xl mx-auto space-y-6 pb-10 font-sans">
       {/* Header */}
       <div className="flex flex-col gap-4">
         <Link
           href="/d8f2a1/admin/orders"
-          className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-neutral-500 hover:text-black transition-colors"
+          className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:text-neutral-900 transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" /> Back to Orders
+          <ArrowLeft className="w-3 h-3" /> Back to Orders
         </Link>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
+
+        <div className="flex justify-between items-center">
+          <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-serif font-bold tracking-tight">Order #{order.orderNumber}</h1>
+              <h1 className="text-lg font-semibold tracking-tight text-neutral-800">Order #{order.orderNumber}</h1>
               <Badge variant="outline" className={cn(
-                "rounded-none border-black font-bold uppercase text-[10px] tracking-widest px-3 py-1",
-                order.status === 'DELIVERED' ? "bg-green-50 text-green-700 border-green-200" :
-                order.status === 'CANCELLED' ? "bg-red-50 text-red-700 border-red-200" :
-                "bg-neutral-50 text-black border-neutral-300"
+                "rounded-full border font-bold uppercase text-[9px] tracking-widest px-2 py-0 shadow-sm",
+                order.status === 'DELIVERED' ? "bg-emerald-50 text-emerald-700 border-emerald-100" :
+                order.status === 'CANCELLED' ? "bg-rose-50 text-rose-700 border-rose-100" :
+                "bg-neutral-50 text-neutral-600 border-neutral-100"
               )}>
                 {order.status}
               </Badge>
             </div>
-            <p className="text-sm text-neutral-500">
-              Placed on {new Date(order.createdAt).toLocaleString('en-US', { dateStyle: 'full', timeStyle: 'short' })}
+            <p className="text-[10px] uppercase tracking-widest text-neutral-500 mt-1">
+              Placed on {new Date(order.createdAt).toLocaleDateString()}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Main Column */}
-        <div className="lg:col-span-8 space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Items & Timeline */}
+        <div className="lg:col-span-2 space-y-6">
           {/* Order Items */}
-          <Card className="rounded-none border-black shadow-none overflow-hidden">
-            <CardHeader className="border-b border-black bg-neutral-50">
-              <CardTitle className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
-                <Package className="w-4 h-4" /> Order Items
+          <Card className="border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-xl overflow-hidden">
+            <CardHeader className="border-b border-neutral-50 bg-neutral-50/30 p-4">
+              <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 flex items-center gap-2">
+                <Package className="w-3.5 h-3.5" /> Order Items
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <table className="w-full text-sm">
+              <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-neutral-100 bg-neutral-50/50">
-                    <th className="text-left p-4 font-bold uppercase text-[10px] tracking-widest">Product</th>
-                    <th className="text-center p-4 font-bold uppercase text-[10px] tracking-widest">Qty</th>
-                    <th className="text-right p-4 font-bold uppercase text-[10px] tracking-widest">Price</th>
-                    <th className="text-right p-4 font-bold uppercase text-[10px] tracking-widest">Amount</th>
+                  <tr className="border-b border-neutral-50 bg-neutral-50/20">
+                    <th className="text-left p-4 text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Product</th>
+                    <th className="text-center p-4 text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Qty</th>
+                    <th className="text-right p-4 text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Price</th>
+                    <th className="text-right p-4 text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Amount</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-100">
+                <tbody className="divide-y divide-neutral-50">
                   {order.items.map((item) => (
                     <tr key={item.id} className="hover:bg-neutral-50/50 transition-colors">
                       <td className="p-4">
-                        <div className="flex gap-4">
-                          <div className="relative w-16 h-20 bg-neutral-100 border border-neutral-200 flex-shrink-0">
+                        <div className="flex gap-3">
+                          <div className="relative w-10 h-14 bg-neutral-50 border border-neutral-100 rounded-md overflow-hidden flex-shrink-0">
                             {item.product.images[0]?.url && (
                               <Image
                                 src={item.product.images[0].url}
@@ -109,40 +110,49 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
                             )}
                           </div>
                           <div className="flex flex-col justify-center">
-                            <p className="font-bold text-black uppercase text-[11px] tracking-widest mb-1">{item.product.name}</p>
-                            {item.variant?.optionValues && typeof item.variant.optionValues === 'object' && Object.keys(item.variant.optionValues as any).length > 0 && (
-                              <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-tighter">
-                                {Object.entries(item.variant.optionValues as any).map(([k, v]) => `${k}: ${v}`).join(' | ')}
-                              </p>
-                            )}
-                            <p className="text-[9px] font-mono text-neutral-400 mt-1">SKU: {item.variant?.sku || 'N/A'}</p>
+                            <p className="font-semibold text-neutral-800 text-[11px] mb-0.5">{item.product.name}</p>
+                            <p className="text-xs text-neutral-500 mt-1">
+                              {item.variant ? (
+                                <>
+                                  {item.variant.title !== 'Default' ? item.variant.title : 'Standard'}
+                                  {item.variant.optionValues && Object.keys(item.variant.optionValues).length > 0 && (
+                                    <span className="ml-2 opacity-70">
+                                      ({Object.entries(item.variant.optionValues as any).map(([k, v]) => `${k}: ${v}`).join(', ')})
+                                    </span>
+                                  )}
+                                </>
+                              ) : (
+                                'Standard'
+                              )}
+                            </p>
+                            <p className="text-[9px] font-mono text-neutral-400 mt-0.5">SKU: {item.variant?.sku || 'N/A'}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="p-4 text-center font-bold">{item.quantity}</td>
-                      <td className="p-4 text-right font-mono">PKR {Number(item.price).toLocaleString()}</td>
-                      <td className="p-4 text-right font-bold font-mono">PKR {(item.quantity * Number(item.price)).toLocaleString()}</td>
+                      <td className="p-4 text-center font-medium text-neutral-600">{item.quantity}</td>
+                      <td className="p-4 text-right text-black font-semibold">PKR {Number(item.price).toLocaleString()}</td>
+                      <td className="p-4 text-right text-black font-semibold">PKR {(item.quantity * Number(item.price)).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>
-                <tfoot className="bg-neutral-50/30 font-bold border-t border-neutral-200">
+                <tfoot className="bg-neutral-50/10 text-neutral-700 font-medium border-t border-neutral-50">
                   <tr>
-                    <td colSpan={3} className="p-4 text-right uppercase text-[10px] tracking-widest">Subtotal</td>
-                    <td className="p-4 text-right font-mono">PKR {Number(order.subtotal).toLocaleString()}</td>
+                    <td colSpan={3} className="p-3 text-right text-[10px] uppercase tracking-widest text-neutral-400">Subtotal</td>
+                    <td className="p-3 text-right font-semibold text-black">PKR {Number(order.subtotal).toLocaleString()}</td>
                   </tr>
                   <tr>
-                    <td colSpan={3} className="p-4 text-right uppercase text-[10px] tracking-widest">Shipping</td>
-                    <td className="p-4 text-right font-mono">PKR {Number(order.shippingCost).toLocaleString()}</td>
+                    <td colSpan={3} className="p-3 text-right text-[10px] uppercase tracking-widest text-neutral-400">Shipping</td>
+                    <td className="p-3 text-right font-semibold text-black">PKR {Number(order.shippingCost).toLocaleString()}</td>
                   </tr>
                   {Number(order.discount) > 0 && (
-                    <tr className="text-red-600">
-                      <td colSpan={3} className="p-4 text-right uppercase text-[10px] tracking-widest">Discount</td>
-                      <td className="p-4 text-right font-mono">-PKR {Number(order.discount).toLocaleString()}</td>
+                    <tr className="text-rose-600">
+                      <td colSpan={3} className="p-3 text-right text-[10px] uppercase tracking-widest">Discount</td>
+                      <td className="p-3 text-right font-semibold">-PKR {Number(order.discount).toLocaleString()}</td>
                     </tr>
                   )}
-                  <tr className="text-lg bg-neutral-100">
-                    <td colSpan={3} className="p-4 text-right font-serif uppercase tracking-widest">Grand Total</td>
-                    <td className="p-4 text-right font-mono text-xl">PKR {Number(order.total).toLocaleString()}</td>
+                  <tr className="bg-neutral-900 text-white">
+                    <td colSpan={3} className="p-4 text-right text-[9px] font-bold uppercase tracking-[0.2em]">Grand Total</td>
+                    <td className="p-4 text-right font-mono text-base font-bold">PKR {Number(order.total).toLocaleString()}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -150,134 +160,128 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
           </Card>
 
           {/* Customer Timeline */}
-          <div className="space-y-6">
-            <h3 className="text-sm font-bold uppercase tracking-[0.2em] flex items-center gap-2">
-              <Clock className="w-4 h-4" /> Order History & Timeline
+          <div className="space-y-4">
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5" /> Order Timeline
             </h3>
-            <div className="relative pl-8 space-y-8 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-neutral-100">
-              {/* Placed */}
-              <div className="relative">
-                <div className="absolute -left-8 w-6 h-6 rounded-full bg-black border-4 border-white shadow-sm flex items-center justify-center">
-                  <Calendar className="w-2 h-2 text-white" />
+            <Card className="border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-xl p-5">
+              <div className="relative pl-6 space-y-6 before:absolute before:left-[7px] before:top-1 before:bottom-1 before:w-[1px] before:bg-neutral-100">
+                <div className="relative">
+                  <div className="absolute -left-[23px] w-4 h-4 rounded-full bg-neutral-900 border-2 border-white shadow-sm flex items-center justify-center">
+                    <Calendar className="w-2 h-2 text-white" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-800">Order Placed</p>
+                    <p className="text-[11px] text-neutral-500">The order was successfully created.</p>
+                    <p className="text-[9px] font-mono text-neutral-400">{new Date(order.createdAt).toLocaleString()}</p>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-black">Order Placed</p>
-                  <p className="text-xs text-neutral-500">The order was successfully created by the customer.</p>
-                  <p className="text-[10px] font-mono text-neutral-400">{new Date(order.createdAt).toLocaleString()}</p>
-                </div>
-              </div>
 
-              {/* Payment */}
-              <div className="relative">
-                <div className={cn(
-                  "absolute -left-8 w-6 h-6 rounded-full border-4 border-white shadow-sm flex items-center justify-center",
-                  order.payment?.status === 'COMPLETED' ? "bg-green-600" : "bg-orange-500"
-                )}>
-                  <CreditCard className="w-2 h-2 text-white" />
+                <div className="relative">
+                  <div className={cn(
+                    "absolute -left-[23px] w-4 h-4 rounded-full border-2 border-white shadow-sm flex items-center justify-center",
+                    order.payment?.status === 'COMPLETED' ? "bg-emerald-500" : "bg-amber-500"
+                  )}>
+                    <CreditCard className="w-2 h-2 text-white" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-800">
+                      Payment: {order.payment?.status}
+                    </p>
+                    <p className="text-[11px] text-neutral-500">
+                      via {order.payment?.method.replace('_', ' ')}
+                    </p>
+                    {order.payment?.paidAt && (
+                      <p className="text-[9px] font-mono text-neutral-400">{new Date(order.payment.paidAt).toLocaleString()}</p>
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-black">
-                    Payment Status: {order.payment?.status}
-                  </p>
-                  <p className="text-xs text-neutral-500">
-                    Method: {order.payment?.method.replace('_', ' ')}
-                    {order.payment?.gatewayRef && ` | Ref: ${order.payment.gatewayRef}`}
-                  </p>
-                  {order.payment?.paidAt && (
-                    <p className="text-[10px] font-mono text-neutral-400">{new Date(order.payment.paidAt).toLocaleString()}</p>
-                  )}
-                </div>
-              </div>
 
-              {/* Latest Update */}
-              <div className="relative">
-                <div className="absolute -left-8 w-6 h-6 rounded-full bg-blue-600 border-4 border-white shadow-sm flex items-center justify-center">
-                  <Clock className="w-2 h-2 text-white" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-black">Latest Activity</p>
-                  <p className="text-xs text-neutral-500">Order status was updated to <strong>{order.status}</strong>.</p>
-                  <p className="text-[10px] font-mono text-neutral-400">{new Date(order.updatedAt).toLocaleString()}</p>
+                <div className="relative">
+                  <div className="absolute -left-[23px] w-4 h-4 rounded-full bg-blue-500 border-2 border-white shadow-sm flex items-center justify-center">
+                    <Clock className="w-2 h-2 text-white" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-800">Current Status: {order.status}</p>
+                    <p className="text-[9px] font-mono text-neutral-400">{new Date(order.updatedAt).toLocaleString()}</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
 
-        {/* Sidebar Column */}
-        <div className="lg:col-span-4 space-y-8">
+        {/* Right Column - Details */}
+        <div className="space-y-6">
           {/* Status Panel */}
-          <OrderStatusUpdater
-            orderId={order.id}
-            currentStatus={order.status}
-            trackingNumber={order.trackingNumber}
-            carrier={order.carrier}
-            notes={order.notes}
-          />
-
-          {/* Customer Info */}
-          <Card className="rounded-none border-neutral-200 shadow-none">
-            <CardHeader className="border-b border-neutral-100">
-              <CardTitle className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                <User className="w-3 h-3" /> Customer Info
-              </CardTitle>
+          <Card className="border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-xl overflow-hidden">
+            <CardHeader className="border-b border-neutral-50 bg-neutral-50/30 p-4">
+              <CardTitle className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Manage Status</CardTitle>
             </CardHeader>
-            <CardContent className="p-4 space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center text-xs font-bold">
-                    {order.user?.name?.[0] || 'G'}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-black">{order.user?.name || 'Guest Customer'}</p>
-                    <p className="text-[10px] text-neutral-500 font-bold uppercase">Customer ID: {order.userId || 'N/A'}</p>
-                  </div>
-                </div>
-                <div className="space-y-2 pt-2">
-                  <div className="flex items-center gap-3 text-xs text-neutral-600">
-                    <Mail className="w-3 h-3" />
-                    <span>{order.user?.email || 'N/A'}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-xs text-neutral-600">
-                    <Phone className="w-3 h-3" />
-                    <span>{order.user?.phone || 'N/A'}</span>
-                  </div>
-                </div>
-              </div>
+            <CardContent className="p-4">
+              <OrderStatusUpdater
+                orderId={order.id}
+                currentStatus={order.status}
+                trackingNumber={order.trackingNumber}
+                carrier={order.carrier}
+                notes={order.notes}
+              />
             </CardContent>
           </Card>
 
-          {/* Shipping Address */}
-          <Card className="rounded-none border-neutral-200 shadow-none">
-            <CardHeader className="border-b border-neutral-100">
-              <CardTitle className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
-                <MapPin className="w-3 h-3" /> Shipping Address
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4">
-              {order.address ? (
-                <div className="text-xs text-neutral-700 leading-relaxed space-y-1">
-                  <p className="font-bold text-black uppercase text-[10px] tracking-widest mb-2 pb-1 border-b border-neutral-100 w-fit">{order.address.label}</p>
-                  <p>{order.address.line1}</p>
-                  {order.address.line2 && <p>{order.address.line2}</p>}
-                  <p>{order.address.city}, {order.address.province}</p>
-                  <p className="font-bold text-black mt-2">{order.address.postalCode}</p>
+          {/* Customer Info */}
+          <Card className="border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-xl p-4">
+            <h3 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-4 flex items-center gap-2">
+              <User className="w-3 h-3" /> Customer Details
+            </h3>
+            <div className="space-y-3 text-xs text-neutral-700">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-neutral-50 border border-neutral-100 flex items-center justify-center text-[10px] font-bold text-neutral-400">
+                  {order.user?.name?.[0] || 'G'}
                 </div>
-              ) : (
-                <p className="text-xs text-neutral-400 italic">No address provided</p>
-              )}
-            </CardContent>
+                <div>
+                  <p className="font-semibold text-neutral-900">{order.user?.name || 'Guest Customer'}</p>
+                  <p className="text-[10px] text-neutral-400">ID: {order.userId || 'N/A'}</p>
+                </div>
+              </div>
+              <div className="space-y-2 pt-2 border-t border-neutral-50">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-3 h-3 text-neutral-300" />
+                  <span>{order.user?.email || 'N/A'}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="w-3 h-3 text-neutral-300" />
+                  <span>{order.user?.phone || 'N/A'}</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Shipping & Payment */}
+          <Card className="border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-xl p-4">
+            <h3 className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold mb-4 flex items-center gap-2">
+              <MapPin className="w-3 h-3" /> Shipping Address
+            </h3>
+            {order.address ? (
+              <div className="text-xs text-neutral-700 leading-relaxed space-y-1">
+                <p className="font-bold text-neutral-900 uppercase text-[9px] tracking-widest mb-2 border-b border-neutral-50 w-fit pb-1">{order.address.label}</p>
+                <p>{order.address.line1}</p>
+                {order.address.line2 && <p>{order.address.line2}</p>}
+                <p>{order.address.city}, {order.address.province}</p>
+                <p className="font-semibold text-neutral-900 mt-2">{order.address.postalCode}</p>
+              </div>
+            ) : (
+              <p className="text-xs text-neutral-400 italic">No address provided</p>
+            )}
           </Card>
 
           {/* Gift Message */}
           {order.isGift && (
-            <Card className="rounded-none border-neutral-200 bg-neutral-50 shadow-none">
-              <CardHeader className="border-b border-neutral-200">
-                <CardTitle className="text-[10px] font-bold uppercase tracking-widest">🎁 Gift Message</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 italic text-xs text-neutral-600">
+            <Card className="border-rose-100 bg-rose-50/30 shadow-none rounded-xl p-4">
+              <h3 className="text-[10px] uppercase tracking-widest text-rose-400 font-bold mb-2">🎁 Gift Message</h3>
+              <p className="italic text-xs text-rose-700 leading-relaxed">
                 "{order.giftMessage || 'No message provided'}"
-              </CardContent>
+              </p>
             </Card>
           )}
         </div>

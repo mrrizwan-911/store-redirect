@@ -145,21 +145,23 @@ async function main() {
   for (const catData of categories) {
     const root = await db.category.upsert({
       where: { slug: catData.slug },
-      update: { name: catData.name },
+      update: { name: catData.name, isActive: true },
       create: {
         name: catData.name,
         slug: catData.slug,
+        isActive: true,
       },
     })
 
     for (const sub of catData.subcategories) {
       await db.category.upsert({
         where: { slug: sub.slug },
-        update: { name: sub.name, parentId: root.id },
+        update: { name: sub.name, parentId: root.id, isActive: true },
         create: {
           name: sub.name,
           slug: sub.slug,
           parentId: root.id,
+          isActive: true,
         },
       })
     }

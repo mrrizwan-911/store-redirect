@@ -87,13 +87,13 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
 
     return (
       <div className="p-8 min-h-screen bg-[#FDFDFD]">
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Header section with Minimal Luxury B&W styling */}
-          <div className="flex flex-col gap-2 border-b border-black pb-6">
-            <h1 data-testid="page-heading" className="text-4xl font-display font-bold uppercase tracking-tight text-black">
+          <div className="flex flex-col gap-1 border-b border-neutral-100 pb-4">
+            <h1 data-testid="page-heading" className="text-2xl font-bold tracking-tight text-neutral-900">
               Inventory Management
             </h1>
-            <p className="text-neutral-500 font-body text-sm tracking-wide">
+            <p className="text-neutral-400 text-[10px] font-bold uppercase tracking-widest">
               MONITOR AND UPDATE STOCK LEVELS ACROSS YOUR PRODUCT CATALOG.
             </p>
           </div>

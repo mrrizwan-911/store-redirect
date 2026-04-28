@@ -75,7 +75,7 @@ export function NewArrivalsStrip({ products }: NewArrivalsStripProps) {
       >
         <div className="min-w-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))] h-1" />
         {products.map((product) => (
-          <div key={product.id} className="min-w-[280px] sm:min-w-[320px] md:min-w-[380px] snap-start">
+          <div key={product.id} className="min-w-[210px] sm:min-w-[240px] md:min-w-[285px] snap-start">
             <ProductCard {...product} />
           </div>
         ))}

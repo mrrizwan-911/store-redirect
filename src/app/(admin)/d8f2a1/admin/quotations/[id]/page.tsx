@@ -59,34 +59,34 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
     };
 
     return (
-      <div className="p-8 min-h-screen bg-[#FDFDFD]">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <div className="space-y-6 animate-in fade-in duration-500 font-sans">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Header with Back button and Status */}
-          <div className="flex flex-col gap-6 border-b border-black pb-8">
+          <div className="flex flex-col gap-4 border-b border-neutral-100 pb-6">
             <Link
               href="/admin/quotations"
-              className="flex items-center gap-2 text-xs font-display uppercase tracking-[0.2em] text-neutral-500 hover:text-black transition-colors w-fit"
+              className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:text-neutral-900 transition-colors w-fit border border-neutral-200 px-3 py-1 rounded-md hover:bg-neutral-50"
             >
               <ChevronLeft className="w-3 h-3" /> Back to Inbox
             </Link>
 
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="space-y-2">
-                <h1 data-testid="page-heading" className="text-4xl font-display font-bold uppercase tracking-tight text-black">
+              <div className="space-y-1">
+                <h1 className="text-2xl font-bold tracking-tight text-neutral-900">
                   Quotation Detail
                 </h1>
-                <p className="text-neutral-500 font-body text-sm tracking-wide">
-                  REF: <span className="font-mono text-black">{quotation.id.slice(-8).toUpperCase()}</span> • RECEIVED {new Date(quotation.createdAt).toLocaleDateString()}
+                <p className="text-xs text-neutral-400">
+                  REF: <span className="font-mono text-neutral-600">{quotation.id.slice(-8).toUpperCase()}</span> • RECEIVED {new Date(quotation.createdAt).toLocaleDateString()}
                 </p>
               </div>
 
               <div className="flex items-center gap-3">
-                <span className={`px-4 py-1.5 text-[10px] font-display font-bold uppercase tracking-[0.15em] border ${
-                  quotation.status === 'PENDING' ? 'bg-neutral-100 border-neutral-200 text-neutral-600' :
+                <span className={`px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest border rounded-full shadow-sm ${
+                  quotation.status === 'PENDING' ? 'bg-neutral-50 border-neutral-200 text-neutral-600' :
                   quotation.status === 'SENT' ? 'bg-blue-50 border-blue-100 text-blue-600' :
-                  quotation.status === 'ACCEPTED' ? 'bg-green-50 border-green-100 text-green-600' :
-                  quotation.status === 'REJECTED' ? 'bg-red-50 border-red-100 text-red-600' :
-                  quotation.status === 'CONVERTED' ? 'bg-[#E8D5B0] border-[#E8D5B0] text-black' :
+                  quotation.status === 'ACCEPTED' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+                  quotation.status === 'REJECTED' ? 'bg-rose-50 border-rose-100 text-rose-600' :
+                  quotation.status === 'CONVERTED' ? 'bg-neutral-900 border-neutral-900 text-white' :
                   'bg-neutral-800 border-neutral-800 text-white'
                 }`}>
                   {quotation.status.replace('_', ' ')}
@@ -101,8 +101,8 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
           </div>
 
           {/* Footer Meta */}
-          <div className="pt-12 flex justify-end">
-            <p className="text-[10px] font-body text-neutral-400 uppercase tracking-[0.2em]">
+          <div className="pt-8 flex justify-end">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-300">
               Last updated: {new Date(quotation.updatedAt).toLocaleString()}
             </p>
           </div>
@@ -114,10 +114,10 @@ export default async function QuotationDetailPage({ params }: QuotationDetailPag
     return (
       <div className="p-8 flex items-center justify-center min-h-[50vh]">
         <div className="text-center space-y-4">
-          <h2 className="font-display text-2xl font-bold uppercase">Error Loading Quotation</h2>
-          <p className="font-body text-neutral-600">Please try again later or contact support.</p>
+          <h2 className="text-xl font-bold tracking-tight text-neutral-900">Error Loading Quotation</h2>
+          <p className="text-sm text-neutral-500">Please try again later or contact support.</p>
           <Link href="/admin/quotations">
-            <Button variant="outline" className="rounded-none border-black mt-4 uppercase font-display tracking-widest">
+            <Button variant="outline" className="rounded-lg border-neutral-200 mt-4 uppercase text-[10px] font-bold tracking-widest px-6">
               Return to Inbox
             </Button>
           </Link>

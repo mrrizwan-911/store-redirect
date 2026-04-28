@@ -67,14 +67,14 @@ export default async function AdminLoyaltyPage({ searchParams }: PageProps) {
   });
 
   return (
-    <div className="container mx-auto py-10 px-4 md:px-8 max-w-7xl">
-      <div className="flex flex-col gap-8">
+    <div className="container mx-auto py-6 px-4 md:px-8 max-w-7xl">
+      <div className="flex flex-col gap-6">
         {/* Header */}
-        <div className="flex flex-col gap-2 border-b border-black pb-6">
-          <h1 data-testid="page-heading" className="text-4xl font-display font-bold uppercase tracking-tight text-black">
+        <div className="flex flex-col gap-1 border-b border-neutral-100 pb-4">
+          <h1 data-testid="page-heading" className="text-2xl font-bold tracking-tight text-neutral-900">
             Loyalty Management
           </h1>
-          <p className="text-neutral-500 font-body text-sm tracking-wide">
+          <p className="text-neutral-500 text-xs tracking-wide">
             Manage customer rewards, tiers, and point adjustments.
           </p>
         </div>

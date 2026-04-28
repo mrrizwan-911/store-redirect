@@ -96,40 +96,40 @@ export default function SizeGuidesPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="space-y-6 animate-in fade-in duration-500 font-sans">
+      <div className="flex justify-between items-center border-b border-neutral-100 pb-4">
         <div className="flex items-center gap-3">
-          <BookOpen className="h-8 w-8" />
-          <h1 className="font-playfair text-3xl font-bold text-[#000000]">Size Guides</h1>
+          <BookOpen className="h-6 w-6 text-neutral-900" />
+          <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Size Guides</h1>
         </div>
         <Button
           onClick={handleAdd}
           disabled={isAdding}
-          className="bg-black text-white hover:bg-neutral-800 rounded-none h-10 px-6 flex items-center gap-2 transition-all"
+          className="bg-neutral-900 text-white hover:bg-neutral-800 rounded-lg h-9 px-6 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all shadow-sm"
         >
           {isAdding ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3.5 w-3.5" />
           )}
           Add Size Guide
         </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-4">
         {guides.map((guide) => (
-          <Card key={guide.id} className="rounded-none border-[#E5E5E5] hover:border-black transition-all bg-white group">
-            <CardHeader className="p-6 flex flex-row items-center justify-between space-y-0">
+          <Card key={guide.id} className="rounded-xl border-neutral-100 hover:border-neutral-200 transition-all bg-white group shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+            <CardHeader className="p-4 flex flex-row items-center justify-between space-y-0">
               <div className="space-y-1">
                 <div className="flex items-center gap-3">
-                  <CardTitle className="text-lg font-bold text-black">{guide.title}</CardTitle>
+                  <CardTitle className="text-sm font-semibold tracking-tight text-neutral-900">{guide.title}</CardTitle>
                   {guide.category && (
-                    <Badge variant="secondary" className="bg-neutral-100 text-neutral-600 rounded-none text-[10px] uppercase font-bold tracking-widest border-none">
+                    <Badge variant="secondary" className="bg-neutral-50 text-neutral-400 rounded-full text-[9px] uppercase font-bold tracking-widest border border-neutral-100">
                       {guide.category.name}
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-neutral-500 line-clamp-1 max-w-2xl">
+                <p className="text-xs text-neutral-500 line-clamp-1 max-w-2xl">
                   {guide.content || 'No content yet. Click edit to add measurement charts.'}
                   {guide.content.length > 120 ? '...' : ''}
                 </p>
@@ -138,7 +138,7 @@ export default function SizeGuidesPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 text-neutral-400 hover:text-black transition-colors"
+                  className="h-8 w-8 text-neutral-400 hover:text-neutral-900 transition-colors"
                   onClick={() => router.push(`/d8f2a1/admin/size-guides/${guide.id}`)}
                 >
                   <Pencil className="h-4 w-4" />
@@ -146,7 +146,7 @@ export default function SizeGuidesPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 text-neutral-400 hover:text-red-600 transition-colors"
+                  className="h-8 w-8 text-neutral-400 hover:text-red-600 transition-colors"
                   onClick={() => handleDelete(guide.id, guide.title)}
                 >
                   <Trash2 className="h-4 w-4" />

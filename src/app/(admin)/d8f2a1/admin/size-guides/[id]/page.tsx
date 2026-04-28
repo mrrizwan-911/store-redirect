@@ -202,15 +202,15 @@ export default function SizeGuideEditorPage() {
           />
 
           <div className="flex items-center gap-4 pt-2">
-            <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-neutral-400">Linked Category</Label>
+            <Label className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Linked Category</Label>
             <Select
               value={categoryId || 'none'}
               onValueChange={(val) => setCategoryId(val === 'none' ? null : val)}
             >
-              <SelectTrigger className="w-[240px] h-9 rounded-none border-neutral-200 focus:ring-0 focus:border-black text-xs">
+              <SelectTrigger className="w-[240px] h-9 rounded-lg border-neutral-100 bg-neutral-50/50 focus:ring-0 focus:border-neutral-200 text-xs">
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
-              <SelectContent className="rounded-none border-black">
+              <SelectContent className="rounded-xl border-neutral-100 shadow-lg">
                 <SelectItem value="none" className="text-xs">No category linked</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.id} className="text-xs">
@@ -222,29 +222,29 @@ export default function SizeGuideEditorPage() {
           </div>
         </div>
 
-        <div className="h-px bg-neutral-100" />
+        <div className="h-px bg-neutral-50" />
 
         <div className="relative flex-1">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Paste or type your size guide content here. Include measurements, conversion charts, fit notes, or any information users might ask about sizing..."
-            className="w-full min-h-[50vh] h-full font-mono text-sm leading-relaxed text-black placeholder:text-neutral-200 border-none focus:ring-0 p-0 resize-none bg-transparent"
+            className="w-full min-h-[50vh] h-full font-sans text-sm leading-relaxed text-neutral-900 placeholder:text-neutral-200 border-none focus:ring-0 p-0 resize-none bg-transparent"
           />
         </div>
       </div>
 
       {/* Footer Bar */}
-      <div className="px-8 py-4 border-t border-black bg-white flex items-center justify-between z-10">
+      <div className="px-8 py-4 border-t border-neutral-100 bg-white flex items-center justify-between z-10">
         <div className="flex items-center gap-4">
           {hasUnsavedChanges ? (
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
-              <span className="text-[10px] uppercase tracking-widest font-bold text-yellow-600">Unsaved changes</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              <span className="text-[10px] uppercase tracking-widest font-bold text-amber-600">Unsaved changes</span>
             </div>
           ) : lastSaved ? (
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <span className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Saved {timeSinceLastSave()}</span>
             </div>
           ) : (
@@ -263,14 +263,14 @@ export default function SizeGuideEditorPage() {
           <Button
             variant="ghost"
             onClick={() => router.push('/d8f2a1/admin/size-guides')}
-            className="text-[10px] uppercase tracking-widest font-bold rounded-none h-9 px-6"
+            className="text-[10px] uppercase tracking-widest font-bold rounded-lg h-9 px-6"
           >
             Cancel
           </Button>
           <Button
             onClick={() => save({ title, content, categoryId })}
             disabled={isSaving || !hasUnsavedChanges}
-            className="bg-black text-white hover:bg-neutral-800 rounded-none h-9 px-8 flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold transition-all"
+            className="bg-neutral-900 text-white hover:bg-neutral-800 rounded-lg h-9 px-8 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all shadow-sm"
           >
             <Save className="h-3.5 w-3.5" />
             Save Now

@@ -39,53 +39,53 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 font-sans">
-      <div className="flex items-center justify-between border-b border-black pb-4">
-        <h1 className="text-3xl font-serif font-bold uppercase tracking-wide">Orders</h1>
+      <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+        <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Orders</h1>
       </div>
 
-      <div className="bg-white border border-black overflow-hidden">
+      <div className="bg-white border border-neutral-100 rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-neutral-100 border-b border-black">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-neutral-50/50 border-b border-neutral-100">
               <tr>
-                <th className="p-4 font-bold uppercase text-xs">Order #</th>
-                <th className="p-4 font-bold uppercase text-xs">Date</th>
-                <th className="p-4 font-bold uppercase text-xs">Customer</th>
-                <th className="p-4 font-bold uppercase text-xs text-center">Items</th>
-                <th className="p-4 font-bold uppercase text-xs text-right">Total</th>
-                <th className="p-4 font-bold uppercase text-xs text-center">Status</th>
-                <th className="p-4 font-bold uppercase text-xs text-center">Actions</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Order #</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Date</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Customer</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400 text-center">Items</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400 text-right">Total</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400 text-center">Status</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-neutral-500">
+                  <td colSpan={7} className="p-12 text-center text-neutral-400 italic">
                     No orders found.
                   </td>
                 </tr>
               ) : (
                 orders.map((order: any) => (
-                  <tr key={order.id} className="border-b border-neutral-200 last:border-0 hover:bg-neutral-50">
-                    <td className="p-4 font-medium">{order.orderNumber}</td>
-                    <td className="p-4 text-neutral-600">
+                  <tr key={order.id} className="border-b border-neutral-50 last:border-0 hover:bg-neutral-50/50 transition-colors">
+                    <td className="p-4 font-semibold text-neutral-900">{order.orderNumber}</td>
+                    <td className="p-4 text-neutral-500">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
                     <td className="p-4">
-                      <div className="font-medium">{order.user?.name || 'Guest'}</div>
-                      <div className="text-xs text-neutral-500">{order.user?.email || ''}</div>
+                      <div className="font-medium text-neutral-800">{order.user?.name || 'Guest'}</div>
+                      <div className="text-[10px] text-neutral-400">{order.user?.email || ''}</div>
                     </td>
-                    <td className="p-4 text-center">{order.itemCount}</td>
-                    <td className="p-4 text-right font-medium">PKR {Number(order.total).toLocaleString()}</td>
+                    <td className="p-4 text-center text-neutral-600">{order.itemCount}</td>
+                    <td className="p-4 text-right font-medium text-neutral-900">PKR {Number(order.total).toLocaleString()}</td>
                     <td className="p-4 text-center">
-                      <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${getStatusColor(order.status)}`}>
+                      <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${getStatusColor(order.status).includes('black') ? 'border-neutral-900' : 'border-neutral-100'} ${getStatusColor(order.status)}`}>
                         {order.status}
                       </span>
                     </td>
                     <td className="p-4 text-center">
                       <Link
                         href={`/admin/orders/${order.id}`}
-                        className="text-xs font-bold uppercase underline underline-offset-4 hover:text-neutral-600 transition-colors"
+                        className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 hover:text-neutral-900 transition-colors border border-neutral-200 px-3 py-1 rounded-md hover:bg-neutral-50"
                       >
                         View
                       </Link>

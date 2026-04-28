@@ -168,16 +168,16 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
       </nav>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-24">
-        {/* Left: Image Gallery (7 cols on large screens) */}
-        <div className="lg:col-span-7">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 max-w-6xl mx-auto">
+        {/* Left: Image Gallery (6 cols on large screens) */}
+        <div className="lg:col-span-6 lg:col-start-2">
           <ImageGallery images={product.images} productName={product.name} />
         </div>
 
-        {/* Right: Product Details (5 cols on large screens) */}
-        <div className="lg:col-span-5 space-y-10">
+        {/* Right: Product Details (4 cols on large screens) */}
+        <div className="lg:col-span-4 pt-4 lg:pr-8 space-y-10">
           <div className="space-y-4">
-            <h1 className="text-4xl md:text-5xl font-display leading-tight tracking-tight">
+            <h1 className="text-3xl md:text-4xl font-display leading-tight tracking-tight">
               {product.name}
             </h1>
 
@@ -201,18 +201,18 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             </div>
 
             <div className="flex items-baseline gap-4">
-              <span className="text-2xl font-light tracking-tight">
+              <span className="text-xl font-light tracking-tight">
                 PKR {currentPrice.toLocaleString()}
               </span>
               {originalPrice && (
-                <span className="text-lg text-text-secondary line-through opacity-50">
+                <span className="text-base text-text-secondary line-through opacity-50">
                   PKR {originalPrice.toLocaleString()}
                 </span>
               )}
             </div>
           </div>
 
-          <p className="text-text-secondary leading-relaxed">
+          <p className="text-text-secondary text-xs leading-relaxed">
             {product.shortDescription || product.description.substring(0, 160) + '...'}
           </p>
 
@@ -281,7 +281,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={handleWhatsAppOrder}
-                  className="flex-1 h-12 border border-black flex items-center justify-center gap-2 text-[11px] uppercase tracking-[0.22em] font-bold hover:bg-neutral-50 transition-colors"
+                  className="flex-1 py-3 border border-black flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.22em] font-bold hover:bg-neutral-50 transition-colors"
                 >
                   <MessageCircle className="w-4 h-4 shrink-0" />
                   <span className="truncate">WhatsApp Order</span>
@@ -289,7 +289,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                 <div className="flex gap-2">
                   <button
                     onClick={handleWhatsAppShare}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-[#E5E5E5] text-[#737373] hover:text-[#000000] hover:border-[#000000] px-4 py-3 transition-colors text-sm"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-[#E5E5E5] text-[#737373] hover:text-[#000000] hover:border-[#000000] px-3 py-2.5 transition-colors text-[10px]"
                     title="Share on WhatsApp"
                   >
                     <Share2 className="h-4 w-4 shrink-0" />
@@ -297,7 +297,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                   </button>
                   <button
                     onClick={handleCopyLink}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-[#E5E5E5] text-[#737373] hover:text-[#000000] hover:border-[#000000] px-4 py-3 transition-colors text-sm min-w-[105px]"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-[#E5E5E5] text-[#737373] hover:text-[#000000] hover:border-[#000000] px-3 py-2.5 transition-colors text-[10px] min-w-[90px]"
                     title="Copy link"
                   >
                     {copied ? (

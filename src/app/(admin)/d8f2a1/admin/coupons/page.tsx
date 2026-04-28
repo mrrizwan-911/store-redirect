@@ -21,8 +21,8 @@ export default async function AdminCouponsPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between border-b border-black pb-4">
-        <h1 data-testid="page-heading" className="text-3xl font-display font-bold uppercase tracking-wide text-black">
+      <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+        <h1 data-testid="page-heading" className="text-2xl font-bold tracking-tight text-neutral-900">
           Coupons Management
         </h1>
       </div>

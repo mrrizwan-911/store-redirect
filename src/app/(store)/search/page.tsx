@@ -1,5 +1,6 @@
 import { db } from '@/lib/db/client'
 import { SearchPageClient } from '@/components/store/search/SearchPageClient'
+import { Suspense } from 'react'
 
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>
@@ -35,5 +36,9 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     reviewCount: p.reviews.length,
   }))
 
-  return <SearchPageClient initialQuery={query} initialFeatured={enriched} />
+  return (
+    <Suspense fallback={<div className="h-96 flex items-center justify-center">Loading search...</div>}>
+      <SearchPageClient initialQuery={query} initialFeatured={enriched} />
+    </Suspense>
+  )
 }

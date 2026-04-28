@@ -42,95 +42,95 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 font-sans">
-      <div className="flex items-center gap-4 border-b border-black pb-4">
-        <Link href="/admin/customers" className="text-sm font-bold uppercase underline underline-offset-4 hover:text-neutral-600">
+      <div className="flex items-center gap-4 border-b border-neutral-100 pb-4">
+        <Link href="/admin/customers" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:text-neutral-900 transition-colors border border-neutral-200 px-3 py-1 rounded-md hover:bg-neutral-50">
           &larr; Back
         </Link>
-        <h1 className="text-3xl font-serif font-bold uppercase tracking-wide">
+        <h1 className="text-2xl font-bold tracking-tight text-neutral-900">
           Customer Profile
         </h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="space-y-6">
-          <div className="bg-white border border-black p-6">
-            <div className="w-16 h-16 bg-black text-white flex items-center justify-center text-2xl font-bold mb-4">
+          <div className="bg-white border border-neutral-100 rounded-xl p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+            <div className="w-12 h-12 bg-neutral-900 text-white flex items-center justify-center text-xl font-bold mb-4 rounded-full">
               {customer.name?.charAt(0).toUpperCase()}
             </div>
-            <h2 className="text-xl font-bold font-serif">{customer.name}</h2>
-            <p className="text-neutral-600">{customer.email}</p>
-            {customer.phone && <p className="text-neutral-600 mt-1">{customer.phone}</p>}
+            <h2 className="text-lg font-bold tracking-tight text-neutral-900">{customer.name}</h2>
+            <p className="text-sm text-neutral-500">{customer.email}</p>
+            {customer.phone && <p className="text-xs text-neutral-400 mt-1">{customer.phone}</p>}
 
-            <div className="mt-6 pt-6 border-t border-neutral-200">
-              <div className="flex justify-between mb-2">
-                <span className="text-sm text-neutral-500 uppercase font-bold">Lifetime Value</span>
-                <span className="font-bold">PKR {customer.ltv?.toLocaleString()}</span>
+            <div className="mt-6 pt-6 border-t border-neutral-50 space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest">Lifetime Value</span>
+                <span className="text-sm font-bold text-neutral-900">PKR {customer.ltv?.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between mb-2">
-                <span className="text-sm text-neutral-500 uppercase font-bold">Total Orders</span>
-                <span className="font-bold">{customer.orders?.length || 0}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest">Total Orders</span>
+                <span className="text-sm font-bold text-neutral-900">{customer.orders?.length || 0}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-sm text-neutral-500 uppercase font-bold">Member Since</span>
-                <span className="text-sm">{new Date(customer.createdAt).toLocaleDateString()}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest">Member Since</span>
+                <span className="text-xs text-neutral-600">{new Date(customer.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-white border border-black p-6">
-            <h3 className="text-sm font-bold uppercase text-neutral-500 mb-4">Loyalty Status</h3>
+          <div className="bg-white border border-neutral-100 rounded-xl p-6 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-4">Loyalty Status</h3>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-neutral-500">Tier</p>
-                <p className="font-bold uppercase">{customer.loyalty?.tier || 'Bronze'}</p>
+                <p className="text-[9px] text-neutral-400 uppercase font-bold tracking-tighter">Tier</p>
+                <p className="text-xs font-bold uppercase text-neutral-900">{customer.loyalty?.tier || 'Bronze'}</p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-neutral-500">Points Balance</p>
-                <p className="font-bold">{customer.loyalty?.points || 0}</p>
+                <p className="text-[9px] text-neutral-400 uppercase font-bold tracking-tighter">Points Balance</p>
+                <p className="text-xs font-bold text-neutral-900">{customer.loyalty?.points || 0}</p>
               </div>
             </div>
           </div>
         </div>
 
         <div className="lg:col-span-2">
-          <div className="bg-white border border-black">
-            <div className="p-6 border-b border-black">
-              <h2 className="text-lg font-bold font-serif uppercase">Order History</h2>
+          <div className="bg-white border border-neutral-100 rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+            <div className="p-4 border-b border-neutral-50 bg-neutral-50/50">
+              <h2 className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Order History</h2>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-neutral-100 border-b border-black">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-neutral-50/30 border-b border-neutral-50">
                   <tr>
-                    <th className="p-4 font-bold uppercase text-xs">Order #</th>
-                    <th className="p-4 font-bold uppercase text-xs">Date</th>
-                    <th className="p-4 font-bold uppercase text-xs text-center">Items</th>
-                    <th className="p-4 font-bold uppercase text-xs text-right">Total</th>
-                    <th className="p-4 font-bold uppercase text-xs text-center">Status</th>
+                    <th className="p-4 font-bold uppercase text-[10px] tracking-widest text-neutral-400">Order #</th>
+                    <th className="p-4 font-bold uppercase text-[10px] tracking-widest text-neutral-400">Date</th>
+                    <th className="p-4 font-bold uppercase text-[10px] tracking-widest text-neutral-400 text-center">Items</th>
+                    <th className="p-4 font-bold uppercase text-[10px] tracking-widest text-neutral-400 text-right">Total</th>
+                    <th className="p-4 font-bold uppercase text-[10px] tracking-widest text-neutral-400 text-center">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {!customer.orders || customer.orders.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="p-8 text-center text-neutral-500">
+                      <td colSpan={5} className="p-12 text-center text-neutral-400 italic">
                         No orders placed yet.
                       </td>
                     </tr>
                   ) : (
                     customer.orders.map((order: any) => (
-                      <tr key={order.id} className="border-b border-neutral-200 last:border-0 hover:bg-neutral-50">
-                        <td className="p-4 font-medium">
-                          <Link href={`/admin/orders/${order.id}`} className="underline underline-offset-4 hover:text-neutral-600">
+                      <tr key={order.id} className="border-b border-neutral-50 last:border-0 hover:bg-neutral-50/50 transition-colors">
+                        <td className="p-4 font-semibold">
+                          <Link href={`/admin/orders/${order.id}`} className="text-neutral-900 hover:underline">
                             {order.orderNumber}
                           </Link>
                         </td>
-                        <td className="p-4 text-neutral-600">
+                        <td className="p-4 text-neutral-500">
                           {new Date(order.createdAt).toLocaleDateString()}
                         </td>
-                        <td className="p-4 text-center">{order.itemsCount || order._count?.items || 0}</td>
-                        <td className="p-4 text-right font-medium">PKR {Number(order.total).toLocaleString()}</td>
+                        <td className="p-4 text-center text-neutral-600">{order.itemsCount || order._count?.items || 0}</td>
+                        <td className="p-4 text-right font-medium text-neutral-900">PKR {Number(order.total).toLocaleString()}</td>
                         <td className="p-4 text-center">
-                          <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${getStatusColor(order.status)}`}>
+                          <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${getStatusColor(order.status).includes('black') ? 'border-neutral-900' : 'border-neutral-100'} ${getStatusColor(order.status)}`}>
                             {order.status}
                           </span>
                         </td>

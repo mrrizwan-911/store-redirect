@@ -10,54 +10,56 @@ export default async function AdminFlashSalesPage() {
   })
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="font-playfair text-3xl font-bold text-[#000000]">Flash Sales</h1>
+    <div className="space-y-6 animate-in fade-in duration-500 font-sans">
+      <div className="flex justify-between items-center border-b border-neutral-100 pb-4">
+        <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Flash Sales</h1>
         <Link
           href="/admin/flash-sales/new"
-          className="flex items-center gap-2 bg-[#000000] text-white px-4 py-2 hover:bg-[#262626] transition-colors"
+          className="flex items-center gap-2 bg-neutral-900 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-800 transition-all shadow-sm"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-3.5 w-3.5" />
           Create Sale
         </Link>
       </div>
 
-      <div className="bg-[#FAFAFA] border border-[#E5E5E5] overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-[#E5E5E5] bg-white">
-              <th className="p-4 text-sm font-medium text-[#737373]">Name</th>
-              <th className="p-4 text-sm font-medium text-[#737373]">Discount</th>
-              <th className="p-4 text-sm font-medium text-[#737373]">Start Time</th>
-              <th className="p-4 text-sm font-medium text-[#737373]">End Time</th>
-              <th className="p-4 text-sm font-medium text-[#737373]">Products</th>
-              <th className="p-4 text-sm font-medium text-[#737373]">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sales.map((sale) => (
-              <tr key={sale.id} className={`border-b border-[#E5E5E5] bg-white ${sale.isActive ? 'border-l-4 border-l-[#E8D5B0]' : ''}`}>
-                <td className="p-4 font-medium text-[#000000]">{sale.name}</td>
-                <td className="p-4 text-[#737373]">{sale.discountPct}%</td>
-                <td className="p-4 text-[#737373] text-sm">{new Date(sale.startTime).toLocaleString()}</td>
-                <td className="p-4 text-[#737373] text-sm">{new Date(sale.endTime).toLocaleString()}</td>
-                <td className="p-4 text-[#737373]">{sale.productIds.length} items</td>
-                <td className="p-4">
-                  {sale.isActive ? (
-                    <span className="bg-[#10B981]/10 text-[#10B981] px-2 py-1 text-xs rounded-full">Active</span>
-                  ) : new Date(sale.endTime) < new Date() ? (
-                    <span className="bg-[#EF4444]/10 text-[#EF4444] px-2 py-1 text-xs rounded-full">Expired</span>
-                  ) : (
-                    <span className="bg-[#F59E0B]/10 text-[#F59E0B] px-2 py-1 text-xs rounded-full">Upcoming</span>
-                  )}
-                </td>
+      <div className="bg-white border border-neutral-100 rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-neutral-50/50 border-b border-neutral-100">
+              <tr>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Name</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Discount</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Start Time</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">End Time</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400 text-center">Products</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400 text-center">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {sales.length === 0 && (
-          <div className="p-8 text-center text-[#737373]">No flash sales found.</div>
-        )}
+            </thead>
+            <tbody>
+              {sales.map((sale) => (
+                <tr key={sale.id} className={`border-b border-neutral-50 last:border-0 hover:bg-neutral-50/50 transition-colors ${sale.isActive ? 'border-l-4 border-l-emerald-500' : ''}`}>
+                  <td className="p-4 font-semibold text-neutral-900">{sale.name}</td>
+                  <td className="p-4 text-neutral-900 font-bold">{sale.discountPct}%</td>
+                  <td className="p-4 text-neutral-500">{new Date(sale.startTime).toLocaleString()}</td>
+                  <td className="p-4 text-neutral-500">{new Date(sale.endTime).toLocaleString()}</td>
+                  <td className="p-4 text-neutral-600 text-center font-medium">{sale.productIds.length} items</td>
+                  <td className="p-4 text-center">
+                    {sale.isActive ? (
+                      <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border border-emerald-100 shadow-sm">Active</span>
+                    ) : new Date(sale.endTime) < new Date() ? (
+                      <span className="bg-neutral-100 text-neutral-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border border-neutral-200">Expired</span>
+                    ) : (
+                      <span className="bg-amber-50 text-amber-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border border-amber-100 shadow-sm">Upcoming</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {sales.length === 0 && (
+            <div className="p-12 text-center text-neutral-400 italic">No flash sales found.</div>
+          )}
+        </div>
       </div>
     </div>
   )

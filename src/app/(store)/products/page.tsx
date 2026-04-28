@@ -2,6 +2,7 @@ import { db } from '@/lib/db/client'
 import { ProductListingClient } from '@/components/store/plp/ProductListingClient'
 import { headers } from 'next/headers'
 import { appendFile } from 'node:fs/promises'
+import { Suspense } from 'react'
 
 interface ProductsPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
@@ -97,12 +98,14 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   })
 
   return (
-    <ProductListingClient
-      initialProducts={enrichedProducts}
-      initialTotal={total}
-      categories={categories}
-      title="All Products"
-      subtitle="Refined essentials for the modern wardrobe."
-    />
+    <Suspense fallback={<div className="h-96 flex items-center justify-center">Loading products...</div>}>
+      <ProductListingClient
+        initialProducts={enrichedProducts}
+        initialTotal={total}
+        categories={categories}
+        title="All Products"
+        subtitle="Refined essentials for the modern wardrobe."
+      />
+    </Suspense>
   )
 }

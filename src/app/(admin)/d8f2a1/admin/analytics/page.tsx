@@ -40,12 +40,12 @@ export default async function AnalyticsPage() {
   const emptyRevenueSeries: { date: string; revenue: number }[] = []
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 font-sans">
-      <div className="flex items-center justify-between border-b border-black pb-4">
-        <h1 className="text-3xl font-serif font-bold uppercase tracking-wide">Analytics Overview</h1>
+    <div className="space-y-6 animate-in fade-in duration-500 font-sans">
+      <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+        <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Analytics Overview</h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           label="Today's Revenue"
           value={`PKR ${revenueData?.today?.revenue?.toLocaleString() || 0}`}
@@ -65,44 +65,44 @@ export default async function AnalyticsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <h2 className="text-sm font-bold uppercase mb-4 text-neutral-500">Revenue (30 Days)</h2>
+        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <h2 className="text-[10px] uppercase tracking-widest font-bold mb-6 text-neutral-400">Revenue (30 Days)</h2>
           <RevenueChart data={emptyRevenueSeries} />
         </div>
-        <div>
+        <div className="bg-white p-6 rounded-xl border border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
           <OrderStatusChart data={statusData || []} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div>
+        <div className="bg-white p-6 rounded-xl border border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
           <PaymentMethodChart data={revenueData?.byPaymentMethod || []} />
         </div>
-        <div>
-          <h3 className="text-sm font-bold uppercase mb-4 text-center">Top Selling Products</h3>
-          <div className="w-full h-80 overflow-y-auto border border-black bg-white">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-neutral-100 border-b border-black">
+        <div className="bg-white p-6 rounded-xl border border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <h3 className="text-[10px] uppercase tracking-widest font-bold mb-6 text-neutral-400">Top Selling Products</h3>
+          <div className="w-full h-80 overflow-y-auto border border-neutral-100 rounded-lg">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-neutral-50 border-b border-neutral-100 sticky top-0">
                 <tr>
-                  <th className="p-3 font-bold uppercase text-xs">Product</th>
-                  <th className="p-3 font-bold uppercase text-xs text-center">Sold</th>
-                  <th className="p-3 font-bold uppercase text-xs text-right">Revenue</th>
+                  <th className="p-3 font-bold uppercase text-[10px] tracking-wider text-neutral-500">Product</th>
+                  <th className="p-3 font-bold uppercase text-[10px] tracking-wider text-neutral-500 text-center">Sold</th>
+                  <th className="p-3 font-bold uppercase text-[10px] tracking-wider text-neutral-500 text-right">Revenue</th>
                 </tr>
               </thead>
               <tbody>
                 {(!topProductsData || topProductsData.length === 0) ? (
                   <tr>
-                    <td colSpan={3} className="p-4 text-center text-neutral-500">No product data available.</td>
+                    <td colSpan={3} className="p-4 text-center text-neutral-400 italic">No product data available.</td>
                   </tr>
                 ) : (
                   topProductsData.map((prod: any, idx: number) => (
-                    <tr key={idx} className="border-b border-neutral-200 last:border-0 hover:bg-neutral-50">
+                    <tr key={idx} className="border-b border-neutral-50 last:border-0 hover:bg-neutral-50/50 transition-colors">
                       <td className="p-3">
-                        <div className="font-bold">{prod.name}</div>
-                        <div className="text-xs text-neutral-500">{prod.category}</div>
+                        <div className="font-semibold text-neutral-800">{prod.name}</div>
+                        <div className="text-[10px] text-neutral-400">{prod.category}</div>
                       </td>
-                      <td className="p-3 text-center">{prod.unitsSold}</td>
-                      <td className="p-3 text-right">PKR {prod.revenue?.toLocaleString()}</td>
+                      <td className="p-3 text-center text-neutral-600">{prod.unitsSold}</td>
+                      <td className="p-3 text-right font-medium text-neutral-900">PKR {prod.revenue?.toLocaleString()}</td>
                     </tr>
                   ))
                 )}

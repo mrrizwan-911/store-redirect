@@ -2,6 +2,7 @@ import { db } from '@/lib/db/client'
 import { ProductListingClient } from '@/components/store/plp/ProductListingClient'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { Suspense } from 'react'
 
 interface CategoryPageProps {
   params: Promise<{ slug: string }>
@@ -102,21 +103,15 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
 
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-8 py-8">
-      <nav className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 mb-8 flex items-center gap-2">
-        <Link href="/" className="hover:text-black transition-colors">Home</Link>
-        <span className="text-neutral-200">/</span>
-        <span className="text-black font-bold">Shop</span>
-        <span className="text-neutral-200">/</span>
-        <span className="text-black font-bold">{activeCategory.name}</span>
-      </nav>
-
-      <ProductListingClient
-        initialProducts={enrichedProducts}
-        initialTotal={total}
-        categories={subcategories}
-        title={activeCategory.name}
-        subtitle={activeCategory.description || `Refined collection in ${activeCategory.name}.`}
-      />
+      <Suspense fallback={<div className="h-96 flex items-center justify-center">Loading collection...</div>}>
+        <ProductListingClient
+          initialProducts={enrichedProducts}
+          initialTotal={total}
+          categories={subcategories}
+          title={activeCategory.name}
+          subtitle={activeCategory.description || `Refined collection in ${activeCategory.name}.`}
+        />
+      </Suspense>
     </div>
   )
 }

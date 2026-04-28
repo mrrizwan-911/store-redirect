@@ -219,34 +219,34 @@ export default function AdminCategoriesPage() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="font-playfair text-3xl font-bold text-[#000000]">Category Management</h1>
+    <div className="space-y-6 animate-in fade-in duration-500 font-sans">
+      <div className="flex justify-between items-center border-b border-neutral-100 pb-4">
+        <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Category Management</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Left Panel - Roots */}
         <div className="md:col-span-5 flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold font-playfair">Root Categories</h2>
+            <h2 className="text-sm font-bold tracking-tight text-neutral-800 uppercase">Root Categories</h2>
             <Button
               size="sm"
               variant="outline"
-              className="border-black hover:bg-black hover:text-white"
+              className="border-neutral-200 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-50"
               onClick={() => openModal('add-root')}
             >
-              <Plus className="h-4 w-4 mr-2" /> Add Root
+              <Plus className="h-3 w-3 mr-2" /> Add Root
             </Button>
           </div>
 
-          <div className="bg-[#FAFAFA] border border-[#E5E5E5] rounded-none">
+          <div className="bg-white border border-neutral-100 rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
             {roots.map((root) => (
               <div
                 key={root.id}
                 onClick={() => setSelectedRootId(root.id)}
-                className={`flex items-center justify-between p-4 cursor-pointer transition-all border-b border-[#E5E5E5] last:border-0 hover:bg-white ${
+                className={`flex items-center justify-between p-4 cursor-pointer transition-all border-b border-neutral-50 last:border-0 hover:bg-neutral-50/50 ${
                   selectedRootId === root.id
-                    ? 'bg-white border-l-2 border-l-black font-medium'
+                    ? 'bg-neutral-50 border-l-2 border-l-neutral-900 font-medium'
                     : 'border-l-2 border-l-transparent'
                 }`}
               >
@@ -302,47 +302,47 @@ export default function AdminCategoriesPage() {
           {selectedRootId ? (
             <>
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-bold font-playfair flex items-center gap-2">
+                <h2 className="text-sm font-bold tracking-tight text-neutral-800 uppercase flex items-center gap-2">
                   <span className="text-neutral-400">{selectedRoot?.name}</span>
-                  <ChevronRight className="h-4 w-4 text-neutral-300" />
+                  <ChevronRight className="h-3 w-3 text-neutral-300" />
                   Subcategories
                 </h2>
                 <Button
                   size="sm"
                   variant="outline"
-                  className="border-black hover:bg-black hover:text-white"
+                  className="border-neutral-200 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-50"
                   onClick={() => openModal('add-sub')}
                 >
-                  <Plus className="h-4 w-4 mr-2" /> Add Subcategory
+                  <Plus className="h-3 w-3 mr-2" /> Add Subcategory
                 </Button>
               </div>
 
-              <div className="bg-[#FAFAFA] border border-[#E5E5E5] rounded-none">
+              <div className="bg-white border border-neutral-100 rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent">
-                      <TableHead className="text-xs uppercase tracking-wider font-bold text-neutral-500">Name</TableHead>
-                      <TableHead className="text-xs uppercase tracking-wider font-bold text-neutral-500">Slug</TableHead>
-                      <TableHead className="text-xs uppercase tracking-wider font-bold text-neutral-500 text-center">Products</TableHead>
-                      <TableHead className="text-xs uppercase tracking-wider font-bold text-neutral-500 text-right">Actions</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Slug</TableHead>
+                      <TableHead className="text-center">Products</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {subcategories.map((sub) => (
-                      <TableRow key={sub.id} className="bg-white hover:bg-neutral-50 border-b border-[#E5E5E5] last:border-0">
-                        <TableCell className="py-4">
+                      <TableRow key={sub.id} className="hover:bg-neutral-50/50">
+                        <TableCell className="py-3">
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-[#000000]">{sub.name}</span>
+                            <span className="font-semibold text-neutral-900">{sub.name}</span>
                             {!sub.isActive && (
-                              <Badge variant="outline" className="text-[9px] py-0 h-3.5 border-neutral-300 text-neutral-400">Inactive</Badge>
+                              <Badge variant="outline" className="text-[9px] py-0 h-3.5 border-neutral-200 text-neutral-400 font-bold uppercase tracking-wider">Inactive</Badge>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="py-4 text-xs text-neutral-500 font-mono">{sub.slug}</TableCell>
-                        <TableCell className="py-4 text-center">
-                          <span className="text-sm">{sub._count?.products || 0}</span>
+                        <TableCell className="py-3 text-[10px] text-neutral-400 font-mono">{sub.slug}</TableCell>
+                        <TableCell className="py-3 text-center">
+                          <span className="text-xs font-medium text-neutral-600">{sub._count?.products || 0}</span>
                         </TableCell>
-                        <TableCell className="py-4 text-right">
+                        <TableCell className="py-3 text-right">
                           <div className="flex items-center justify-end gap-1">
                             <Switch
                               checked={sub.isActive}
@@ -352,7 +352,7 @@ export default function AdminCategoriesPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-neutral-400 hover:text-black"
+                              className="h-7 w-7 text-neutral-400 hover:text-neutral-900 transition-colors"
                               onClick={() => openModal('edit', sub)}
                             >
                               <Pencil className="h-3.5 w-3.5" />
@@ -360,7 +360,7 @@ export default function AdminCategoriesPage() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-neutral-400 hover:text-red-600"
+                              className="h-7 w-7 text-neutral-400 hover:text-red-600 transition-colors"
                               onClick={() => handleDelete(sub)}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -390,84 +390,85 @@ export default function AdminCategoriesPage() {
 
       {/* Add/Edit Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px] rounded-none border-black">
+        <DialogContent className="sm:max-w-[425px] rounded-xl border-neutral-100 shadow-lg">
           <DialogHeader>
-            <DialogTitle className="font-playfair text-2xl font-bold">
+            <DialogTitle className="text-lg font-bold tracking-tight text-neutral-900">
               {modalMode === 'edit' ? 'Edit Category' : modalMode === 'add-root' ? 'Add Root Category' : 'Add Subcategory'}
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleSave} className="space-y-6 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-xs uppercase tracking-widest font-bold">Name</Label>
+          <form onSubmit={handleSave} className="space-y-4 py-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="name" className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Name</Label>
               <Input
                 id="name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g. Tops, Sneakers, Accessories"
-                className="rounded-none border-neutral-300 focus:border-black transition-all"
+                className="rounded-lg border-neutral-100 bg-neutral-50/50 text-xs focus-visible:ring-neutral-200 transition-all"
                 disabled={editTarget?.isProtected && modalMode === 'edit'}
                 required
               />
               {editTarget?.isProtected && modalMode === 'edit' ? (
-                <p className="text-[10px] text-neutral-500 font-medium italic">Protected — cannot rename</p>
+                <p className="text-[10px] text-neutral-400 italic">Protected — cannot rename</p>
               ) : (
-                <p className="text-[10px] text-neutral-500 font-medium">
-                  Slug preview: <span className="font-mono text-black">{computedSlug || "..."}</span>
+                <p className="text-[10px] text-neutral-400">
+                  Slug preview: <span className="font-mono text-neutral-600">{computedSlug || "..."}</span>
                 </p>
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-xs uppercase tracking-widest font-bold">Description</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="description" className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Description</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Optional description..."
-                className="rounded-none border-neutral-300 focus:border-black min-h-[100px] resize-none transition-all"
+                className="rounded-lg border-neutral-100 bg-neutral-50/50 text-xs focus-visible:ring-neutral-200 min-h-[80px] resize-none transition-all"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="sortOrder" className="text-xs uppercase tracking-widest font-bold">Sort Order</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="sortOrder" className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Sort Order</Label>
                 <Input
                   id="sortOrder"
                   type="number"
                   value={formData.sortOrder}
                   onChange={(e) => setFormData({ ...formData, sortOrder: Number(e.target.value) })}
-                  className="rounded-none border-neutral-300 focus:border-black transition-all"
+                  className="rounded-lg border-neutral-100 bg-neutral-50/50 text-xs focus-visible:ring-neutral-200 transition-all"
                 />
               </div>
-              <div className="space-y-2 flex flex-col justify-end">
+              <div className="space-y-1.5 flex flex-col justify-end">
                 <div className="flex items-center gap-3 py-2">
                   <Switch
                     id="isActive"
                     checked={formData.isActive}
                     onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                    className="scale-90"
                   />
-                  <Label htmlFor="isActive" className="text-xs uppercase tracking-widest font-bold cursor-pointer">Active</Label>
+                  <Label htmlFor="isActive" className="text-[10px] uppercase tracking-widest font-bold text-neutral-400 cursor-pointer">Active</Label>
                 </div>
               </div>
             </div>
 
-            <DialogFooter className="pt-4 border-t border-neutral-100">
+            <DialogFooter className="pt-4 border-t border-neutral-50">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
-                className="rounded-none border-neutral-300 hover:bg-neutral-50"
+                className="rounded-lg border-neutral-200 hover:bg-neutral-50 text-[10px] font-bold uppercase tracking-widest"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={saving}
-                className="rounded-none bg-black text-white hover:bg-[#262626] transition-all min-w-[100px]"
+                className="rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 transition-all min-w-[80px] text-[10px] font-bold uppercase tracking-widest"
               >
                 {saving ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-3 w-3 animate-spin" />
                 ) : (
                   modalMode === 'edit' ? 'Update' : 'Create'
                 )}

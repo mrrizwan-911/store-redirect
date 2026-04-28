@@ -657,46 +657,29 @@ export function ProductListingClient({
           </div>
         </div>
       ) : (
-        <div className="bg-black text-white">
-          <div className="max-w-7xl mx-auto px-6 md:px-8">
-            {/* Breadcrumb */}
-            <p className="text-[10px] uppercase tracking-[0.25em] text-white/40 pt-6 pb-0">
-              Home <span className="mx-2 text-white/20">/</span> Shop <span className="mx-2 text-white/20">/</span> {title}
-            </p>
+        <div className="bg-white text-black border-b border-neutral-100">
+          <div className="max-w-7xl mx-auto px-6 md:px-8 py-12 md:py-16">
+            <div className="flex flex-col items-center text-center">
+              {/* Breadcrumb */}
+              <p className="text-[9px] uppercase tracking-[0.3em] text-neutral-400 mb-6 font-bold flex items-center gap-2">
+                <Link href="/" className="hover:text-black transition-colors">Home</Link>
+                <span>/</span>
+                <span className="text-neutral-300">Shop</span>
+                <span>/</span>
+                <span className="text-black">{title}</span>
+              </p>
 
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 py-8">
-              {/* Left: Big editorial title */}
-              <div className="flex-1 max-w-2xl">
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, ease: [0.19, 1, 0.22, 1] }}
-                >
-                  <h1 className="text-4xl sm:text-5xl md:text-7xl font-display italic leading-none tracking-tight text-white">
-                    {title}
-                  </h1>
-                </motion.div>
-              </div>
+              {/* Title */}
+              <h1 className="font-display text-4xl md:text-6xl tracking-tight mb-4">
+                {title}
+              </h1>
 
-              {/* Right: count + sort */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.15 }}
-                className="flex items-center gap-6 pb-1"
-              >
-                <span className="text-[10px] uppercase tracking-[0.25em] text-white/50 font-bold">
-                  {total} {total === 1 ? 'Product' : 'Products'}
-                </span>
-                {/* Sort in header */}
-                <div>
-                  <SortDropdown
-                    value={currentSort}
-                    onChange={(val) => updateUrl(currentFilters, val)}
-                    isDarkBg={true}
-                  />
-                </div>
-              </motion.div>
+              {/* Subtitle */}
+              {subtitle && (
+                <p className="text-neutral-500 text-sm max-w-xl mx-auto leading-relaxed">
+                  {subtitle}
+                </p>
+              )}
             </div>
           </div>
         </div>

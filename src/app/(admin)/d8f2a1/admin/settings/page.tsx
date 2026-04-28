@@ -32,37 +32,37 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex items-center justify-between border-b border-black pb-4">
-        <h1 data-testid="page-heading" className="text-3xl font-display font-bold uppercase tracking-tight text-black">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+        <h1 data-testid="page-heading" className="text-2xl font-bold tracking-tight text-neutral-900">
           Admin Settings
         </h1>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 max-w-4xl">
+      <div className="grid grid-cols-1 gap-6 max-w-4xl">
         {/* Store Information Section */}
-        <Card className="rounded-none border-neutral-200 bg-[#FAFAFA] shadow-none">
-          <CardHeader>
-            <CardTitle className="font-display text-xl uppercase tracking-wide">Store Info</CardTitle>
-            <CardDescription className="font-body text-neutral-500">
+        <Card className="rounded-xl border-neutral-100 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-sm font-semibold tracking-tight text-neutral-800 uppercase">Store Info</CardTitle>
+            <CardDescription className="text-xs text-neutral-500">
               Manage your store&apos;s public identity and contact details.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="store-name" className="font-body font-semibold uppercase text-xs tracking-wider">
+          <CardContent className="p-4 pt-2 space-y-4">
+            <div className="space-y-1">
+              <Label htmlFor="store-name" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">
                 Store Name
               </Label>
               <Input
                 id="store-name"
                 value={storeInfo.name}
                 onChange={(e) => setStoreInfo({ ...storeInfo, name: e.target.value })}
-                className="rounded-none border-neutral-200 bg-white focus-visible:ring-black"
+                className="rounded-lg border-neutral-100 bg-neutral-50/50 text-xs focus-visible:ring-neutral-200"
                 placeholder="Enter store name"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="store-email" className="font-body font-semibold uppercase text-xs tracking-wider">
+            <div className="space-y-1">
+              <Label htmlFor="store-email" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">
                 Store Email
               </Label>
               <Input
@@ -70,25 +70,25 @@ export default function SettingsPage() {
                 type="email"
                 value={storeInfo.email}
                 onChange={(e) => setStoreInfo({ ...storeInfo, email: e.target.value })}
-                className="rounded-none border-neutral-200 bg-white focus-visible:ring-black"
+                className="rounded-lg border-neutral-100 bg-neutral-50/50 text-xs focus-visible:ring-neutral-200"
                 placeholder="Enter store email"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="whatsapp" className="font-body font-semibold uppercase text-xs tracking-wider">
+            <div className="space-y-1">
+              <Label htmlFor="whatsapp" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">
                 WhatsApp Number
               </Label>
               <Input
                 id="whatsapp"
                 value={storeInfo.whatsapp}
                 onChange={(e) => setStoreInfo({ ...storeInfo, whatsapp: e.target.value })}
-                className="rounded-none border-neutral-200 bg-white focus-visible:ring-black"
+                className="rounded-lg border-neutral-100 bg-neutral-50/50 text-xs focus-visible:ring-neutral-200"
                 placeholder="+92 XXX XXXXXXX"
               />
             </div>
             <Button
               onClick={handleSaveStoreInfo}
-              className="w-fit rounded-none bg-black text-white hover:bg-neutral-800 font-body uppercase tracking-widest text-xs px-8 py-4 h-auto"
+              className="w-fit rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 text-[10px] font-bold uppercase tracking-widest px-6 py-2 h-auto"
             >
               Save Changes
             </Button>
@@ -96,18 +96,18 @@ export default function SettingsPage() {
         </Card>
 
         {/* Notification Settings Section */}
-        <Card className="rounded-none border-neutral-200 bg-[#FAFAFA] shadow-none">
-          <CardHeader>
-            <CardTitle className="font-display text-xl uppercase tracking-wide">Notification Toggles</CardTitle>
-            <CardDescription className="font-body text-neutral-500">
+        <Card className="rounded-xl border-neutral-100 bg-white shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-sm font-semibold tracking-tight text-neutral-800 uppercase">Notification Toggles</CardTitle>
+            <CardDescription className="text-xs text-neutral-500">
               Configure which automated emails are sent to your customers.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="p-4 pt-2 space-y-6">
             <div className="flex items-center justify-between space-x-4">
               <div className="space-y-0.5">
-                <Label className="font-body font-semibold text-sm">Send order confirmation emails</Label>
-                <p className="text-xs text-neutral-500 font-body">
+                <Label className="font-semibold text-xs text-neutral-800">Send order confirmation emails</Label>
+                <p className="text-[10px] text-neutral-400">
                   Automatically send an email to the customer after they place an order.
                 </p>
               </div>
@@ -116,13 +116,13 @@ export default function SettingsPage() {
                 onCheckedChange={(checked) =>
                   setNotifications({ ...notifications, orderConfirmation: checked })
                 }
-                className="rounded-none"
+                className="scale-90"
               />
             </div>
             <div className="flex items-center justify-between space-x-4">
               <div className="space-y-0.5">
-                <Label className="font-body font-semibold text-sm">Send abandoned cart emails</Label>
-                <p className="text-xs text-neutral-500 font-body">
+                <Label className="font-semibold text-xs text-neutral-800">Send abandoned cart emails</Label>
+                <p className="text-[10px] text-neutral-400">
                   Automatically send a reminder to customers who leave items in their cart.
                 </p>
               </div>
@@ -131,13 +131,13 @@ export default function SettingsPage() {
                 onCheckedChange={(checked) =>
                   setNotifications({ ...notifications, abandonedCart: checked })
                 }
-                className="rounded-none"
+                className="scale-90"
               />
             </div>
             <div className="flex items-center justify-between space-x-4">
               <div className="space-y-0.5">
-                <Label className="font-body font-semibold text-sm">Send shipped emails</Label>
-                <p className="text-xs text-neutral-500 font-body">
+                <Label className="font-semibold text-xs text-neutral-800">Send shipped emails</Label>
+                <p className="text-[10px] text-neutral-400">
                   Automatically notify customers when their order has been marked as shipped.
                 </p>
               </div>
@@ -146,12 +146,12 @@ export default function SettingsPage() {
                 onCheckedChange={(checked) =>
                   setNotifications({ ...notifications, shipped: checked })
                 }
-                className="rounded-none"
+                className="scale-90"
               />
             </div>
             <Button
               onClick={handleSaveToggles}
-              className="w-fit rounded-none bg-black text-white hover:bg-neutral-800 font-body uppercase tracking-widest text-xs px-8 py-4 h-auto"
+              className="w-fit rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 text-[10px] font-bold uppercase tracking-widest px-6 py-2 h-auto"
             >
               Save Toggles
             </Button>

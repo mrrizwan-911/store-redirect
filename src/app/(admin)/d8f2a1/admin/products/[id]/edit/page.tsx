@@ -38,8 +38,10 @@ export default async function EditProductPage(context: { params: Promise<{ id: s
   }
 
   return (
-    <div className="p-8">
-      <h1 className="font-playfair text-3xl font-bold text-[#000000] mb-8">Edit Product</h1>
+    <div className="space-y-6 animate-in fade-in duration-500 font-sans">
+      <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+        <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Edit Product</h1>
+      </div>
       <ProductForm initialData={initialData as any} categories={categories} />
     </div>
   )

@@ -14,13 +14,13 @@ import { persistor } from '@/store'
 
 const navItems = [
   { icon: BarChart2, label: 'Analytics', route: '/d8f2a1/admin/analytics' },
-  { icon: Package, label: 'Products', route: '/d8f2a1/admin/products' },
-  { icon: FolderTree, label: 'Categories', route: '/d8f2a1/admin/categories' },
-  { icon: FileText, label: 'Size Guides', route: '/d8f2a1/admin/size-guides' },
   { icon: ShoppingBag, label: 'Orders', route: '/d8f2a1/admin/orders' },
+  { icon: Package, label: 'Products', route: '/d8f2a1/admin/products' },
+  { icon: Archive, label: 'Inventory', route: '/d8f2a1/admin/inventory' },
+  { icon: FolderTree, label: 'Categories', route: '/d8f2a1/admin/categories' },
   { icon: Users, label: 'Customers', route: '/d8f2a1/admin/customers' },
   { icon: FileText, label: 'Quotations', route: '/d8f2a1/admin/quotations' },
-  { icon: Archive, label: 'Inventory', route: '/d8f2a1/admin/inventory' },
+  { icon: FileText, label: 'Size Guides', route: '/d8f2a1/admin/size-guides' },
   { icon: Tag, label: 'Coupons', route: '/d8f2a1/admin/coupons' },
   { icon: Zap, label: 'Flash Sales', route: '/d8f2a1/admin/flash-sales' },
   { icon: Shirt, label: 'Outfits', route: '/d8f2a1/admin/outfits' },
@@ -48,34 +48,34 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside className="w-60 bg-white border-r border-black flex flex-col h-full font-sans">
-      <div className="p-6 border-b border-black flex items-center justify-between">
-        <h1 className="text-xl font-bold font-serif tracking-wide uppercase">Admin</h1>
+    <aside className="w-56 bg-white border-r border-neutral-100 flex flex-col h-full font-sans">
+      <div className="p-4 border-b border-neutral-100 flex items-center justify-between">
+        <h1 className="text-sm font-bold font-serif tracking-widest uppercase">Admin</h1>
         <Link
           href="/"
           className="text-neutral-400 hover:text-black transition-colors"
           title="Back to Storefront"
         >
-          <ExternalLink className="w-4 h-4" />
+          <ExternalLink className="w-3.5 h-3.5" />
         </Link>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-4">
-        <ul className="space-y-1">
+      <nav className="flex-1 overflow-y-auto py-2">
+        <ul className="space-y-0.5">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.route)
             const Icon = item.icon
             return (
-              <li key={item.route}>
+              <li key={item.route} className="px-3">
                 <Link
                   href={item.route}
-                  className={`flex items-center gap-3 px-6 py-3 text-sm transition-colors ${
+                  className={`flex items-center gap-3 px-3 py-1.5 text-xs transition-all duration-200 rounded-md ${
                     isActive
-                      ? 'border-l-2 border-black bg-neutral-100 text-black font-medium'
-                      : 'text-neutral-600 hover:bg-neutral-50 hover:text-black border-l-2 border-transparent'
+                      ? 'bg-neutral-100 text-neutral-900 font-semibold'
+                      : 'text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 font-medium'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-neutral-900' : 'text-neutral-400'}`} />
                   {item.label}
                 </Link>
               </li>
@@ -84,21 +84,21 @@ export function AdminSidebar() {
         </ul>
       </nav>
 
-      <div className="p-6 border-t border-black mt-auto">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 bg-black text-white flex items-center justify-center text-sm font-bold">
+      <div className="p-4 border-t border-neutral-100 mt-auto">
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-7 h-7 bg-neutral-900 text-white flex items-center justify-center text-[10px] font-bold rounded-full">
             A
           </div>
           <div>
-            <p className="text-sm font-bold">Admin User</p>
-            <p className="text-xs text-neutral-500">admin@store.com</p>
+            <p className="text-[11px] font-bold text-neutral-900">Admin User</p>
+            <p className="text-[9px] text-neutral-400">admin@store.com</p>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 text-sm text-neutral-600 hover:text-black transition-colors"
+          className="flex items-center gap-2 text-[11px] font-medium text-neutral-400 hover:text-rose-600 transition-colors"
         >
-          <LogOut className="w-4 h-4" />
+          <LogOut className="w-3.5 h-3.5" />
           Logout
         </button>
       </div>

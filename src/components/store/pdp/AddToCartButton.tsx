@@ -65,14 +65,14 @@ export default function AddToCartButton({
       onClick={handleAddToCart}
       disabled={isDisabled}
       className={cn(
-        'w-full h-12 rounded-none text-base font-medium transition-all duration-300',
+        'w-full h-auto py-3 rounded-none text-[10px] uppercase tracking-[0.22em] font-bold transition-all duration-300',
         !selectedVariant && 'bg-neutral-200 text-neutral-500 cursor-not-allowed',
         isOutOfStock && 'bg-neutral-100 text-neutral-400 cursor-not-allowed',
         !isDisabled && 'hover:bg-primary-hover active:scale-[0.98]',
         className
       )}
     >
-      <ShoppingBag className="mr-2 h-5 w-5" />
+      <ShoppingBag className="mr-2 h-4 w-4" />
       {isAdding ? (
         'Adding...'
       ) : isOutOfStock ? (
