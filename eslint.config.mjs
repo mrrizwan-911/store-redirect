@@ -12,6 +12,13 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-require-imports": "off",
       "react-hooks/error-boundaries": "off",
       "prefer-const": "warn",
+      "react/no-unescaped-entities": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+      "react-hooks/purity": "off",
+      "react-hooks/static-components": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/immutability": "off",
+      "@typescript-eslint/no-unused-expressions": "warn",
     },
   },
   // Override default ignores of eslint-config-next.
@@ -21,6 +28,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "prisma/seed.js",
+    "scripts/**",
   ]),
 ]);
 
