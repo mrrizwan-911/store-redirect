@@ -2,22 +2,42 @@ import { AnnouncementBar } from '@/components/store/AnnouncementBar'
 import { Navbar } from '@/components/store/Navbar'
 import { ConditionalFooter } from '@/components/store/layout/ConditionalFooter'
 import { WishlistSyncProvider } from '@/components/store/WishlistSyncProvider'
+import { db } from '@/lib/db/client'
 
 export default async function StoreLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/categories`, {
-    next: { revalidate: 300 },
-  }).catch(() => null)
-  const serverCategories = res?.ok ? (await res.json()).data ?? [] : []
+  // Directly fetch categories from DB to avoid build-time fetch timeouts
+  const serverCategories = await db.category.findMany({
+    where: { isActive: true, parentId: null },
+    include: {
+      children: {
+        where: { isActive: true },
+        orderBy: [
+          { sortOrder: 'asc' },
+          { name: 'asc' }
+        ],
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          sortOrder: true
+        }
+      }
+    },
+    orderBy: [
+      { sortOrder: 'asc' },
+      { name: 'asc' }
+    ]
+  }).catch(() => [])
 
   return (
     <WishlistSyncProvider>
       <div className="flex flex-col min-h-screen">
         <AnnouncementBar />
-        <Navbar serverCategories={serverCategories} />
+        <Navbar serverCategories={serverCategories as any} />
         <main className="flex-1">
           {children}
         </main>
