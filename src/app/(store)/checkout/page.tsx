@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
 import { CheckoutClient } from '@/components/store/checkout/CheckoutClient'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Checkout | Calnza',
   description: 'Complete your purchase.',

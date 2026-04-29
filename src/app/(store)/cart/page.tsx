@@ -1,8 +1,10 @@
 import { CartPage } from '@/components/store/cart/CartPage'
 import { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
-  title: 'Your Cart | E-Commerce',
+  title: 'Your Cart | Calnza',
   description: 'Review your cart items before checkout.',
 }
 

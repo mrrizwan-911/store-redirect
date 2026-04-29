@@ -5,6 +5,10 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle2, ArrowRight } from 'lucide-react'
 
+// Although this is a client component, we mark it dynamic to ensure
+// the parent layout doesn't try to pre-render it with dummy params
+export const dynamic = 'force-dynamic'
+
 interface OrderSummary {
   id: string
   orderNumber: string
