@@ -9,7 +9,7 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
-    seed: "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts",
+    seed: "node prisma/seed.js",
   },
   datasource: {
     // Use direct connection for all Prisma CLI operations (migrate, push, studio)

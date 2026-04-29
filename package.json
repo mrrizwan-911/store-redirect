@@ -14,7 +14,7 @@
     "create-admin": "ts-node -r tsconfig-paths/register --compiler-options {\\\"module\\\":\\\"CommonJS\\\"} scripts/create-admin.ts"
   },
   "prisma": {
-    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.89.0",
