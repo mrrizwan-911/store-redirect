@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingBag, Heart, User, Search, Menu, X, LayoutDashboard, LogOut, ChevronDown, Plus } from 'lucide-react'
+import { ShoppingBag, Heart, User, Search, Menu, X, LayoutDashboard, LogOut, ChevronDown, Plus, Sparkles } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import {
   DropdownMenu,
@@ -61,6 +61,7 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isAccountOpen, setIsAccountOpen] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false)
 
   const router = useRouter()
   const pathname = usePathname()
@@ -123,7 +124,7 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
 
   const navLinkStyles = "relative text-[11px] font-normal uppercase tracking-[0.2em] text-gray-800 hover:text-black transition-colors font-sans after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:origin-center after:scale-x-0 after:bg-black after:transition-transform after:duration-500 hover:after:scale-x-100"
 
-  const sidebarLinkStyles = "flex items-center gap-4 py-4 text-sm font-medium uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-all group"
+  const sidebarLinkStyles = "flex items-center gap-5 py-3 text-[11px] font-normal text-zinc-700 hover:text-black transition-all group"
 
   return (
     <header className={cn(
@@ -141,121 +142,109 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
                   <Menu className="h-6 w-6 stroke-[1.5]" />
                 </div>
               </SheetTrigger>
-              <SheetContent side="left" className="w-full sm:w-[400px] p-0 bg-[#111111] border-none shadow-2xl">
+              <SheetContent side="left" showCloseButton={false} style={{ backgroundColor: 'white' }} className="w-full sm:w-[400px] p-0 !bg-white border-r border-neutral-200 shadow-2xl overflow-hidden">
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                <div className="flex flex-col h-full text-white">
+                <div className="flex flex-col h-full !bg-white !text-black overflow-hidden" style={{ backgroundColor: 'white', color: 'black' }}>
                   {/* Sidebar Header */}
-                  <div className="flex items-center justify-between px-8 py-10">
-                    <Link href="/" onClick={() => setIsSidebarOpen(false)} className="group">
-                      <span className="font-display text-2xl font-bold tracking-tighter text-white uppercase">
-                        CALNZA
-                      </span>
-                      <p className="text-[8px] uppercase tracking-[0.4em] text-zinc-500 mt-1">Your Curated Wardrobe</p>
-                    </Link>
-                    <button onClick={() => setIsSidebarOpen(false)} className="text-zinc-500 hover:text-white transition-colors">
-                      <X className="w-6 h-6 stroke-[1.5]" />
+                  <div className="flex items-center justify-between px-8 py-10 border-b border-neutral-100 shrink-0">
+                    <div className="flex items-center gap-4">
+                      <Link href="/" onClick={() => setIsSidebarOpen(false)} className="flex flex-col group">
+                        <span className="font-display text-xl font-medium tracking-tight text-black uppercase">
+                          CALNZA
+                        </span>
+                        <span className="text-[9px] text-zinc-400 font-medium tracking-wider mt-0.5">
+                          Your Curated Wardrobe
+                        </span>
+                      </Link>
+                    </div>
+                    <button
+                      onClick={() => setIsSidebarOpen(false)}
+                      className="text-zinc-400 hover:text-black transition-colors p-2"
+                      aria-label="Close menu"
+                    >
+                      <X className="w-5 h-5 stroke-[1.2]" />
                     </button>
                   </div>
 
                   {/* Sidebar Links */}
-                  <nav className="flex-1 px-8 overflow-y-auto scrollbar-hide space-y-2">
-                    <Link href="/" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
-                      <div className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 group-hover:bg-white group-hover:text-black transition-colors">
-                        <Menu className="w-4 h-4 stroke-[1.5]" />
-                      </div>
-                      Home
-                    </Link>
-                    <Link href="/products" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
-                      <div className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 group-hover:bg-white group-hover:text-black transition-colors">
-                        <ShoppingBag className="w-4 h-4 stroke-[1.5]" />
-                      </div>
-                      Store
-                    </Link>
-                    <Link href="/products?sort=createdAt_desc" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
-                      <div className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 group-hover:bg-white group-hover:text-black transition-colors">
-                        <Plus className="w-4 h-4 stroke-[1.5]" />
-                      </div>
-                      New Arrivals
-                    </Link>
-                    <Link href="/story" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
-                      <div className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-900 group-hover:bg-white group-hover:text-black transition-colors">
-                        <X className="w-4 h-4 stroke-[1.5]" />
-                      </div>
-                      About
-                    </Link>
+                  <nav className="flex-1 px-10 overflow-y-auto scrollbar-hide py-4 space-y-4">
+                    <div className="flex flex-col space-y-0.5">
+                      <Link href="/" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
+                        <Menu className="w-5 h-5 stroke-[1.2]" />
+                        Home
+                      </Link>
+                      <Link href="/products" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
+                        <ShoppingBag className="w-5 h-5 stroke-[1.2]" />
+                        Store
+                      </Link>
 
-                    {/* Divider */}
-                    <div className="h-px bg-zinc-900 my-8" />
-
-                    {/* Dynamic Categories */}
-                    <div className="space-y-1">
-                      <p className="text-[9px] uppercase tracking-[0.4em] text-zinc-600 font-bold mb-4 px-1">Categories</p>
-                      {sideMenuCategories.map(cat => (
-                        <Link
-                          key={cat.id}
-                          href={`/categories/${cat.slug}`}
-                          onClick={() => setIsSidebarOpen(false)}
-                          className="flex items-center justify-between py-3 px-1 text-xs uppercase tracking-[0.2em] text-zinc-400 hover:text-white transition-colors"
+                      {/* Categories Dropdown */}
+                      <div className="flex flex-col">
+                        <button
+                          onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+                          className={sidebarLinkStyles}
                         >
-                          {cat.name}
-                          <ChevronDown className="w-3 h-3 -rotate-90 opacity-40" />
-                        </Link>
-                      ))}
-                      <Link
-                         href="/categories/sale"
-                         onClick={() => setIsSidebarOpen(false)}
-                         className="flex items-center justify-between py-3 px-1 text-xs uppercase tracking-[0.2em] text-amber-500/80 hover:text-amber-400 transition-colors"
-                       >
-                         Flash Sale
-                         <span className="text-[7px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded-full border border-amber-500/20">LIVE</span>
-                       </Link>
-                    </div>
+                          <ChevronDown className={cn("w-5 h-5 stroke-[1.2] transition-transform duration-300", isCategoriesOpen ? "rotate-0" : "-rotate-90")} />
+                          <span className="flex-1 text-left">Categories</span>
+                        </button>
 
-                    {/* Upcoming */}
-                    <div className="pt-10">
-                      <p className="text-[9px] uppercase tracking-[0.4em] text-zinc-600 font-bold mb-4 px-1">Coming Soon</p>
-                      <div className="space-y-4 opacity-40">
-                         <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-zinc-500">
-                           Home Decor <span className="text-[7px] border border-zinc-800 px-2 py-0.5 rounded-full">JUNE '26</span>
-                         </div>
-                         <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-zinc-500">
-                           Beauty <span className="text-[7px] border border-zinc-800 px-2 py-0.5 rounded-full">AUG '26</span>
-                         </div>
+                        {isCategoriesOpen && (
+                          <div className="flex flex-col pl-10 space-y-1 mt-1 animate-in slide-in-from-top-2 duration-300">
+                            {sideMenuCategories.map(cat => (
+                              <Link
+                                key={cat.id}
+                                href={`/categories/${cat.slug}`}
+                                onClick={() => setIsSidebarOpen(false)}
+                                className="py-2 text-[11px] font-normal text-zinc-500 hover:text-black transition-colors"
+                              >
+                                {cat.name}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
                       </div>
+
+                      <Link href="/products?sort=createdAt_desc" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
+                        <Plus className="w-5 h-5 stroke-[1.2]" />
+                        New Arrivals
+                      </Link>
+                      <Link href="/lookbook" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
+                        <Sparkles className="w-5 h-5 stroke-[1.2]" />
+                        Lookbook
+                      </Link>
+                      <Link href="/wishlist" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
+                        <Heart className="w-5 h-5 stroke-[1.2]" />
+                        Wishlist
+                      </Link>
                     </div>
                   </nav>
 
-                  {/* Sidebar Footer */}
-                  <div className="p-8 bg-[#0a0a0a] border-t border-zinc-900 space-y-6">
-                    <div className="flex items-center justify-between">
+                  {/* Sidebar Footer (Fixed) */}
+                  <div className="shrink-0 px-10 py-6 border-t border-neutral-100 bg-white space-y-4">
+                    <div className="flex flex-col space-y-0.5">
                        <button
-                         onClick={() => {
-                           setIsSidebarOpen(false);
-                           isAuthenticated ? router.push(dashboardHref) : router.push('/login');
-                         }}
-                         className="flex items-center gap-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-white transition-colors"
+                          onClick={() => {
+                            setIsSidebarOpen(false);
+                            dispatch(toggleCart());
+                          }}
+                          className={sidebarLinkStyles}
                        >
-                         <User className="w-4 h-4" /> {isAuthenticated ? 'Account' : 'Sign In'}
+                          <ShoppingBag className="w-5 h-5 stroke-[1.2]" />
+                          Cart ({cartCount})
                        </button>
                        <button
-                         onClick={() => {
-                           setIsSidebarOpen(false);
-                           dispatch(toggleCart());
-                         }}
-                         className="flex items-center gap-3 text-[10px] uppercase tracking-widest font-bold text-zinc-400 hover:text-white transition-colors"
+                          onClick={() => {
+                            setIsSidebarOpen(false);
+                            isAuthenticated ? router.push(dashboardHref) : router.push('/login');
+                          }}
+                          className={sidebarLinkStyles}
                        >
-                         <ShoppingBag className="w-4 h-4" /> Cart ({cartCount})
+                          <User className="w-5 h-5 stroke-[1.2]" />
+                          {isAuthenticated ? 'Account' : 'Login'}
                        </button>
                     </div>
 
-                    <div className="flex items-center gap-2 pt-2 text-zinc-600">
-                       <span className="text-[8px] uppercase tracking-widest">Shipping to:</span>
-                       <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 font-bold">
-                          <span role="img" aria-label="Pakistan">🇵🇰</span> Pakistan
-                       </div>
-                    </div>
-
-                    <div className="pt-4 text-[8px] text-zinc-700 uppercase tracking-widest leading-relaxed">
+                    <div className="text-[9.5px] font-medium text-zinc-400 uppercase tracking-[0.2em] whitespace-nowrap mt-auto pt-2 text-center w-full">
                       © {new Date().getFullYear()} CALNZA. All rights reserved.
                     </div>
                   </div>

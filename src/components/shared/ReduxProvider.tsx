@@ -5,6 +5,7 @@ import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/integration/react'
 import { store, persistor } from '@/store'
 import { registerServiceWorker } from '@/lib/utils/registerSW'
+import { AuthInitializer } from './AuthInitializer'
 
 export function ReduxProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -14,6 +15,7 @@ export function ReduxProvider({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
       <PersistGate loading={<div className="min-h-screen" />} persistor={persistor}>
+        <AuthInitializer />
         {children}
       </PersistGate>
     </Provider>

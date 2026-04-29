@@ -20,6 +20,7 @@ interface ProductListingClientProps {
   title: string
   subtitle?: string
   featuredProducts?: any[]
+  baseCategorySlug?: string
 }
 
 export function ProductListingClient({
@@ -29,6 +30,7 @@ export function ProductListingClient({
   title,
   subtitle,
   featuredProducts = [],
+  baseCategorySlug,
 }: ProductListingClientProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -309,7 +311,15 @@ export function ProductListingClient({
     const fetchProducts = async () => {
       setIsLoading(true)
       try {
-        const response = await fetch(`/api/products?${searchParams.toString()}`)
+        const params = new URLSearchParams(searchParams.toString())
+
+        // If no category filter is explicitly set in query params,
+        // and we are on a category-specific page, use the base category slug
+        if (!params.has('category') && baseCategorySlug) {
+          params.set('category', baseCategorySlug)
+        }
+
+        const response = await fetch(`/api/products?${params.toString()}`)
         const result = await response.json()
         if (result.success) {
           setProducts(result.data.products)

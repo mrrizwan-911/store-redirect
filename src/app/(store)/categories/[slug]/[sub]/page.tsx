@@ -128,6 +128,7 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
           categories={siblings}
           title={subcategory.name}
           subtitle={subcategory.description || `Refined collection in ${subcategory.parent?.name} / ${subcategory.name}.`}
+          baseCategorySlug={sub}
         />
       </Suspense>
     </div>

@@ -59,3 +59,13 @@
     @apply border-0 border-b-2 border-neutral-200 bg-transparent px-0 transition-all duration-500 focus:border-black focus:ring-0 rounded-none;
   }
 }
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

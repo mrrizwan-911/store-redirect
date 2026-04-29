@@ -1,22 +1,30 @@
-import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
+        protocol: "https" as const,
+        hostname: "images.unsplash.com",
       },
       {
-        protocol: 'https',
-        hostname: 'placehold.co',
+        protocol: "https" as const,
+        hostname: "placehold.co",
       },
       {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
+        protocol: "https" as const,
+        hostname: "res.cloudinary.com",
       },
     ],
   },
 };
 
-export default nextConfig;
+export default withSentryConfig(nextConfig, {
+  org: "calnza",
+  project: "javascript-nextjs",
+  silent: true,
+  widenClientFileUpload: true,
+  tunnelRoute: "/monitoring",
+  disableLogger: true,
+  automaticVercelMonitors: true,
+});

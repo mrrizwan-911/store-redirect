@@ -110,6 +110,7 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
           categories={subcategories}
           title={activeCategory.name}
           subtitle={activeCategory.description || `Refined collection in ${activeCategory.name}.`}
+          baseCategorySlug={slug}
         />
       </Suspense>
     </div>

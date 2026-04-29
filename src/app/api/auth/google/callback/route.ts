@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
     // Check if user already exists and what role they have
     const existingUser = await db.user.findUnique({
       where: { email: profile.email },
-      select: { id: true, role: true, name: true }
+      select: { id: true, role: true, name: true, email: true }
     })
 
     if (isAdminEmail(profile.email) && !existingUser) {
@@ -57,7 +57,10 @@ export async function GET(req: NextRequest) {
     let user: any
     if (existingUser) {
       // Upgrade GUEST to CUSTOMER, leave CUSTOMER/ADMIN roles untouched
-      const updateData: any = { googleId: profile.sub }
+      const updateData: any = {
+        googleId: profile.sub,
+        name: profile.name || existingUser.name // Update name from Google if available
+      }
       if (existingUser.role === 'GUEST') {
         updateData.role = 'CUSTOMER'
         updateData.isVerified = true
