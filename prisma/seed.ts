@@ -1,5 +1,7 @@
 // @ts-nocheck
-import { PrismaClient } from '@prisma/client'
+/* eslint-disable @typescript-eslint/no-var-requires */
+// @ts-ignore
+const { PrismaClient } = require('@prisma/client')
 import { PrismaPg } from '@prisma/adapter-pg'
 import bcrypt from 'bcryptjs'
 import path from 'path'
