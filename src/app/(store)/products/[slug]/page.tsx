@@ -3,6 +3,8 @@ import { db } from '@/lib/db/client'
 import ProductDetailClient from '@/components/store/pdp/ProductDetailClient'
 import { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: Promise<{
     slug: string

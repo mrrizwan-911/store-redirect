@@ -2,6 +2,8 @@ import { db } from '@/lib/db/client'
 import { SearchPageClient } from '@/components/store/search/SearchPageClient'
 import { Suspense } from 'react'
 
+export const dynamic = 'force-dynamic'
+
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>
 }

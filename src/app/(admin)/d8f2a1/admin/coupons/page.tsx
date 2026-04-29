@@ -3,6 +3,8 @@ import { db } from '@/lib/db/client';
 import { getUserSession } from '@/lib/auth/session';
 import CouponsClient from '@/components/admin/promotions/CouponsClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Coupons | Admin',
 };
