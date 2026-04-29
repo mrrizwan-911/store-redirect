@@ -6,6 +6,8 @@ import { NewArrivalsStrip } from '@/components/store/home/NewArrivalsStrip'
 import { LookbookTeaser } from '@/components/store/home/LookbookTeaser'
 import { NewsletterSection } from '@/components/store/home/NewsletterSection'
 
+export const dynamic = 'force-dynamic'
+
 async function fetchProducts(where: object, orderBy: object, take: number) {
   return db.product.findMany({
     where: { isActive: true, ...where },

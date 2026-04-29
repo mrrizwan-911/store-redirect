@@ -1,38 +1,14 @@
 import { db } from '@/lib/db/client'
 import { ProductListingClient } from '@/components/store/plp/ProductListingClient'
-import { headers } from 'next/headers'
-import { appendFile } from 'node:fs/promises'
 import { Suspense } from 'react'
+
+export const dynamic = 'force-dynamic'
 
 interface ProductsPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  try {
-    const requestHeaders = await headers()
-    const userAgent = requestHeaders.get('user-agent') ?? 'unknown'
-    const secChUa = requestHeaders.get('sec-ch-ua') ?? 'missing'
-    // #region agent log
-    await appendFile(
-      '/home/hasan/clothes-store/.cursor/debug-072827.log',
-      `${JSON.stringify({
-        sessionId: '072827',
-        runId: 'initial-repro-2',
-        hypothesisId: 'H6',
-        location: 'src/app/(store)/products/page.tsx:16',
-        message: 'products-page-server-render',
-        data: {
-          route: '/products',
-          userAgent: userAgent.slice(0, 140),
-          secChUa: secChUa.slice(0, 140),
-        },
-        timestamp: Date.now(),
-      })}\n`
-    )
-    // #endregion
-  } catch {}
-
   const resolvedSearchParams = await searchParams
 
   // Parse search params

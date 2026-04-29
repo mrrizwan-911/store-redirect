@@ -2,6 +2,8 @@ import { db } from '@/lib/db/client'
 import { OutfitDetail } from '@/components/store/OutfitDetail'
 import { notFound } from 'next/navigation'
 
+export const dynamic = 'force-dynamic'
+
 export default async function SingleOutfitPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
   const outfit = await db.outfit.findUnique({

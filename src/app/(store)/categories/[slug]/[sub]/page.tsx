@@ -1,8 +1,9 @@
 import { db } from '@/lib/db/client'
 import { ProductListingClient } from '@/components/store/plp/ProductListingClient'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { Suspense } from 'react'
+
+export const dynamic = 'force-dynamic'
 
 interface SubcategoryPageProps {
   params: Promise<{ slug: string; sub: string }>
