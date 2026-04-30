@@ -4,23 +4,20 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useAppSelector } from '@/store/hooks';
 import AuthLayout from '@/components/store/auth/AuthLayout';
 
 export default function ForgotPasswordPage() {
-  const router = useRouter();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   // Redirect if already authenticated
   React.useEffect(() => {
     if (isAuthenticated && user) {
-      const redirectPath = user.role === 'ADMIN' ? '/d8f2a1/admin' : '/account';
-      router.push(redirectPath);
+      const redirectPath = user.role === 'ADMIN' ? '/d8f2a1/admin/analytics' : '/account';
+      window.location.href = redirectPath;
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);

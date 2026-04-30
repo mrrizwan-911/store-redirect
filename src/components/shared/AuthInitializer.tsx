@@ -2,31 +2,43 @@
 
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { setUser } from '@/store/slices/authSlice'
+import { setUser, setToken, logout } from '@/store/slices/authSlice'
 
 export function AuthInitializer() {
   const dispatch = useAppDispatch()
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth)
+  const { isAuthenticated, user, accessToken } = useAppSelector((state) => state.auth)
 
   useEffect(() => {
-    // If not authenticated in Redux, try to fetch profile from session cookies
-    if (!isAuthenticated || !user) {
+    // If we have no accessToken but think we are authenticated (e.g. after page reload),
+    // try to restore the session using the refresh token cookie.
+    if (!accessToken && isAuthenticated) {
       const initAuth = async () => {
         try {
-          const response = await fetch('/api/account/profile')
-          const result = await response.json()
+          const refreshResponse = await fetch('/api/auth/refresh', { method: 'POST' })
+          const refreshResult = await refreshResponse.json()
 
-          if (result.success && result.data) {
-            dispatch(setUser(result.data))
+          if (refreshResult.success && refreshResult.data?.access_token) {
+            dispatch(setToken(refreshResult.data.access_token))
+
+            const profileResponse = await fetch('/api/account/profile')
+            const profileResult = await profileResponse.json()
+
+            if (profileResult.success && profileResult.data) {
+              dispatch(setUser(profileResult.data))
+            }
+          } else if (refreshResponse.status === 401) {
+            // Only logout if the server explicitly says the session is invalid
+            dispatch(logout())
           }
         } catch (error) {
-          // Silent fail - user just isn't logged in or session expired
+          // On network error or other issues, we don't logout to avoid
+          // kicking the user out prematurely.
         }
       }
 
       initAuth()
     }
-  }, [isAuthenticated, user, dispatch])
+  }, [isAuthenticated, user, accessToken, dispatch])
 
   return null
 }

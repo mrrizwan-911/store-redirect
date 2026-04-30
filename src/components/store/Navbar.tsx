@@ -89,6 +89,7 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
       dispatch(logout());
       dispatch(clearCart());
       await persistor.purge();
+      router.refresh();
       router.push('/login');
     }
   }

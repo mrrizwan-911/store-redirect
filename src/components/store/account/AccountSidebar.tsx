@@ -74,6 +74,7 @@ export function AccountSidebar({ isCollapsed, onToggle }: AccountSidebarProps) {
     dispatch(logout())
     dispatch(clearCart())
     await persistor.purge()
+    router.refresh()
     router.push('/login')
   }
 

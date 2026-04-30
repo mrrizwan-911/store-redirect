@@ -18,7 +18,8 @@ function VerifyOtpContent() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      const redirectPath = user.role === 'ADMIN' ? '/d8f2a1/admin' : '/account';
+      router.refresh();
+      const redirectPath = user.role === 'ADMIN' ? '/d8f2a1/admin/analytics' : '/account';
       router.push(redirectPath);
     }
   }, [isAuthenticated, user, router]);

@@ -20,10 +20,24 @@ export async function POST(req: NextRequest) {
     const alreadyProcessed = await redis.get(lockKey)
 
     if (alreadyProcessed) {
-      logger.auth('Refresh race condition detected, ignoring duplicate request', { jti: payload.jti })
-      // Return 200 with a flag or just success: true.
-      // The first request already set the cookies, so this one doesn't need to do anything.
-      return NextResponse.json({ success: true, message: 'Already refreshed' })
+      logger.auth('Refresh race condition detected, returning new access token', { jti: payload.jti })
+      const accessToken = signAccessToken({
+        userId: payload.userId,
+        email: payload.email,
+        role: payload.role,
+      })
+      const response = NextResponse.json({
+        success: true,
+        data: { access_token: accessToken }
+      })
+      response.cookies.set('access_token', accessToken, {
+        httpOnly: true,
+        secure: process.env.APP_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 15 * 60,
+        path: '/',
+      })
+      return response
     }
 
     if (!stored || stored.expiresAt < new Date()) {

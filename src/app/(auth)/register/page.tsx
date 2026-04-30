@@ -4,14 +4,11 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import { registerSchema } from '@/lib/validations/auth';
 import { ZodError } from 'zod';
-import { setUser, setToken } from '@/store/slices/authSlice';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppSelector } from '@/store/hooks';
 import AuthLayout from '@/components/store/auth/AuthLayout';
 
 export default function RegisterPage() {
@@ -29,7 +26,8 @@ export default function RegisterPage() {
   // Redirect if already authenticated
   React.useEffect(() => {
     if (isAuthenticated && user) {
-      const redirectPath = user.role === 'ADMIN' ? '/d8f2a1/admin' : '/account';
+      router.refresh();
+      const redirectPath = user.role === 'ADMIN' ? '/d8f2a1/admin/analytics' : '/account';
       router.push(redirectPath);
     }
   }, [isAuthenticated, user, router]);

@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import { loginSchema } from '@/lib/validations/auth';
@@ -29,8 +27,9 @@ export default function LoginPage() {
   // Redirect if already authenticated
   React.useEffect(() => {
     if (isAuthenticated && user) {
+      router.refresh(); // Clear Next.js client-side cache
       if (user.role === 'ADMIN') {
-        router.push('/d8f2a1/admin');
+        router.push('/d8f2a1/admin/analytics');
       } else {
         router.push('/account');
       }
@@ -77,9 +76,10 @@ export default function LoginPage() {
 
       toast.success('Welcome back!');
 
-      // Role-based redirection
+      // Redirect immediately using router for better Next.js state sync
+      router.refresh();
       if (result.data.user.role === 'ADMIN') {
-        router.push('/d8f2a1/admin');
+        router.push('/d8f2a1/admin/analytics');
       } else {
         router.push('/account');
       }

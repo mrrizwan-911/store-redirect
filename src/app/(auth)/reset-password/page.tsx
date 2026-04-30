@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
-import { useAppSelector } from '@/store/hooks';
 import AuthLayout from '@/components/store/auth/AuthLayout';
 
 function ResetPasswordForm() {
@@ -60,7 +59,7 @@ function ResetPasswordForm() {
       }
 
       toast.success('Password updated successfully!');
-      router.push('/login');
+      window.location.href = '/login';
     } catch (error) {
       toast.error('Something went wrong. Please try again.');
     } finally {
