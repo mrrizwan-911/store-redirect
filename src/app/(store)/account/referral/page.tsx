@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Users, Copy, Share2, Award, Gift, Check, Loader2 } from 'lucide-react'
+import { Users, Copy, Share2, Award, Gift, Check, LoaderCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -68,7 +68,7 @@ export default function ReferralPage() {
                 className="rounded-[12px] h-14 px-8 bg-white text-black hover:bg-neutral-200 uppercase tracking-widest text-[10px] font-bold transition-all flex items-center justify-center gap-3 shadow-2xl shrink-0"
               >
                 {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <LoaderCircle className="w-4 h-4 animate-spin" />
                 ) : copied ? (
                   <>
                     <Check className="w-4 h-4 stroke-[2.5]" /> Copied

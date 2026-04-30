@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { SimpleImageUploader } from '../products/SimpleImageUploader'
-import { GripVertical, X, CheckCircle2 } from 'lucide-react'
+import { GripVertical, X, CircleCheck } from 'lucide-react'
 
 export function OutfitBuilder({ initialData }: { initialData?: any }) {
   const router = useRouter()
@@ -247,7 +247,7 @@ export function OutfitBuilder({ initialData }: { initialData?: any }) {
                       )}
                     </div>
                     <div className="text-sm truncate flex-1">{product.name}</div>
-                    {isSelected && <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />}
+                    {isSelected && <CircleCheck className="w-4 h-4 text-green-500 flex-shrink-0" />}
                   </div>
                 )
               })}

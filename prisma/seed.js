@@ -9,7 +9,7 @@ const { loadEnvConfig } = require('@next/env')
 // Load .env.local
 loadEnvConfig(path.resolve(__dirname, '..'))
 
-const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL! })
+const adapter = new PrismaPg({ connectionString: process.env.DIRECT_URL })
 const db = new PrismaClient({ adapter })
 
 async function main() {
@@ -203,7 +203,7 @@ async function main() {
     { name: 'Aviator Sunglasses', slug: 'aviator-sunglasses', price: 4500, cat: 'sunglasses', sku: 'AC-SUN-001' },
   ]
 
-  const seededProducts: any[] = []
+  const seededProducts = []
 
   for (const p of products) {
     const category = await db.category.findUnique({ where: { slug: p.cat } })
@@ -318,6 +318,51 @@ async function main() {
       }
     }
   }
+
+  // 6. Create Initial Site Settings
+  console.log('Seeding site settings...')
+  await db.siteSettings.upsert({
+    where: { id: 'global' },
+    update: {},
+    create: {
+      id: 'global',
+      announcementText: 'Free delivery on orders over PKR 3,000 | New arrivals every Friday',
+      showAnnouncement: true,
+      footerTitle: 'CALNZA',
+      footerDescription: 'Redefining luxury fashion for the modern era. Curated with surgical precision and ethical craftsmanship in Pakistan.',
+      footerLinks: {
+        about: [
+          { label: 'Our Story', href: '/story' },
+          { label: 'Craftsmanship', href: '/craftsmanship' },
+          { label: 'Sustainability', href: '/sustainability' },
+          { label: 'Journal', href: '/journal' },
+        ],
+        categories: [
+          { label: 'Clothes', href: '/categories/clothes' },
+          { label: 'Shoes', href: '/categories/shoes' },
+          { label: 'Apparel', href: '/categories/apparel' },
+          { label: 'Accessories', href: '/categories/accessories' },
+        ],
+        help: [
+          { label: 'Size Guide', href: '/size-guide' },
+          { label: 'Track Order', href: '/track' },
+          { label: 'Returns & Exchanges', href: '/returns' },
+          { label: 'Contact Us', href: '/contact' },
+          { label: 'FAQ', href: '/faq' },
+        ],
+      },
+      socialLinks: {
+        instagram: 'https://instagram.com/calnza',
+        facebook: 'https://facebook.com/calnza',
+        whatsapp: 'https://wa.me/923001234567',
+      },
+      contactEmail: 'concierge@calnza.pk',
+      contactPhone: '+92 300 1234567',
+      contactAddress: 'DHA Phase 6, Lahore, Pakistan',
+      showPaymentMethods: true,
+      paymentMethods: ['JAZZCASH', 'EASYPAISA', 'VISA', 'MASTERCARD'],
+    },
+  })
 
   console.log('Seed complete!')
 }

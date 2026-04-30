@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircle2, ArrowRight } from 'lucide-react'
+import { CircleCheck, ArrowRight } from 'lucide-react'
 
 // Although this is a client component, we mark it dynamic to ensure
 // the parent layout doesn't try to pre-render it with dummy params
@@ -74,7 +74,7 @@ export default function OrderConfirmationPage() {
     <main className="min-h-screen bg-white pt-24 pb-16">
       <div className="max-w-2xl mx-auto px-4">
         <div className="text-center mb-12">
-          <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" strokeWidth={1.5} />
+          <CircleCheck className="w-16 h-16 text-green-500 mx-auto mb-4" strokeWidth={1.5} />
           <h1 className="text-3xl font-bold tracking-tight mb-2">Order Confirmed</h1>
           <p className="text-neutral-500 text-sm">
             Thank you for your order. We'll notify you when it ships.

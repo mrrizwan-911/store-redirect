@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Star, CheckCircle2 } from 'lucide-react'
+import { Star, CircleCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import ReviewForm from './ReviewForm'
@@ -146,7 +146,7 @@ export default function ReviewsSection({
                   <span className="font-bold">{review.user.name}</span>
                   {review.isVerified && (
                     <div className="flex items-center gap-1 text-success">
-                      <CheckCircle2 className="w-3 h-3" />
+                      <CircleCheck className="w-3 h-3" />
                       <span>Verified Purchase</span>
                     </div>
                   )}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plus, Pencil, Trash2, Loader2, BookOpen } from 'lucide-react'
+import { Plus, Pencil, Trash2, LoaderCircle, BookOpen } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -90,7 +90,7 @@ export default function SizeGuidesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[600px]">
-        <Loader2 className="h-8 w-8 animate-spin text-black" />
+        <LoaderCircle className="h-8 w-8 animate-spin text-black" />
       </div>
     )
   }
@@ -108,7 +108,7 @@ export default function SizeGuidesPage() {
           className="bg-neutral-900 text-white hover:bg-neutral-800 rounded-lg h-9 px-6 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest transition-all shadow-sm"
         >
           {isAdding ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
           ) : (
             <Plus className="h-3.5 w-3.5" />
           )}

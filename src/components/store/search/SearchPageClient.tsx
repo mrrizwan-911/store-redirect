@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Search, Loader2, X, Camera, MessageSquare, Bot, Send } from 'lucide-react'
+import { Search, LoaderCircle, X, Camera, MessageSquare, Bot, Send } from 'lucide-react'
 import { ProductCard } from '../shared/ProductCard'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
@@ -316,7 +316,7 @@ export function SearchPageClient({ initialQuery, initialFeatured }: SearchPageCl
               disabled={isLoading || isStreaming}
             >
               {isLoading || isStreaming ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <LoaderCircle className="w-4 h-4 animate-spin" />
               ) : (
                 searchMode === 'search' ? <Search className={cn(isInitialView ? "w-4 h-4 md:w-5 md:h-5" : "w-3.5 h-3.5 md:w-4 md:h-4")} strokeWidth={2.5} /> : <Send className={cn(isInitialView ? "w-4 h-4 md:w-5 md:h-5" : "w-3.5 h-3.5 md:w-4 md:h-4")} />
               )}

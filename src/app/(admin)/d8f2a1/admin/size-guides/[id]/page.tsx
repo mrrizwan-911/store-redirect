@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import { ChevronLeft, Loader2, Save, ArrowLeft } from 'lucide-react'
+import { ChevronLeft, LoaderCircle, Save, ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { debounce } from 'lodash'
@@ -166,7 +166,7 @@ export default function SizeGuideEditorPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[600px]">
-        <Loader2 className="h-8 w-8 animate-spin text-black" />
+        <LoaderCircle className="h-8 w-8 animate-spin text-black" />
       </div>
     )
   }
@@ -253,7 +253,7 @@ export default function SizeGuideEditorPage() {
 
           {isSaving && (
             <div className="flex items-center gap-2">
-              <Loader2 className="h-3 w-3 animate-spin text-neutral-400" />
+              <LoaderCircle className="h-3 w-3 animate-spin text-neutral-400" />
               <span className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Saving...</span>
             </div>
           )}

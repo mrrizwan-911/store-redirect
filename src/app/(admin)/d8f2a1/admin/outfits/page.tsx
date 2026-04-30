@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Plus, Edit, Trash, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { Plus, Edit, Trash, CircleCheck, CircleX, LoaderCircle } from 'lucide-react'
 
 export default function AdminOutfitsPage() {
   const [outfits, setOutfits] = useState<any[]>([])
@@ -54,7 +54,7 @@ export default function AdminOutfitsPage() {
 
       {loading ? (
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
+          <LoaderCircle className="w-6 h-6 animate-spin text-neutral-400" />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -76,11 +76,11 @@ export default function AdminOutfitsPage() {
                 <div className="absolute top-3 right-3">
                   {outfit.isPublished ? (
                     <span className="bg-emerald-500 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                      <CheckCircle2 className="w-2.5 h-2.5" /> Published
+                      <CircleCheck className="w-2.5 h-2.5" /> Published
                     </span>
                   ) : (
                     <span className="bg-neutral-400 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                      <XCircle className="w-2.5 h-2.5" /> Draft
+                      <CircleX className="w-2.5 h-2.5" /> Draft
                     </span>
                   )}
                 </div>

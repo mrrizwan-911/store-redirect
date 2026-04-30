@@ -13,7 +13,7 @@ import {
   ChevronRight,
   ExternalLink,
   MessageCircle,
-  CheckCircle2
+  CircleCheck
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -170,7 +170,7 @@ export default function OrderDetailPage() {
                       isCurrent && "ring-4 ring-neutral-100"
                     )}>
                       {index < currentStepIndex ? (
-                        <CheckCircle2 className="w-5 h-5 stroke-[2.5]" />
+                        <CircleCheck className="w-5 h-5 stroke-[2.5]" />
                       ) : index === 3 ? (
                         <Truck className="w-5 h-5 stroke-[2]" />
                       ) : (

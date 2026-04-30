@@ -29,12 +29,12 @@ import {
   Building2,
   FileText,
   Clock,
-  CheckCircle2,
+  CircleCheck,
   Send,
   FileDown,
   PlusCircle,
   AlertCircle,
-  Loader2
+  LoaderCircle
 } from "lucide-react";
 
 interface QuotationItem {
@@ -177,7 +177,7 @@ export function QuotationDetail({ quotation }: QuotationDetailProps) {
           className="w-full bg-[#E8D5B0] hover:bg-[#d4c19d] text-black rounded-none uppercase font-display tracking-widest py-6"
           onClick={showNotImplemented}
         >
-          <CheckCircle2 className="w-4 h-4 mr-2" /> Convert to Order
+          <CircleCheck className="w-4 h-4 mr-2" /> Convert to Order
         </Button>
       </div>
 
@@ -300,7 +300,7 @@ export function QuotationDetail({ quotation }: QuotationDetailProps) {
                 onClick={handleApproveAndSend}
                 disabled={isApproving}
               >
-                {isApproving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                {isApproving ? <LoaderCircle className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 Approve & Send Formal Quotation
               </Button>
 

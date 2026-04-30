@@ -7,7 +7,7 @@ import { HorizontalProductFilters } from './HorizontalProductFilters'
 import { ProductGrid } from './ProductGrid'
 import { SortDropdown } from './SortDropdown'
 import { motion, AnimatePresence } from 'framer-motion'
-import { SlidersHorizontal, X, Search, Camera, Loader2, Clock, History, ArrowRight } from 'lucide-react'
+import { SlidersHorizontal, X, Search, Camera, LoaderCircle, Clock, History, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -394,7 +394,7 @@ export function ProductListingClient({
               <form onSubmit={handleSearchSubmit} className="relative group w-full max-w-3xl mx-auto">
                 <div className="absolute left-6 top-1/2 -translate-y-1/2 text-neutral-500 group-focus-within:text-black transition-colors pointer-events-none">
                   {isLoading || isVisualSearchLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <LoaderCircle className="w-5 h-5 animate-spin" />
                   ) : (
                     <Search className="w-5 h-5" />
                   )}

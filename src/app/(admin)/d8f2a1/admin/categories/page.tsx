@@ -8,7 +8,7 @@ import {
   Plus,
   ChevronRight,
   FolderTree,
-  Loader2
+  LoaderCircle
 } from "lucide-react"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
@@ -213,7 +213,7 @@ export default function AdminCategoriesPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[600px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <LoaderCircle className="h-8 w-8 animate-spin text-primary" />
       </div>
     )
   }
@@ -468,7 +468,7 @@ export default function AdminCategoriesPage() {
                 className="rounded-lg bg-neutral-900 text-white hover:bg-neutral-800 transition-all min-w-[80px] text-[10px] font-bold uppercase tracking-widest"
               >
                 {saving ? (
-                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <LoaderCircle className="h-3 w-3 animate-spin" />
                 ) : (
                   modalMode === 'edit' ? 'Update' : 'Create'
                 )}

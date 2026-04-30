@@ -456,3 +456,32 @@ model SizeGuide {
 
   @@index([categoryId])
 }
+
+model SiteSettings {
+  id                String   @id @default("global")
+
+  // Announcement Bar
+  announcementText  String   @default("Free delivery on orders over PKR 3,000 | New arrivals every Friday")
+  showAnnouncement  Boolean  @default(true)
+
+  // Footer Content
+  footerLogo        String?
+  footerTitle       String   @default("CALNZA")
+  footerDescription String   @default("Redefining luxury fashion for the modern era. Curated with surgical precision and ethical craftsmanship in Pakistan.")
+
+  // Dynamic Links (Stored as JSON for flexibility)
+  // Structure: { "about": [{ "label": "Text", "href": "/url" }], "categories": [...], "help": [...] }
+  footerLinks       Json     @default("{\"about\": [], \"categories\": [], \"help\": []}")
+
+  // Social Media & Contact
+  socialLinks       Json     @default("{\"instagram\": \"\", \"facebook\": \"\", \"whatsapp\": \"\"}")
+  contactEmail      String   @default("concierge@calnza.pk")
+  contactPhone      String   @default("+92 300 1234567")
+  contactAddress    String   @default("DHA Phase 6, Lahore, Pakistan")
+
+  // Visibility & Config
+  showPaymentMethods Boolean  @default(true)
+  paymentMethods     String[] @default(["JAZZCASH", "EASYPAISA", "VISA", "MASTERCARD"])
+
+  updatedAt         DateTime @updatedAt
+}

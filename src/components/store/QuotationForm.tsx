@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { logger } from "@/lib/utils/logger";
 import { toast } from "sonner";
-import { Plus, Trash2, Search, Loader2 } from "lucide-react";
+import { Plus, Trash2, Search, LoaderCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -231,7 +231,7 @@ export const QuotationForm = () => {
                             </div>
                             {isSearching ? (
                               <div className="flex items-center justify-center py-4">
-                                <Loader2 className="size-4 animate-spin" />
+                                <LoaderCircle className="size-4 animate-spin" />
                               </div>
                             ) : searchResults.length > 0 ? (
                               searchResults.map((p) => (
@@ -304,7 +304,7 @@ export const QuotationForm = () => {
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">
-                <Loader2 className="size-5 animate-spin" /> Processing...
+                <LoaderCircle className="size-5 animate-spin" /> Processing...
               </span>
             ) : (
               "Submit Quote Request"

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { CheckCircle2 } from 'lucide-react'
+import { CircleCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function NewsletterSection() {
@@ -23,7 +23,7 @@ export function NewsletterSection() {
       <div className="max-w-7xl mx-auto px-6 md:px-10">
         {isSubmitted ? (
           <div className="animate-in fade-in zoom-in duration-700 text-center py-10">
-            <CheckCircle2 className="w-16 h-16 text-black mx-auto mb-8 stroke-[1]" />
+            <CircleCheck className="w-16 h-16 text-black mx-auto mb-8 stroke-[1]" />
             <h2 className="font-display text-4xl md:text-5xl font-medium tracking-tight mb-4 text-black">
               You&apos;re on the list
             </h2>

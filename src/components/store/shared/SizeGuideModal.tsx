@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Ruler, Info, Loader2 } from 'lucide-react'
+import { Ruler, Info, LoaderCircle } from 'lucide-react'
 
 interface SizeGuideModalProps {
   categoryId?: string
@@ -82,7 +82,7 @@ export function SizeGuideModal({ categoryId, categorySlug, categoryName = 'cloth
         <DialogHeader className="p-8 pb-4 bg-neutral-50 border-b border-neutral-100">
           <DialogTitle className="font-display text-3xl tracking-tight uppercase flex items-center gap-3">
             {dbGuide?.title || 'Size Guide'}
-            {loading && <Loader2 className="w-4 h-4 animate-spin text-neutral-300" />}
+            {loading && <LoaderCircle className="w-4 h-4 animate-spin text-neutral-300" />}
           </DialogTitle>
           <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-bold mt-1">
             Find your perfect fit with our detailed measurement chart

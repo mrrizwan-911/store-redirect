@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { CheckCircle2, XCircle } from 'lucide-react'
+import { CircleCheck, CircleX } from 'lucide-react'
 
 interface CouponInputProps {
   onApply: (discountAmount: number, code: string) => void
@@ -69,7 +69,7 @@ export function CouponInput({ onApply, subtotal }: CouponInputProps) {
 
       {feedback && (
         <p className={`text-xs mt-2 flex items-center gap-1 ${feedback.type === 'success' ? 'text-[#10B981]' : 'text-[#EF4444]'}`}>
-          {feedback.type === 'success' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+          {feedback.type === 'success' ? <CircleCheck className="w-3 h-3" /> : <CircleX className="w-3 h-3" />}
           {feedback.message}
         </p>
       )}

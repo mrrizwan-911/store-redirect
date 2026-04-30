@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Search, Camera, Upload, Loader2, ArrowRight } from 'lucide-react'
+import { X, Search, Camera, Upload, LoaderCircle, ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -155,7 +155,7 @@ export function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                     type="submit"
                     className="absolute right-0 top-1/2 -translate-y-1/2 text-neutral-300 group-hover:text-black transition-colors"
                   >
-                    {isLoading ? <Loader2 className="w-10 h-10 animate-spin" /> : <Search className="w-10 h-10" />}
+                    {isLoading ? <LoaderCircle className="w-10 h-10 animate-spin" /> : <Search className="w-10 h-10" />}
                   </button>
                 </form>
                 <div className="h-px w-full bg-neutral-200" />

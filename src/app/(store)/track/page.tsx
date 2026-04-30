@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Search, Package, Truck, Calendar, MapPin, CreditCard, ChevronRight, Loader2 } from 'lucide-react'
+import { Search, Package, Truck, Calendar, MapPin, CreditCard, ChevronRight, LoaderCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -67,7 +67,7 @@ export default function TrackOrderPage() {
             disabled={isLoading}
             className="h-14 px-8 bg-black text-white hover:bg-neutral-800 rounded-[12px] uppercase tracking-widest text-[10px] font-bold shadow-xl transition-all active:scale-95"
           >
-            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Track'}
+            {isLoading ? <LoaderCircle className="w-4 h-4 animate-spin" /> : 'Track'}
           </Button>
         </form>
         {error && (

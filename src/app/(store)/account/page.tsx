@@ -9,7 +9,7 @@ import {
   MapPin,
   ArrowRight,
   Clock,
-  CheckCircle2,
+  CircleCheck,
   ChevronRight
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -123,7 +123,7 @@ export default function AccountOverview() {
         <Card className="rounded-[12px] border-neutral-200 shadow-none bg-neutral-50/50">
           <CardHeader className="pb-2">
             <CardTitle className="text-[10px] uppercase tracking-widest text-neutral-600 flex items-center gap-2 font-black">
-              <CheckCircle2 className="w-3 h-3 stroke-[2.5]" /> Member Tier
+              <CircleCheck className="w-3 h-3 stroke-[2.5]" /> Member Tier
             </CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between">
