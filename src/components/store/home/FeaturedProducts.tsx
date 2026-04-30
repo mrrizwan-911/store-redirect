@@ -11,6 +11,8 @@ interface ProductCardData {
   price: number
   salePrice?: number
   category: string
+  sku: string
+  description?: string
   avgRating?: number
   reviewCount?: number
   isBadgeNew?: boolean

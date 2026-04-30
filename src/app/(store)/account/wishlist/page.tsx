@@ -16,6 +16,8 @@ interface WishlistItem {
     slug: string
     basePrice: string
     salePrice: string | null
+    sku: string
+    description: string
     category: {
       name: string
     }
@@ -72,6 +74,8 @@ export default function DashboardWishlistPage() {
               price={Number(item.product.basePrice)}
               salePrice={item.product.salePrice ? Number(item.product.salePrice) : undefined}
               category={item.product.category?.name || 'Category'}
+              sku={item.product.sku}
+              description={item.product.description}
             />
           ))}
         </div>

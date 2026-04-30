@@ -21,8 +21,12 @@ import {
   Minus,
   Share2,
   Copy,
-  Check
+  Check,
+  Scale
 } from 'lucide-react'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { addToCompare, removeFromCompare } from '@/store/slices/compareSlice'
+import { toast } from 'sonner'
 
 interface Product {
   id: string
@@ -63,6 +67,10 @@ interface ProductDetailClientProps {
 }
 
 export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
+  const dispatch = useAppDispatch()
+  const { items: compareItems } = useAppSelector((state) => state.compare)
+  const isInCompare = compareItems.some((item) => item.id === product.id)
+
   const { isInWishlist, toggle: handleWishlistToggle } = useWishlist(product.id)
   const [mounted, setMounted] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -71,6 +79,33 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  const handleCompare = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (isInCompare) {
+      dispatch(removeFromCompare(product.id))
+      toast.success('Removed from comparison')
+    } else {
+      if (compareItems.length >= 3) {
+        toast.error('You can only compare up to 3 items')
+        return
+      }
+      dispatch(addToCompare({
+        id: product.id,
+        name: product.name,
+        slug: product.slug,
+        price: Number(product.basePrice),
+        salePrice: product.salePrice ? Number(product.salePrice) : null,
+        imageUrl: product.images[0]?.url || '/placeholder.png',
+        category: product.category.name,
+        sku: product.sku,
+        description: product.description,
+        avgRating: product.avgRating,
+        reviewCount: product.reviewCount
+      }))
+      toast.success('Added to comparison')
+    }
+  }
 
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
     if (product.variants && product.variants.length > 0) {
@@ -330,9 +365,15 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                 <Heart className={cn("w-3.5 h-3.5", isWishlisted && "fill-current")} />
                 {isWishlisted ? "In Wishlist" : "Add to Wishlist"}
               </button>
-              <button className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] font-bold text-text-secondary hover:text-black transition-all">
-                <RefreshCcw className="w-3.5 h-3.5" />
-                Compare
+              <button
+                onClick={handleCompare}
+                className={cn(
+                  "flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] font-bold transition-all",
+                  isInCompare ? "text-black" : "text-text-secondary hover:text-black"
+                )}
+              >
+                <Scale className={cn("w-3.5 h-3.5", isInCompare && "fill-current")} />
+                {isInCompare ? "In Comparison" : "Compare"}
               </button>
             </div>
 
@@ -485,6 +526,8 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                 salePrice={p.salePrice ? Number(p.salePrice) : undefined}
                 category={p.category.name}
                 imageUrl={p.images[0]?.url || '/placeholder.png'}
+                sku={p.sku}
+                description={p.description}
                 avgRating={p.avgRating || undefined}
                 reviewCount={p.reviewCount}
               />

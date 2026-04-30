@@ -4,11 +4,13 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { useAppSelector } from '@/store/hooks';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { setUser, setToken } from '@/store/slices/authSlice';
 import AuthLayout from '@/components/store/auth/AuthLayout';
 
 function VerifyOtpContent() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId');
   const email = searchParams.get('email');
@@ -25,8 +27,10 @@ function VerifyOtpContent() {
   }, [isAuthenticated, user, router]);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
+  const [resendCooldown, setResendCooldown] = useState(0);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Timer countdown
@@ -37,6 +41,15 @@ function VerifyOtpContent() {
     }, 1000);
     return () => clearInterval(interval);
   }, [timeLeft]);
+
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const interval = setInterval(() => {
+      setResendCooldown((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [resendCooldown]);
 
   // Handle OTP input change
   const handleChange = (index: number, value: string) => {
@@ -110,8 +123,17 @@ function VerifyOtpContent() {
         throw new Error(result.error || 'Invalid or expired OTP');
       }
 
+      // Success! Auto-login
+      if (result.data?.user && result.data?.access_token) {
+        dispatch(setUser(result.data.user));
+        dispatch(setToken(result.data.access_token));
+      }
+
       toast.success('Email verified successfully!');
-      router.push('/login');
+      router.refresh();
+
+      const redirectPath = result.data?.user?.role === 'ADMIN' ? '/d8f2a1/admin/analytics' : '/account';
+      router.push(redirectPath);
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);
@@ -124,8 +146,36 @@ function VerifyOtpContent() {
   };
 
   const handleResend = async () => {
-    toast.info('Feature coming soon: Resending OTP...');
-    // In a real app, call a resend-otp endpoint here
+    if (resendCooldown > 0) return;
+
+    setIsResending(true);
+    try {
+      const response = await fetch('/api/auth/resend-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, email }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to resend OTP');
+      }
+
+      toast.success('A new verification code has been sent!');
+      setResendCooldown(60); // 60s cooldown
+      setTimeLeft(600); // Reset expiry timer
+      setOtp(['', '', '', '', '', '']); // Clear inputs
+      inputRefs.current[0]?.focus();
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('Failed to resend code');
+      }
+    } finally {
+      setIsResending(false);
+    }
   };
 
   return (
@@ -152,7 +202,7 @@ function VerifyOtpContent() {
               inputMode="numeric"
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              className="w-11 h-14 border-2 border-neutral-200 rounded-[12px] text-center text-xl font-display bg-transparent text-black focus:border-black focus:ring-0 outline-none transition-all duration-300"
+              className="w-11 h-14 border-2 border-neutral-200 rounded-none text-center text-xl font-display bg-transparent text-black focus:border-black focus:ring-0 outline-none transition-all duration-300"
               autoFocus={index === 0}
             />
           ))}
@@ -162,7 +212,7 @@ function VerifyOtpContent() {
           <Button
             type="submit"
             disabled={isLoading || timeLeft === 0}
-            className="w-full bg-black hover:bg-[#1A1A1A] text-white uppercase tracking-[0.2em] text-[13px] font-bold rounded-[12px] h-[60px] transition-all"
+            className="w-full bg-black hover:bg-[#1A1A1A] text-white uppercase tracking-[0.2em] text-[13px] font-bold rounded-none h-[60px] transition-all"
           >
             {isLoading ? 'Verifying...' : 'Verify OTP'}
           </Button>
@@ -173,10 +223,10 @@ function VerifyOtpContent() {
               <button
                 onClick={handleResend}
                 type="button"
-                disabled={timeLeft > 540}
+                disabled={isResending || resendCooldown > 0}
                 className="text-black font-bold disabled:opacity-20 ml-1"
               >
-                Resend OTP
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
               </button>
             </p>
 

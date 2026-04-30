@@ -4,6 +4,7 @@ import createWebStorage from 'redux-persist/lib/storage/createWebStorage'
 import cartReducer from './slices/cartSlice'
 import authReducer from './slices/authSlice'
 import wishlistReducer from './slices/wishlistSlice'
+import compareReducer from './slices/compareSlice'
 
 // Create a fallback storage for SSR
 const createNoopStorage = () => {
@@ -32,12 +33,13 @@ const rootReducer = combineReducers({
   cart: cartReducer,
   auth: persistReducer(authPersistConfig, authReducer),
   wishlist: wishlistReducer,
+  compare: compareReducer,
 })
 
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['cart'],
+  whitelist: ['cart', 'compare'],
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

@@ -16,6 +16,8 @@ export interface ProductSummary {
   salePrice?: number | null
   category: { name: string; slug: string }
   images: { url: string }[]
+  sku: string
+  description: string
   avgRating: number | null
   reviewCount: number
   isLowStock?: boolean
@@ -141,6 +143,8 @@ export function ProductGrid({
                 salePrice={product.salePrice ?? undefined}
                 category={product.category.name}
                 imageUrl={product.images[0]?.url || '/placeholder.png'}
+                sku={product.sku}
+                description={product.description}
                 avgRating={product.avgRating ?? undefined}
                 reviewCount={product.reviewCount}
                 isLowStock={product.isLowStock}

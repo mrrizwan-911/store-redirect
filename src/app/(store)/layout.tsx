@@ -2,6 +2,7 @@ import { AnnouncementBar } from '@/components/store/AnnouncementBar'
 import { Navbar } from '@/components/store/Navbar'
 import { ConditionalFooter } from '@/components/store/layout/ConditionalFooter'
 import { WishlistSyncProvider } from '@/components/store/WishlistSyncProvider'
+import { ComparisonBar } from '@/components/store/compare/ComparisonBar'
 import { db } from '@/lib/db/client'
 
 export default async function StoreLayout({
@@ -35,12 +36,13 @@ export default async function StoreLayout({
 
   return (
     <WishlistSyncProvider>
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col min-h-screen relative">
         <AnnouncementBar />
         <Navbar serverCategories={serverCategories as any} />
         <main className="flex-1">
           {children}
         </main>
+        <ComparisonBar />
         <ConditionalFooter />
       </div>
     </WishlistSyncProvider>

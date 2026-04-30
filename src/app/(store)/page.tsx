@@ -47,6 +47,8 @@ export default async function Homepage() {
       price: Number(p.basePrice),
       salePrice: p.salePrice ? Number(p.salePrice) : undefined,
       category: p.category.name,
+      sku: p.sku,
+      description: p.description,
       avgRating: avgRating ? Math.round(avgRating * 10) / 10 : undefined,
       reviewCount: p.reviews.length,
       isBadgeNew: isNew,

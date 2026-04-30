@@ -455,6 +455,8 @@ export function SearchPageClient({ initialQuery, initialFeatured }: SearchPageCl
                         salePrice={product.salePrice}
                         category={product.category.name}
                         imageUrl={product.images[0]?.url || ''}
+                        sku={product.sku}
+                        description={product.description}
                         avgRating={product.avgRating}
                         reviewCount={product.reviewCount}
                       />
