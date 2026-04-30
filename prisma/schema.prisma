@@ -242,6 +242,7 @@ model OrderItem {
   variant   ProductVariant? @relation(fields: [variantId], references: [id])
 
   @@index([orderId])
+  @@index([productId])
 }
 
 model Payment {
@@ -258,6 +259,8 @@ model Payment {
 
   @@index([orderId])
   @@index([status])
+  @@index([paidAt])
+  @@index([status, paidAt])
 }
 
 model FlashSale {

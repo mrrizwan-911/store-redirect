@@ -1,25 +1,9 @@
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { verifyRefreshToken } from '@/lib/auth/jwt'
+import { validateAdmin } from '@/lib/auth/serverAuth'
 import { AdminSidebar } from '@/components/admin/layout/AdminSidebar'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies()
-  const token = (await cookieStore).get('refresh_token')?.value
-
-  if (!token) {
-    redirect('/login')
-  }
-
-  try {
-    const payload = verifyRefreshToken(token)
-    if (payload.role !== 'ADMIN') {
-      redirect('/login')
-    }
-  } catch (error) {
-    console.error("JWT ERROR IN LAYOUT:", error)
-    redirect('/login')
-  }
+  // Centralized admin validation (redirects if not admin)
+  await validateAdmin()
 
   return (
     <div className="flex h-screen bg-white text-black font-sans selection:bg-black selection:text-white overflow-hidden">

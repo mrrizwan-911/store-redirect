@@ -1,27 +1,15 @@
-import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-
-async function fetchCustomer(id: string) {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('refresh_token')?.value
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-
-  const res = await fetch(`${baseUrl}/api/admin/customers/${id}`, {
-    headers: {
-      ...(token ? { Cookie: `refresh_token=${token}` } : {}),
-    },
-    cache: 'no-store'
-  })
-
-  if (!res.ok) return null
-  const json = await res.json()
-  return json.data
-}
+import { validateAdmin } from '@/lib/auth/serverAuth'
+import { getCustomerById } from '@/lib/services/admin/customer'
 
 export default async function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // 1. Validate Admin
+  await validateAdmin()
+
+  // 2. Fetch data directly
   const { id } = await params;
-  const customer = await fetchCustomer(id)
+  const customer = await getCustomerById(id)
 
   if (!customer) {
     notFound()
@@ -43,7 +31,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
   return (
     <div className="space-y-6 animate-in fade-in duration-500 font-sans">
       <div className="flex items-center gap-4 border-b border-neutral-100 pb-4">
-        <Link href="/admin/customers" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:text-neutral-900 transition-colors border border-neutral-200 px-3 py-1 rounded-md hover:bg-neutral-50">
+        <Link href="/d8f2a1/admin/customers" className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 hover:text-neutral-900 transition-colors border border-neutral-200 px-3 py-1 rounded-md hover:bg-neutral-50">
           &larr; Back
         </Link>
         <h1 className="text-2xl font-bold tracking-tight text-neutral-900">
@@ -120,7 +108,7 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
                     customer.orders.map((order: any) => (
                       <tr key={order.id} className="border-b border-neutral-50 last:border-0 hover:bg-neutral-50/50 transition-colors">
                         <td className="p-4 font-semibold">
-                          <Link href={`/admin/orders/${order.id}`} className="text-neutral-900 hover:underline">
+                          <Link href={`/d8f2a1/admin/orders/${order.id}`} className="text-neutral-900 hover:underline">
                             {order.orderNumber}
                           </Link>
                         </td>

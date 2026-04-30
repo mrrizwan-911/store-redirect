@@ -1,42 +1,25 @@
-import { cookies } from 'next/headers'
+import { validateAdmin } from '@/lib/auth/serverAuth'
+import { getRevenueStats, getOrdersByStatus, getTopProducts, getAbandonedCartStats } from '@/lib/services/admin/analytics'
 import { KpiCard } from '@/components/admin/dashboard/KpiCard'
 import { RevenueChart } from '@/components/admin/dashboard/RevenueChart'
 import { OrderStatusChart } from '@/components/admin/dashboard/OrderStatusChart'
 import { PaymentMethodChart } from '@/components/admin/dashboard/PaymentMethodChart'
 
-async function fetchAnalyticsData(endpoint: string) {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('refresh_token')?.value
-
-  // Use a relative or absolute URL based on environment. In server components, absolute is required.
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-
-  const res = await fetch(`${baseUrl}/api/admin/analytics/${endpoint}`, {
-    headers: {
-      ...(token ? { Cookie: `refresh_token=${token}` } : {}),
-    },
-    cache: 'no-store'
-  })
-
-  if (!res.ok) {
-    return null
-  }
-
-  const json = await res.json()
-  return json.data
-}
-
 export default async function AnalyticsPage() {
-  const [revenueData, statusData, topProductsData] = await Promise.all([
-    fetchAnalyticsData('revenue'),
-    fetchAnalyticsData('orders-by-status'),
-    fetchAnalyticsData('top-products')
+  // 1. Validate Admin Session (Redirects to login if invalid)
+  await validateAdmin()
+
+  // 2. Fetch data directly from services (No internal HTTP calls)
+  const [revenueData, statusData, topProductsData, abandonedData] = await Promise.all([
+    getRevenueStats(),
+    getOrdersByStatus(),
+    getTopProducts(),
+    getAbandonedCartStats()
   ])
 
   // Process data for charts
-  // The daily revenue chart needs last 30 days data. The API returned aggregate.
-  // Wait, the API for `revenue` didn't return a 30-day time series, it just returned today/month/ytd/activeOrders.
-  // Let's create an empty time series for the RevenueChart as it wasn't specified in the API yet.
+  // The daily revenue chart needs last 30 days data.
+  // For now we use an empty series as the service doesn't provide time-series yet.
   const emptyRevenueSeries: { date: string; revenue: number }[] = []
 
   return (
@@ -78,6 +61,35 @@ export default async function AnalyticsPage() {
         <div className="bg-white p-6 rounded-xl border border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
           <PaymentMethodChart data={revenueData?.byPaymentMethod || []} />
         </div>
+        <div className="bg-white p-6 rounded-xl border border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <h3 className="text-[10px] uppercase tracking-widest font-bold mb-6 text-neutral-400">Abandoned Carts (60m+)</h3>
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="p-4 bg-neutral-50 rounded-lg border border-neutral-100">
+              <p className="text-[10px] uppercase font-bold text-neutral-400 mb-1">Total Carts</p>
+              <p className="text-xl font-bold text-neutral-900">{abandonedData?.count || 0}</p>
+            </div>
+            <div className="p-4 bg-neutral-50 rounded-lg border border-neutral-100">
+              <p className="text-[10px] uppercase font-bold text-neutral-400 mb-1">Lost Revenue</p>
+              <p className="text-xl font-bold text-rose-600">PKR {abandonedData?.potentialRevenue?.toLocaleString() || 0}</p>
+            </div>
+          </div>
+          <h4 className="text-[10px] uppercase font-bold text-neutral-400 mb-3">Top Abandoned Items</h4>
+          <ul className="space-y-2">
+            {(!abandonedData?.topAbandoned || abandonedData.topAbandoned.length === 0) ? (
+              <li className="text-xs text-neutral-400 italic py-2">No abandoned items tracked.</li>
+            ) : (
+              abandonedData.topAbandoned.map((item: any, idx: number) => (
+                <li key={idx} className="flex items-center justify-between text-xs py-2 border-b border-neutral-50 last:border-0">
+                  <span className="font-medium text-neutral-700 truncate mr-4">{item.name}</span>
+                  <span className="text-neutral-400 shrink-0">{item.count} times</span>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
         <div className="bg-white p-6 rounded-xl border border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
           <h3 className="text-[10px] uppercase tracking-widest font-bold mb-6 text-neutral-400">Top Selling Products</h3>
           <div className="w-full h-80 overflow-y-auto border border-neutral-100 rounded-lg">

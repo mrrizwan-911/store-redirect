@@ -1,27 +1,15 @@
-import { cookies } from 'next/headers'
 import Link from 'next/link'
-
-async function fetchCustomers(page = 1) {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('refresh_token')?.value
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-
-  const res = await fetch(`${baseUrl}/api/admin/customers?page=${page}`, {
-    headers: {
-      ...(token ? { Cookie: `refresh_token=${token}` } : {}),
-    },
-    cache: 'no-store'
-  })
-
-  if (!res.ok) return null
-  const json = await res.json()
-  return json.data
-}
+import { validateAdmin } from '@/lib/auth/serverAuth'
+import { getCustomers } from '@/lib/services/admin/customer'
 
 export default async function CustomersPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  // 1. Validate Admin
+  await validateAdmin()
+
+  // 2. Fetch data directly
   const params = await searchParams;
   const page = parseInt(params.page || '1', 10)
-  const data = await fetchCustomers(page)
+  const data = await getCustomers({ page })
   const customers = data?.customers || []
 
   return (
