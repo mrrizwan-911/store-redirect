@@ -25,6 +25,7 @@ const navItems = [
   { icon: Zap, label: 'Flash Sales', route: '/d8f2a1/admin/flash-sales' },
   { icon: Shirt, label: 'Outfits', route: '/d8f2a1/admin/outfits' },
   { icon: Star, label: 'Loyalty', route: '/d8f2a1/admin/loyalty' },
+  { icon: Mail, label: 'Inquiries', route: '/d8f2a1/admin/inquiries' },
   { icon: Mail, label: 'Newsletter', route: '/d8f2a1/admin/notifications?filter=subscribers' },
   { icon: Info, label: 'About', route: '/d8f2a1/admin/settings#about' },
   { icon: Phone, label: 'Contact', route: '/d8f2a1/admin/settings#contact' },

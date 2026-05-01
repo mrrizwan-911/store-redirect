@@ -402,6 +402,27 @@ model Subscriber {
   @@index([status])
 }
 
+model Inquiry {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String   @db.Text
+  status    InquiryStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+enum InquiryStatus {
+  PENDING
+  READ
+  REPLIED
+  ARCHIVED
+}
+
 enum SubscriberStatus {
   ACTIVE
   UNSUBSCRIBED

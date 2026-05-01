@@ -65,7 +65,7 @@ export default function NewsletterPage() {
       {/* Editorial Benefit Grid */}
       <section className="py-24 bg-neutral-50 border-t border-neutral-100">
         <div className="max-w-7xl mx-auto px-6 md:px-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-12 mb-20">
             <div className="space-y-4">
               <h3 className="font-display text-xl font-medium uppercase tracking-tight">Private Sales</h3>
               <p className="text-neutral-600 text-sm leading-relaxed font-sans">
@@ -83,6 +83,21 @@ export default function NewsletterPage() {
               <p className="text-neutral-600 text-sm leading-relaxed font-sans">
                 Deep dives into craftsmanship, ethical sourcing, and the architecture of the modern wardrobe.
               </p>
+            </div>
+          </div>
+
+          <div className="pt-20 border-t border-neutral-200 text-center space-y-6">
+            <p className="text-[10px] uppercase tracking-[0.4em] text-neutral-400 font-bold">Manage Your Dispatch</p>
+            <p className="text-sm text-neutral-500 font-sans max-w-lg mx-auto">
+              If you wish to exit the Inner Circle and stop receiving our surgical dispatches, you may initiate the unsubscribe protocol below.
+            </p>
+            <div className="pt-4">
+              <a
+                href="/unsubscribe"
+                className="text-[11px] font-bold uppercase tracking-[0.2em] border-b border-black pb-1 hover:text-neutral-400 hover:border-neutral-400 transition-all duration-300"
+              >
+                Click to Unsubscribe
+              </a>
             </div>
           </div>
         </div>
