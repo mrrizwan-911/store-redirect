@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingBag, Heart, User, Search, Menu, X, LayoutDashboard, LogOut, ChevronDown, Plus, Sparkles } from 'lucide-react'
+import { ShoppingBag, Heart, User, Search, Menu, X, LayoutDashboard, LogOut, ChevronDown, Plus, Sparkles, Info, Mail, Phone } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import {
   DropdownMenu,
@@ -216,6 +216,21 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
                       <Link href="/wishlist" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
                         <Heart className="w-5 h-5 stroke-[1.2]" />
                         Wishlist
+                      </Link>
+
+                      <div className="h-px bg-neutral-100 my-2" />
+
+                      <Link href="/story" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
+                        <Info className="w-5 h-5 stroke-[1.2]" />
+                        Our Story
+                      </Link>
+                      <Link href="/newsletter" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
+                        <Mail className="w-5 h-5 stroke-[1.2]" />
+                        Newsletter
+                      </Link>
+                      <Link href="/contact" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}>
+                        <Phone className="w-5 h-5 stroke-[1.2]" />
+                        Contact
                       </Link>
                     </div>
                   </nav>

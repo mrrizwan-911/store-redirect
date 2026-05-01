@@ -3,18 +3,40 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { CircleCheck } from 'lucide-react'
+import { CircleCheck, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 export function NewsletterSection() {
   const [email, setEmail] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (email) {
-      setIsSubmitted(true)
-      setEmail('')
+    if (!email) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'HOMEPAGE' }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setIsSubmitted(true)
+        setEmail('')
+        toast.success('Welcome to the inner circle!')
+      } else {
+        toast.error(result.error || 'Failed to subscribe')
+      }
+    } catch {
+      toast.error('An error occurred. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -68,13 +90,18 @@ export function NewsletterSection() {
                 </div>
                 <Button
                   type="submit"
+                  disabled={isLoading}
                   className={cn(
                     "h-16 lg:h-14 px-12 rounded-none uppercase tracking-[0.2em] text-[11px] font-bold",
                     "bg-black text-white hover:bg-neutral-900 transition-all duration-500",
-                    "active:scale-95 shadow-2xl lg:shadow-none"
+                    "active:scale-95 shadow-2xl lg:shadow-none disabled:opacity-70"
                   )}
                 >
-                  Subscribe
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    "Subscribe"
+                  )}
                 </Button>
               </form>
 

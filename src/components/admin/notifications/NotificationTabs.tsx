@@ -8,6 +8,8 @@ const TABS = [
   { label: "Orders", value: "orders" },
   { label: "Abandoned Carts", value: "cart" },
   { label: "Quotations", value: "quotations" },
+  { label: "Subscribers", value: "subscribers" },
+  { label: "Marketing", value: "marketing" },
   { label: "Failed", value: "failed" },
 ];
 

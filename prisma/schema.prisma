@@ -17,6 +17,7 @@ model User {
   googleId      String?         @unique
   wishlistToken String?         @unique @default(cuid())
   referralCode  String?         @unique @default(cuid())
+  marketingConsent Boolean @default(false)
   notes         String?
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
@@ -386,6 +387,24 @@ model EmailLog {
 
   @@index([email, type])
   @@index([status])
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  status    SubscriberStatus @default(ACTIVE)
+  source    String?  // e.g., "HOMEPAGE", "FOOTER"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+enum SubscriberStatus {
+  ACTIVE
+  UNSUBSCRIBED
 }
 
 enum Role {

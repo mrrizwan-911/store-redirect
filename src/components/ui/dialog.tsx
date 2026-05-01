@@ -21,7 +21,7 @@ function DialogTrigger({
       <DialogPrimitive.Trigger
         data-slot="dialog-trigger"
         render={children}
-        nativeButton={false}
+        nativeButton={true}
         {...props}
       />
     )

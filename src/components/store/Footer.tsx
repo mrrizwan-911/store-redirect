@@ -2,11 +2,42 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Camera, Globe, Share2, Phone as WhatsApp, Mail, MapPin } from 'lucide-react'
+import { Camera, Globe, Share2, Phone as WhatsApp, Mail, MapPin, Loader2, Send } from 'lucide-react'
+import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 
 export function Footer() {
   const [settings, setSettings] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [email, setEmail] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) return
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'FOOTER' }),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        setEmail('')
+        toast.success('Thank you for subscribing!')
+      } else {
+        toast.error(result.error || 'Failed to subscribe')
+      }
+    } catch (error) {
+      toast.error('An error occurred. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   useEffect(() => {
     async function fetchSettings() {
@@ -44,7 +75,7 @@ export function Footer() {
   return (
     <footer className="bg-black text-white pt-32 pb-16">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 lg:gap-12 mb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-16 lg:gap-12 mb-24">
 
           {/* About */}
           <div className="space-y-8">
@@ -133,6 +164,42 @@ export function Footer() {
                 </div>
               </li>
             </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div className="space-y-8">
+            <h4 className="text-[10px] uppercase tracking-[0.4em] font-bold text-white/30">Newsletter</h4>
+            <div className="space-y-4">
+              <p className="text-white/40 text-[11px] uppercase tracking-[0.2em] leading-relaxed">
+                Join the inner circle for exclusive updates.
+              </p>
+              <form onSubmit={handleSubscribe} className="relative group">
+                <input
+                  type="email"
+                  placeholder="EMAIL ADDRESS"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isSubmitting}
+                  className={cn(
+                    "w-full bg-transparent border-b border-white/10 py-3 text-[11px] tracking-widest text-white outline-none transition-all duration-500",
+                    "focus:border-white placeholder:text-white/20 placeholder:text-[9px]",
+                    isSubmitting && "opacity-50"
+                  )}
+                />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="absolute right-0 bottom-3 text-white/40 hover:text-white transition-colors duration-500"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Send className="w-3 h-3" />
+                  )}
+                </button>
+              </form>
+            </div>
           </div>
 
         </div>

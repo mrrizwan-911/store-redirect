@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   BarChart2, Package, ShoppingBag, Users, FileText,
   Archive, Tag, Zap, Shirt, Star, Mail, Settings, LogOut,
-  ExternalLink, FolderTree
+  ExternalLink, FolderTree, Info, Phone
 } from 'lucide-react'
 import { useAppDispatch } from '@/store/hooks'
 import { logout } from '@/store/slices/authSlice'
@@ -25,6 +25,9 @@ const navItems = [
   { icon: Zap, label: 'Flash Sales', route: '/d8f2a1/admin/flash-sales' },
   { icon: Shirt, label: 'Outfits', route: '/d8f2a1/admin/outfits' },
   { icon: Star, label: 'Loyalty', route: '/d8f2a1/admin/loyalty' },
+  { icon: Mail, label: 'Newsletter', route: '/d8f2a1/admin/notifications?filter=subscribers' },
+  { icon: Info, label: 'About', route: '/d8f2a1/admin/settings#about' },
+  { icon: Phone, label: 'Contact', route: '/d8f2a1/admin/settings#contact' },
   { icon: Mail, label: 'Notifications', route: '/d8f2a1/admin/notifications' },
   { icon: Settings, label: 'Settings', route: '/d8f2a1/admin/settings' },
 ]

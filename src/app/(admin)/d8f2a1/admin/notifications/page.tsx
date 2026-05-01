@@ -3,6 +3,8 @@ import { getUserSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 import { NotificationTabs } from '@/components/admin/notifications/NotificationTabs';
 import { EmailLogTable } from '@/components/admin/notifications/EmailLogTable';
+import { SubscriberTable } from '@/components/admin/notifications/SubscriberTable';
+import { BroadcastDialog } from '@/components/admin/notifications/BroadcastDialog';
 import { logger } from "@/lib/utils/logger";
 
 export const dynamic = "force-dynamic";
@@ -32,13 +34,23 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
   logger.info("Fetching notification logs", { filter });
 
   try {
-    let where: any = {};
+    const where: any = {};
+    let subscribers: any[] = [];
+
     if (filter === 'orders') where.type = { in: ['order_confirm', 'order_shipped', 'order_delivered'] };
     if (filter === 'cart') where.type = 'abandoned_cart';
     if (filter === 'quotations') where.type = 'quotation_sent';
+    if (filter === 'marketing') where.type = 'MARKETING';
     if (filter === 'failed') where.status = 'failed';
 
-    const logs = await db.emailLog.findMany({
+    if (filter === 'subscribers') {
+      subscribers = await db.subscriber.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 100
+      });
+    }
+
+    const logs = filter === 'subscribers' ? [] : await db.emailLog.findMany({
       where,
       orderBy: { sentAt: 'desc' },
       take: 50
@@ -48,13 +60,18 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
       <div className="p-8 min-h-screen bg-[#FDFDFD]">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Header section with Minimal Luxury B&W styling */}
-          <div className="flex flex-col gap-1 border-b border-neutral-100 pb-4">
-            <h1 data-testid="page-heading" className="text-2xl font-bold tracking-tight text-neutral-900">
-              Notifications
-            </h1>
-            <p className="text-neutral-400 text-[10px] font-bold uppercase tracking-widest">
-              VIEW AND MANAGE EMAIL LOGS AND NOTIFICATION STATUS.
-            </p>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-neutral-100 pb-4">
+            <div className="flex flex-col gap-1">
+              <h1 data-testid="page-heading" className="text-2xl font-bold tracking-tight text-neutral-900">
+                Notifications
+              </h1>
+              <p className="text-neutral-400 text-[10px] font-bold uppercase tracking-widest">
+                VIEW AND MANAGE EMAIL LOGS, SUBSCRIBERS AND MARKETING CAMPAIGNS.
+              </p>
+            </div>
+            {(filter === 'marketing' || filter === 'subscribers') && (
+              <BroadcastDialog />
+            )}
           </div>
 
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -63,13 +80,21 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
 
             {/* Table section */}
             <div className="mt-8">
-              <EmailLogTable logs={logs} />
+              {filter === 'subscribers' ? (
+                <SubscriberTable subscribers={subscribers} />
+              ) : (
+                <EmailLogTable logs={logs} />
+              )}
             </div>
           </div>
 
           {/* Footer/Meta info */}
           <div className="flex justify-between items-center pt-8 text-[10px] font-body text-neutral-400 uppercase tracking-[0.2em]">
-            <span>Showing {logs.length} logs</span>
+            <span>
+              {filter === 'subscribers'
+                ? `Showing ${subscribers.length} subscribers`
+                : `Showing ${logs.length} logs`}
+            </span>
             <span>Last Updated: {new Date().toLocaleTimeString()}</span>
           </div>
         </div>

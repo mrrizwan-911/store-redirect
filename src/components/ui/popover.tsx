@@ -9,10 +9,26 @@ function Popover({ ...props }: PopoverPrimitive.Root.Props) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />
 }
 
-function PopoverTrigger({ ...props }: PopoverPrimitive.Trigger.Props) {
-  // @ts-ignore - Base UI Trigger does not support asChild, but some components might pass it
-  const { asChild, ...rest } = props as any;
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...rest} />
+function PopoverTrigger({
+  asChild,
+  children,
+  ...props
+}: PopoverPrimitive.Trigger.Props & { asChild?: boolean }) {
+  if (asChild && React.isValidElement(children)) {
+    return (
+      <PopoverPrimitive.Trigger
+        data-slot="popover-trigger"
+        render={children}
+        nativeButton={true}
+        {...props}
+      />
+    )
+  }
+  return (
+    <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props}>
+      {children}
+    </PopoverPrimitive.Trigger>
+  )
 }
 
 function PopoverPortal({ ...props }: PopoverPrimitive.Portal.Props) {
