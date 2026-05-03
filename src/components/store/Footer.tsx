@@ -92,17 +92,17 @@ export function Footer() {
             </p>
             <div className="flex gap-4">
               {socialLinks?.instagram && (
-                <Link href={socialLinks.instagram} target="_blank" className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-500">
+                <Link href={socialLinks.instagram} target="_blank" className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-all duration-500">
                   <Camera className="w-4 h-4" />
                 </Link>
               )}
               {socialLinks?.facebook && (
-                <Link href={socialLinks.facebook} target="_blank" className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-500">
+                <Link href={socialLinks.facebook} target="_blank" className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-all duration-500">
                   <Globe className="w-4 h-4" />
                 </Link>
               )}
               {socialLinks?.whatsapp && (
-                <Link href={socialLinks.whatsapp} target="_blank" className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all duration-500">
+                <Link href={socialLinks.whatsapp} target="_blank" className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-all duration-500">
                   <WhatsApp className="w-4 h-4" />
                 </Link>
               )}

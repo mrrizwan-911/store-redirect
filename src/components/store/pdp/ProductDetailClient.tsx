@@ -8,8 +8,11 @@ import AddToCartButton from './AddToCartButton'
 import ReviewsSection from './ReviewsSection'
 import { ProductCard } from '../shared/ProductCard'
 import { SizeGuideModal } from '../shared/SizeGuideModal'
+import { RecentlyViewed } from '../shared/RecentlyViewed'
 import { useWishlist } from '@/hooks/useWishlist'
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed'
 import { cn } from '@/lib/utils'
+import { logger } from '@/lib/utils/logger'
 import {
   ChevronRight,
   MessageCircle,
@@ -63,22 +66,27 @@ interface Product {
 
 interface ProductDetailClientProps {
   product: Product
+  categoryProducts: any[]
   relatedProducts: any[]
 }
 
-export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
+export default function ProductDetailClient({ product, categoryProducts, relatedProducts }: ProductDetailClientProps) {
   const dispatch = useAppDispatch()
   const { items: compareItems } = useAppSelector((state) => state.compare)
   const isInCompare = compareItems.some((item) => item.id === product.id)
 
   const { isInWishlist, toggle: handleWishlistToggle } = useWishlist(product.id)
+  const { addViewedProduct } = useRecentlyViewed()
   const [mounted, setMounted] = useState(false)
   const [copied, setCopied] = useState(false)
   const isWishlisted = mounted && isInWishlist
 
   useEffect(() => {
     setMounted(true)
-  }, [])
+    if (product.id) {
+      addViewedProduct(product.id)
+    }
+  }, [product.id])
 
   const handleCompare = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -129,7 +137,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
 
   const handleQuantityChange = (type: 'inc' | 'dec') => {
     if (type === 'inc') {
-      const maxStock = selectedVariant?.stock || 99
+      const maxStock = selectedVariant?.stock || 9999
       if (quantity < maxStock) setQuantity(prev => prev + 1)
     } else {
       if (quantity > 1) setQuantity(prev => prev - 1)
@@ -137,31 +145,41 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   }
 
   const handleWhatsAppOrder = () => {
+    const selectedOptionsText = Object.entries(selectedOptions)
+      .map(([key, value]) => `${key}: ${value}`)
+      .join('\n')
+
     const message = encodeURIComponent(
-      `Hi! I'm interested in the ${product.name}.\n` +
-      `URL: ${window.location.origin}/products/${product.slug}\n` +
-      (Object.keys(selectedOptions).length > 0 ? Object.entries(selectedOptions).map(([k,v]) => `${k}: ${v}`).join('\n') + '\n' : '') +
-      `Quantity: ${quantity}`
+      `*New Order Request from CALNZA*\n\n` +
+      `*Product:* ${product.name}\n` +
+      `*Link:* ${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/products/${product.slug}\n` +
+      (selectedOptionsText ? `*Details:*\n${selectedOptionsText}\n` : '') +
+      `*Quantity:* ${quantity}\n\n` +
+      `Please let me know the availability and delivery process.`
     )
-    window.open(`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+923000000000'}?text=${message}`, '_blank')
+
+    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/[^0-9]/g, '') || '923000000000'
+    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank')
   }
 
   const handleWhatsAppShare = () => {
+    const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/products/${product.slug}`
     const text = encodeURIComponent(
-      `Check out ${product.name} on our store!\n${window.location.href}`
+      `Check out this ${product.name} on CALNZA!\n\n${shareUrl}`
     )
     window.open(`https://wa.me/?text=${text}`, '_blank')
   }
 
   const handleCopyLink = async () => {
+    const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/products/${product.slug}`
     try {
-      await navigator.clipboard.writeText(window.location.href)
+      await navigator.clipboard.writeText(shareUrl)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
       // fallback for older browsers
       const input = document.createElement('input')
-      input.value = window.location.href
+      input.value = shareUrl
       document.body.appendChild(input)
       input.select()
       document.execCommand('copy')
@@ -172,7 +190,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   }
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/products/${product.slug}`
+    const url = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/products/${product.slug}`
     if (navigator.share) {
       try {
         await navigator.share({
@@ -181,7 +199,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           url: url,
         })
       } catch (err) {
-        console.log('Error sharing', err)
+        logger.error('Error sharing', err)
       }
     } else {
       navigator.clipboard.writeText(url)
@@ -190,9 +208,9 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-16">
+    <div className="max-w-7xl mx-auto px-4 md:px-8 pt-2 pb-16">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-text-secondary mb-10">
+      <nav className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-text-secondary mb-4">
         <Link href="/" className="hover:text-text-primary transition-colors">Home</Link>
         <ChevronRight className="w-3 h-3 opacity-50" />
         <Link href={`/categories/${product.category.slug}`} className="hover:text-text-primary transition-colors">
@@ -203,14 +221,14 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
       </nav>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 max-w-6xl mx-auto">
         {/* Left: Image Gallery (6 cols on large screens) */}
         <div className="lg:col-span-6 lg:col-start-2">
           <ImageGallery images={product.images} productName={product.name} />
         </div>
 
         {/* Right: Product Details (4 cols on large screens) */}
-        <div className="lg:col-span-4 pt-4 lg:pr-8 space-y-10">
+        <div className="lg:col-span-4 pt-4 lg:pr-8 space-y-6">
           <div className="space-y-4">
             <h1 className="text-3xl md:text-4xl font-display leading-tight tracking-tight">
               {product.name}
@@ -269,18 +287,18 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             {/* Quantity Stepper */}
             <div className="flex items-center gap-4">
               <span className="text-[10px] uppercase tracking-widest font-bold text-text-secondary">Quantity</span>
-              <div className="flex items-center border border-border">
+              <div className="flex items-center border border-border rounded-[var(--radius)] overflow-hidden">
                 <button
                   onClick={() => handleQuantityChange('dec')}
-                  className="p-3 hover:bg-neutral-50 transition-colors disabled:opacity-30"
+                  className="p-3 hover:bg-neutral-50 transition-colors disabled:opacity-30 border-r border-border"
                   disabled={quantity <= 1}
                 >
                   <Minus className="w-3 h-3" />
                 </button>
-                <span className="w-12 text-center text-sm">{quantity}</span>
+                <span className="w-12 text-center text-sm font-medium">{quantity}</span>
                 <button
                   onClick={() => handleQuantityChange('inc')}
-                  className="p-3 hover:bg-neutral-50 transition-colors"
+                  className="p-3 hover:bg-neutral-50 transition-colors border-l border-border"
                 >
                   <Plus className="w-3 h-3" />
                 </button>
@@ -307,24 +325,24 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4 pt-4">
               <AddToCartButton
                 product={product}
                 selectedVariant={selectedVariant}
                 quantity={quantity}
               />
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   onClick={handleWhatsAppOrder}
-                  className="flex-1 py-3 border border-black flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.22em] font-bold hover:bg-neutral-50 transition-colors"
+                  className="flex-1 py-3.5 px-8 border-2 border-black rounded-full flex items-center justify-center gap-2 text-[10px] uppercase tracking-[0.2em] font-bold hover:bg-black hover:text-white transition-all duration-500 group"
                 >
-                  <MessageCircle className="w-4 h-4 shrink-0" />
+                  <MessageCircle className="w-4 h-4 shrink-0 group-hover:scale-110 transition-transform" />
                   <span className="truncate">WhatsApp Order</span>
                 </button>
-                <div className="flex gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={handleWhatsAppShare}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-[#E5E5E5] text-[#737373] hover:text-[#000000] hover:border-[#000000] px-3 py-2.5 transition-colors text-[10px]"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-[#E5E5E5] rounded-full text-[#737373] hover:text-[#000000] hover:border-[#000000] px-5 py-3 transition-all duration-500 text-[10px] uppercase tracking-widest font-bold"
                     title="Share on WhatsApp"
                   >
                     <Share2 className="h-4 w-4 shrink-0" />
@@ -332,7 +350,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                   </button>
                   <button
                     onClick={handleCopyLink}
-                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-[#E5E5E5] text-[#737373] hover:text-[#000000] hover:border-[#000000] px-3 py-2.5 transition-colors text-[10px] min-w-[90px]"
+                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 border border-[#E5E5E5] rounded-full text-[#737373] hover:text-[#000000] hover:border-[#000000] px-5 py-3 transition-all duration-500 text-[10px] uppercase tracking-widest font-bold min-w-[100px]"
                     title="Copy link"
                   >
                     {copied ? (
@@ -381,14 +399,14 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             <div className="flex justify-center gap-4 pt-6 mt-6 border-t border-border">
               <span className="text-[10px] uppercase tracking-widest font-bold text-text-secondary self-center">Share:</span>
               <button
-                onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + '/products/' + product.slug)}`, '_blank')}
+                onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent((process.env.NEXT_PUBLIC_APP_URL || window.location.origin) + '/products/' + product.slug)}`, '_blank')}
                 className="p-2 text-text-secondary hover:text-black transition-colors"
                 aria-label="Share on Facebook"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
               </button>
               <button
-                onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.origin + '/products/' + product.slug)}&text=${encodeURIComponent(product.name)}`, '_blank')}
+                onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent((process.env.NEXT_PUBLIC_APP_URL || window.location.origin) + '/products/' + product.slug)}&text=${encodeURIComponent(product.name)}`, '_blank')}
                 className="p-2 text-text-secondary hover:text-black transition-colors"
                 aria-label="Share on Twitter"
               >
@@ -503,6 +521,42 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
         </div>
       </div>
 
+      {/* Category Products */}
+      {categoryProducts.length > 0 && (
+        <div className="mt-32 border-t border-border pt-24">
+          <div className="flex justify-between items-end mb-12">
+            <div>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-text-secondary font-bold mb-2 block">Discovery</span>
+              <h3 className="text-3xl font-display uppercase tracking-tight">More from {product.category.name}</h3>
+            </div>
+            <Link
+              href={`/categories/${product.category.slug}`}
+              className="text-[10px] uppercase tracking-[0.2em] font-bold border-b border-black pb-1 hover:opacity-50 transition-opacity"
+            >
+              Explore Category
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {categoryProducts.map((p) => (
+              <ProductCard
+                key={p.id}
+                id={p.id}
+                name={p.name}
+                slug={p.slug}
+                price={Number(p.basePrice)}
+                salePrice={p.salePrice ? Number(p.salePrice) : undefined}
+                category={p.category.name}
+                imageUrl={p.images[0]?.url || '/placeholder.png'}
+                sku={p.sku}
+                description={p.description}
+                avgRating={p.avgRating || undefined}
+                reviewCount={p.reviewCount}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Related Products */}
       {relatedProducts.length > 0 && (
         <div className="mt-32 border-t border-border pt-24">
@@ -535,6 +589,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           </div>
         </div>
       )}
+      <RecentlyViewed />
     </div>
   )
 }

@@ -8,10 +8,18 @@ import { isAdminEmail } from '@/lib/auth/admin'
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const code = searchParams.get('code')
+  const state = searchParams.get('state')
+  const storedState = req.cookies.get('oauth_state')?.value
   const appUrl = process.env.NEXT_PUBLIC_APP_URL!
 
   if (!code) {
     return NextResponse.redirect(`${appUrl}/login?error=oauth_denied`)
+  }
+
+  // Verify state to prevent CSRF
+  if (!state || !storedState || state !== storedState) {
+    logger.error('Google OAuth state mismatch', { state, storedState })
+    return NextResponse.redirect(`${appUrl}/login?error=oauth_invalid_state`)
   }
 
   try {
@@ -59,7 +67,8 @@ export async function GET(req: NextRequest) {
       // Upgrade GUEST to CUSTOMER, leave CUSTOMER/ADMIN roles untouched
       const updateData: any = {
         googleId: profile.sub,
-        name: profile.name || existingUser.name // Update name from Google if available
+        name: profile.name || existingUser.name, // Update name from Google if available
+        referralCode: (existingUser as any).referralCode || Math.random().toString(36).substring(2, 10).toUpperCase()
       }
       if (existingUser.role === 'GUEST') {
         updateData.role = 'CUSTOMER'
@@ -78,6 +87,7 @@ export async function GET(req: NextRequest) {
           googleId: profile.sub,
           role: 'CUSTOMER',
           isVerified: true,
+          referralCode: Math.random().toString(36).substring(2, 10).toUpperCase()
         },
       })
       // Fire welcome email for genuinely new users only

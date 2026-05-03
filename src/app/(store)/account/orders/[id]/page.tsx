@@ -232,6 +232,15 @@ export default function OrderDetailPage() {
                     <p className="text-xs text-neutral-600 font-medium">Qty: {item.quantity}</p>
                     <p className="text-sm font-bold font-mono text-black">PKR {Number(item.price).toLocaleString()}</p>
                   </div>
+                  {order.status === 'DELIVERED' && (
+                    <div className="mt-4">
+                      <Button asChild variant="outline" size="sm" className="rounded-[8px] h-9 text-[9px] uppercase tracking-widest font-bold border-neutral-200 hover:border-black transition-all">
+                        <Link href={`/products/${item.product.slug}?review=true`}>
+                          Review This Item
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

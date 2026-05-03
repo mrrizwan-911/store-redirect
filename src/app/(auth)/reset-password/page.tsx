@@ -77,7 +77,7 @@ function ResetPasswordForm() {
           <Button
             asChild
             variant="outline"
-            className="w-full border-neutral-200 hover:bg-neutral-50 text-black uppercase tracking-[0.2em] text-[13px] font-bold rounded-[12px] h-[60px] transition-all"
+            className="w-full border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all duration-500 uppercase tracking-[0.3em] text-[13px] font-bold rounded-[var(--radius)] h-[60px] shadow-sm"
           >
             <Link href="/forgot-password">Request New Link</Link>
           </Button>
@@ -163,7 +163,7 @@ function ResetPasswordForm() {
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-black hover:bg-[#1A1A1A] text-white uppercase tracking-[0.2em] text-[13px] font-bold rounded-[12px] h-[60px] transition-all"
+          className="w-full border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all duration-500 uppercase tracking-[0.3em] text-[13px] font-bold rounded-[var(--radius)] h-[60px] shadow-sm"
         >
           {isLoading ? 'Updating...' : 'Update Password'}
         </Button>

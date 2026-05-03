@@ -72,10 +72,10 @@ export function SizeGuideModal({ categoryId, categorySlug, categoryName = 'cloth
     <Dialog>
       <DialogTrigger asChild>
         {trigger || (
-          <div role="button" tabIndex={0} className="inline-flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-neutral-400 hover:text-black transition-colors underline underline-offset-4 decoration-neutral-200 cursor-pointer">
+          <button className="inline-flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-neutral-400 hover:text-black transition-colors underline underline-offset-4 decoration-neutral-200 cursor-pointer">
             <Ruler className="w-3 h-3" />
             Size Guide
-          </div>
+          </button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-2xl bg-white border-none rounded-none p-0 overflow-hidden shadow-2xl">

@@ -63,9 +63,9 @@ export function CartDrawer() {
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
               <p className="text-neutral-500 text-sm">Your cart is empty.</p>
-              <button 
+              <button
                 onClick={() => dispatch(closeCart())}
-                className="h-10 px-6 border border-black text-black hover:bg-[#FAFAFA] transition-colors uppercase text-[10px] font-bold tracking-[0.22em] rounded-none"
+                className="h-10 px-6 border border-black text-black hover:bg-[#FAFAFA] transition-colors uppercase text-[10px] font-bold tracking-[0.22em] rounded-[var(--radius)]"
               >
                 Start Shopping
               </button>
@@ -74,7 +74,7 @@ export function CartDrawer() {
             items.map((item) => (
               <div key={`${item.productId}-${item.variantId || 'base'}`}>
                 <div className="flex gap-4 items-start">
-                  <div className="w-16 h-20 bg-[#FAFAFA] border border-[#E5E5E5] shrink-0 rounded-none overflow-hidden relative">
+                  <div className="w-16 h-20 bg-[#FAFAFA] border border-[#E5E5E5] shrink-0 rounded-[var(--radius)] overflow-hidden relative">
                     <Image 
                       src={item.imageUrl || 'https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?w=400&q=80'} 
                       alt={item.name} 
@@ -108,8 +108,8 @@ export function CartDrawer() {
                     </button>
                     
                     <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center border border-[#E5E5E5] w-24 h-8 rounded-none overflow-hidden">
-                        <button 
+                      <div className="flex items-center border border-[#E5E5E5] w-24 h-8 rounded-[var(--radius)] overflow-hidden">
+                        <button
                           onClick={() => handleQuantityChange(item.productId, item.variantId, item.quantity, -1)}
                           className="w-8 h-full flex justify-center items-center text-neutral-500 hover:text-black hover:bg-[#FAFAFA] transition-colors"
                           aria-label="Decrease quantity"
@@ -117,9 +117,10 @@ export function CartDrawer() {
                           <Minus className="w-3 h-3" />
                         </button>
                         <span className="flex-1 text-center font-bold text-[12px]">{item.quantity}</span>
-                        <button 
+                        <button
                           onClick={() => handleQuantityChange(item.productId, item.variantId, item.quantity, 1)}
-                          className="w-8 h-full flex justify-center items-center text-neutral-500 hover:text-black hover:bg-[#FAFAFA] transition-colors"
+                          className="w-8 h-full flex justify-center items-center text-neutral-500 hover:text-black hover:bg-[#FAFAFA] transition-colors disabled:opacity-30"
+                          disabled={item.quantity >= item.stock}
                           aria-label="Increase quantity"
                         >
                           <Plus className="w-3 h-3" />
@@ -144,17 +145,17 @@ export function CartDrawer() {
             <p className="text-[11px] text-neutral-500 mb-5">Shipping & taxes calculated at checkout.</p>
 
             <div className="grid grid-cols-2 gap-4">
-              <Link 
+              <Link
                 href="/cart"
                 onClick={() => dispatch(closeCart())}
-                className="w-full h-11 border border-black text-black hover:bg-white transition-colors uppercase text-[10px] font-bold tracking-[0.22em] rounded-none flex items-center justify-center"
+                className="w-full h-11 border-2 border-black text-black hover:bg-black hover:text-white transition-all duration-300 uppercase text-[10px] font-bold tracking-[0.22em] rounded-full flex items-center justify-center"
               >
                 View Cart
               </Link>
-              <Link 
+              <Link
                 href="/checkout"
                 onClick={() => dispatch(closeCart())}
-                className="w-full h-11 bg-black text-white hover:bg-[#262626] transition-colors uppercase text-[10px] font-bold tracking-[0.22em] rounded-none flex items-center justify-center"
+                className="w-full h-11 border-2 border-black bg-transparent text-black hover:bg-black hover:text-white transition-all duration-500 uppercase text-[10px] font-bold tracking-[0.3em] rounded-full flex items-center justify-center shadow-none active:scale-[0.98]"
               >
                 Checkout
               </Link>

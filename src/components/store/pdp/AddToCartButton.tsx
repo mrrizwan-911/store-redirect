@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAppDispatch } from '@/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { addItem, openCart } from '@/store/slices/cartSlice'
 import { Button } from '@/components/ui/button'
 import { ShoppingBag } from 'lucide-react'
@@ -32,10 +32,18 @@ export default function AddToCartButton({
   className,
 }: AddToCartButtonProps) {
   const dispatch = useAppDispatch()
+  const { items: cartItems } = useAppSelector((state) => state.cart)
   const [isAdding, setIsAdding] = useState(false)
 
-  const isOutOfStock = selectedVariant ? selectedVariant.stock <= 0 : false
-  const isDisabled = !selectedVariant || isOutOfStock || isAdding
+  const existingInCart = cartItems.find(
+    i => i.productId === product.id && i.variantId === selectedVariant?.id
+  )
+
+  const currentQtyInCart = existingInCart?.quantity || 0
+  const availableStock = selectedVariant?.stock || 0
+  const isOutOfStock = availableStock <= 0
+  const isMaxInCart = selectedVariant ? currentQtyInCart >= availableStock : false
+  const isDisabled = !selectedVariant || isOutOfStock || isMaxInCart || isAdding
 
   const handleAddToCart = () => {
     if (!selectedVariant) return
@@ -51,6 +59,7 @@ export default function AddToCartButton({
           name: product.name,
           price: Number(selectedVariant.price || product.salePrice || product.basePrice),
           quantity: quantity,
+          stock: availableStock,
           imageUrl: product.images[0]?.url || '',
           variantTitle: selectedVariant.title,
         })
@@ -64,11 +73,11 @@ export default function AddToCartButton({
     <Button
       onClick={handleAddToCart}
       disabled={isDisabled}
+      variant="outline"
       className={cn(
-        'w-full h-auto py-3 rounded-none text-[10px] uppercase tracking-[0.22em] font-bold transition-all duration-300',
-        !selectedVariant && 'bg-neutral-200 text-neutral-500 cursor-not-allowed',
-        isOutOfStock && 'bg-neutral-100 text-neutral-400 cursor-not-allowed',
-        !isDisabled && 'hover:bg-primary-hover active:scale-[0.98]',
+        'w-full h-auto py-5 text-[12px] uppercase tracking-[0.3em] font-bold transition-all duration-700 border-2 rounded-full',
+        !isDisabled && 'border-primary text-primary bg-transparent hover:bg-primary hover:text-white shadow-none active:scale-[0.99] ring-offset-2 hover:ring-2 hover:ring-primary',
+        isDisabled && 'opacity-50 cursor-not-allowed border-border text-text-secondary',
         className
       )}
     >
@@ -77,6 +86,8 @@ export default function AddToCartButton({
         'Adding...'
       ) : isOutOfStock ? (
         'Out of Stock'
+      ) : isMaxInCart ? (
+        'Max Quantity in Cart'
       ) : !selectedVariant ? (
         'Select Size & Color'
       ) : (

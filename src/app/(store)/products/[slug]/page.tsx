@@ -52,12 +52,26 @@ export default async function ProductPage({ params }: Props) {
       ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
       : null
 
-  // Fetch related products (same category, excluding current product)
-  const relatedProducts = await db.product.findMany({
+  // Fetch category-specific products (Same category, excluding current product, up to 8)
+  const categoryProducts = await db.product.findMany({
     where: {
       categoryId: product.categoryId,
       id: { not: product.id },
       isActive: true,
+    },
+    include: {
+      images: { where: { isPrimary: true }, take: 1 },
+      category: { select: { name: true, slug: true } },
+    },
+    take: 8,
+  })
+
+  // Fetch related products (e.g., featured or trending items from other categories)
+  const relatedProducts = await db.product.findMany({
+    where: {
+      id: { not: product.id },
+      isActive: true,
+      isFeatured: true,
     },
     include: {
       images: { where: { isPrimary: true }, take: 1 },
@@ -79,6 +93,12 @@ export default async function ProductPage({ params }: Props) {
     }))
   }
 
+  const enrichedCategoryProducts = categoryProducts.map(p => ({
+    ...p,
+    basePrice: Number(p.basePrice),
+    salePrice: p.salePrice ? Number(p.salePrice) : null,
+  }))
+
   const enrichedRelatedProducts = relatedProducts.map(p => ({
     ...p,
     basePrice: Number(p.basePrice),
@@ -86,9 +106,10 @@ export default async function ProductPage({ params }: Props) {
   }))
 
   return (
-    <main className="min-h-screen bg-background pt-20">
+    <main className="min-h-screen bg-background pt-4">
       <ProductDetailClient
         product={enrichedProduct as any}
+        categoryProducts={enrichedCategoryProducts as any}
         relatedProducts={enrichedRelatedProducts as any}
       />
     </main>

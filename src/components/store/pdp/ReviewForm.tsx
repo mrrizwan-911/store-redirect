@@ -125,7 +125,7 @@ export default function ReviewForm({ onSuccess, onCancel }: ReviewFormProps) {
           placeholder="Summarize your experience"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full p-4 border-[#E5E5E5] rounded-none focus:border-black focus:ring-0 outline-none bg-white text-black h-12"
+          className="w-full p-4 border-[#E5E5E5] rounded-[var(--radius)] focus:border-black focus:ring-0 outline-none bg-white text-black h-12"
         />
       </div>
 
@@ -140,7 +140,7 @@ export default function ReviewForm({ onSuccess, onCancel }: ReviewFormProps) {
           placeholder="What did you like or dislike?"
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          className="w-full p-4 border-[#E5E5E5] rounded-none focus:border-black focus:ring-0 outline-none bg-white text-black min-h-[120px]"
+          className="w-full p-4 border-[#E5E5E5] rounded-[var(--radius)] focus:border-black focus:ring-0 outline-none bg-white text-black min-h-[120px]"
         />
         <p className="text-[10px] text-neutral-400">Min. 10 characters</p>
       </div>
@@ -148,7 +148,7 @@ export default function ReviewForm({ onSuccess, onCancel }: ReviewFormProps) {
       <Button
         type="submit"
         disabled={isLoading}
-        className="w-full bg-black hover:bg-[#262626] text-white py-6 uppercase tracking-widest font-bold rounded-none transition-colors h-14"
+        className="w-full border-2 border-black bg-transparent text-black hover:bg-black hover:text-white py-6 uppercase tracking-[0.3em] font-bold rounded-full transition-all duration-500 h-14 active:scale-[0.98]"
       >
         {isLoading ? 'Submitting...' : 'Submit Review'}
       </Button>

@@ -121,7 +121,7 @@ export default function OrderConfirmationPage() {
             Continue Shopping
           </Link>
           <Link
-            href="/auth/register"
+            href="/register"
             className="flex-1 text-center bg-black text-white px-6 py-3 text-xs uppercase tracking-widest font-bold hover:bg-neutral-900 transition-colors flex items-center justify-center gap-2"
           >
             Create Account <ArrowRight className="w-3 h-3" />

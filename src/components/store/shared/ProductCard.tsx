@@ -92,18 +92,17 @@ export function ProductCard({
 
   return (
     <div
-      className="group relative bg-white rounded-[12px] border border-[#E5E5E5] transition-colors duration-300 hover:border-black/25 overflow-hidden"
+      className="group relative bg-white rounded-[var(--radius)] border border-[#E5E5E5] transition-colors duration-300 hover:border-black/25 overflow-hidden"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Container */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#FAFAFA] rounded-t-[12px]">
+      <div className="relative aspect-[4/5] overflow-hidden bg-[#FAFAFA] rounded-t-[var(--radius)]">
         <Link href={`/products/${slug}`} className="block h-full w-full relative">
           <Image
             src={(isHovered && secondaryImageUrl) ? secondaryImageUrl : (imageUrl || '/placeholder.png')}
             alt={name}
             fill
-            unoptimized
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
           />
@@ -128,7 +127,7 @@ export function ProductCard({
           <button
             onClick={handleWishlist}
             className={cn(
-              "h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors",
+              "h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)]",
               isWishlisted && "border-black text-black"
             )}
             aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
@@ -141,7 +140,7 @@ export function ProductCard({
           <button
             onClick={handleCompare}
             className={cn(
-              "h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors",
+              "h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)]",
               isInCompare && "border-black text-black"
             )}
             aria-label={isInCompare ? "Remove from comparison" : "Add to comparison"}
@@ -152,7 +151,7 @@ export function ProductCard({
 
           <button
             onClick={handleAddToCart}
-            className="h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors"
+            className="h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)]"
             aria-label="View Details"
           >
             <Plus className="w-3.5 h-3.5" />

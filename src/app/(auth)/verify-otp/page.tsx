@@ -202,7 +202,7 @@ function VerifyOtpContent() {
               inputMode="numeric"
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              className="w-11 h-14 border-2 border-neutral-200 rounded-none text-center text-xl font-display bg-transparent text-black focus:border-black focus:ring-0 outline-none transition-all duration-300"
+              className="w-11 h-14 border-2 border-neutral-200 rounded-[var(--radius)] text-center text-xl font-display bg-transparent text-black focus:border-black focus:ring-0 outline-none transition-all duration-300"
               autoFocus={index === 0}
             />
           ))}
@@ -212,7 +212,7 @@ function VerifyOtpContent() {
           <Button
             type="submit"
             disabled={isLoading || timeLeft === 0}
-            className="w-full bg-black hover:bg-[#1A1A1A] text-white uppercase tracking-[0.2em] text-[13px] font-bold rounded-none h-[60px] transition-all"
+            className="w-full bg-black hover:bg-[#1A1A1A] text-white uppercase tracking-[0.2em] text-[13px] font-bold rounded-[var(--radius)] h-[60px] transition-all"
           >
             {isLoading ? 'Verifying...' : 'Verify OTP'}
           </Button>

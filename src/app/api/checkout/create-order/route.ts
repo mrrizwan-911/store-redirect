@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
       shippingMethod,
       paymentMethod,
       couponCode,
+      loyaltyPoints,
       items,
       isGift,
       giftMessage,
@@ -103,7 +104,32 @@ export async function POST(req: NextRequest) {
     }
     // If subtotal >= 3000, shipping is free regardless of method chosen if it was standard/free
 
-    const total = subtotal + shippingCost - discount
+    // 4. Validate Loyalty Points
+    let loyaltyDiscount = 0
+    let pointsToDeduct = 0
+    if (userId && loyaltyPoints && loyaltyPoints > 0) {
+      const account = await db.loyaltyAccount.findUnique({ where: { userId } })
+      if (!account || account.points < loyaltyPoints) {
+        return NextResponse.json(
+          { success: false, error: 'Insufficient loyalty points' },
+          { status: 400 }
+        )
+      }
+      if (loyaltyPoints % 100 !== 0 || loyaltyPoints > 2000) {
+        return NextResponse.json(
+          { success: false, error: 'Invalid loyalty points redemption' },
+          { status: 400 }
+        )
+      }
+
+      // Cap loyalty discount to the remaining balance after coupon
+      const remainingBalance = subtotal - discount + shippingCost
+      loyaltyDiscount = Math.min(loyaltyPoints, remainingBalance)
+      pointsToDeduct = loyaltyDiscount // 1 point = 1 PKR
+    }
+
+    const totalDiscount = discount + loyaltyDiscount
+    const total = Math.max(0, subtotal + shippingCost - totalDiscount)
 
     // Pre-checkout: validate all variants have sufficient stock
     for (const item of lineItems) {
@@ -153,7 +179,7 @@ export async function POST(req: NextRequest) {
           status: OrderStatus.PENDING,
           subtotal: subtotal,
           shippingCost: shippingCost,
-          discount: discount,
+          discount: totalDiscount,
           total: total,
           couponCode: discount > 0 ? couponCode?.toUpperCase() : null,
           trackingNumber,
@@ -189,6 +215,25 @@ export async function POST(req: NextRequest) {
           where: { code: couponCode.toUpperCase() },
           data: { usedCount: { increment: 1 } },
         })
+      }
+
+      // 5. Deduct Loyalty Points if used
+      if (userId && pointsToDeduct > 0) {
+        const account = await tx.loyaltyAccount.findUnique({ where: { userId } })
+        if (account) {
+          await tx.loyaltyAccount.update({
+            where: { userId },
+            data: { points: { decrement: pointsToDeduct } }
+          })
+
+          await tx.loyaltyEvent.create({
+            data: {
+              accountId: account.id,
+              points: -pointsToDeduct,
+              reason: `Redeemed at checkout for order #${order.orderNumber}`,
+            }
+          })
+        }
       }
 
       // Atomically decrement stock for each variant

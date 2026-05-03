@@ -83,7 +83,7 @@ export default function DashboardWishlistPage() {
 
       {/* Empty State */}
       {items.length === 0 && (
-        <div className="py-32 text-center border-2 border-dashed border-neutral-200 rounded-[12px] bg-neutral-50/30">
+        <div className="py-32 text-center border-2 border-dashed border-neutral-200 rounded-[var(--radius)] bg-neutral-50/30">
           <Heart className="w-12 h-12 text-neutral-300 mx-auto mb-6 stroke-[1.5]" />
           <h2 className="font-display text-2xl mb-2 text-black">Your wishlist is empty</h2>
           <p className="text-neutral-500 text-sm font-medium max-w-xs mx-auto mb-8">
@@ -91,7 +91,7 @@ export default function DashboardWishlistPage() {
           </p>
           <Link
             href="/products"
-            className="rounded-[12px] bg-black text-white h-12 px-10 uppercase tracking-widest text-[10px] font-bold shadow-lg flex items-center justify-center mx-auto w-fit transition-all hover:bg-neutral-900"
+            className="rounded-[var(--radius)] border-2 border-black bg-white text-black h-12 px-10 uppercase tracking-widest text-[10px] font-bold shadow-sm flex items-center justify-center mx-auto w-fit transition-all duration-300 hover:bg-black hover:text-white"
           >
             Explore Products
           </Link>

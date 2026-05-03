@@ -156,7 +156,7 @@ export default function RegisterPage() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-black hover:bg-[#1A1A1A] text-white uppercase tracking-[0.2em] text-[13px] font-bold h-[60px] transition-all"
+            className="w-full border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all duration-500 uppercase tracking-[0.3em] text-[13px] font-bold h-[60px] rounded-[var(--radius)] shadow-sm"
           >
             {isLoading ? 'Creating Account...' : 'Sign Up'}
           </Button>
@@ -170,7 +170,7 @@ export default function RegisterPage() {
             onClick={handleGoogleLogin}
             type="button"
             variant="outline"
-            className="w-full border-neutral-200 hover:bg-neutral-50 text-black uppercase tracking-[0.2em] text-[13px] font-bold h-[60px] transition-all flex items-center justify-center gap-3"
+            className="w-full border-neutral-200 hover:bg-neutral-50 text-black uppercase tracking-[0.2em] text-[13px] font-bold h-[60px] transition-all flex items-center justify-center gap-3 rounded-[var(--radius)]"
           >
             <svg viewBox="0 0 24 24" className="w-5 h-5">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />

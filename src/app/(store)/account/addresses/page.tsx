@@ -185,152 +185,158 @@ export default function AddressBookPage() {
           if (!open) resetForm()
         }}>
           <DialogTrigger asChild>
-            <div role="button" tabIndex={0} className="rounded-[12px] h-14 px-8 bg-black text-white hover:bg-neutral-900 uppercase tracking-widest text-[10px] font-bold transition-all flex items-center gap-3 shadow-xl cursor-pointer">
+            <button className="rounded-[var(--radius)] h-14 px-8 border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all duration-300 uppercase tracking-widest text-[10px] font-bold flex items-center gap-3 shadow-sm cursor-pointer">
               <Plus className="w-4 h-4 stroke-[2]" /> Add New Address
-            </div>
+            </button>
           </DialogTrigger>
-          <DialogContent className="max-w-md rounded-[12px] border-none p-8 bg-white shadow-2xl">
-            <DialogHeader className="mb-6">
-              <DialogTitle className="font-display text-3xl tracking-tight text-black">
+          <DialogContent className="max-w-3xl rounded-[var(--radius)] border-none p-10 bg-white shadow-2xl">
+            <DialogHeader className="mb-8">
+              <DialogTitle className="font-display text-4xl tracking-tight text-black">
                 {editingAddress ? 'Edit Address' : 'New Address'}
               </DialogTitle>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-1.5">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Row 1: Label & Company */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Address Label</label>
+                  <input
+                    name="label"
+                    value={formData.label}
+                    onChange={handleInputChange}
+                    placeholder="e.g. Home, Office"
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Company (Optional)</label>
+                  <input
+                    name="company"
+                    value={formData.company || ''}
+                    onChange={handleInputChange}
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Names & Email */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">First Name</label>
                   <input
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
                     required
                   />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">Last Name</label>
                   <input
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
                     required
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">Email</label>
                   <input
                     name="email"
                     type="email"
                     value={formData.email || ''}
                     onChange={handleInputChange}
-                    className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Phone</label>
+              </div>
+
+              {/* Row 3: Phone & Country */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Phone Number</label>
                   <input
                     name="phone"
                     type="tel"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Country</label>
+                  <input
+                    name="country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-black">Company (Optional)</label>
-                <input
-                  name="company"
-                  value={formData.company || ''}
-                  onChange={handleInputChange}
-                  className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
-                />
+              {/* Row 4: Street Address & Suite (Combined) */}
+              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8">
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Street Address</label>
+                  <input
+                    name="line1"
+                    value={formData.line1}
+                    onChange={handleInputChange}
+                    placeholder="House number, street name"
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Apartment / Suite</label>
+                  <input
+                    name="line2"
+                    value={formData.line2 || ''}
+                    onChange={handleInputChange}
+                    placeholder="Opt."
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-black">Country</label>
-                <input
-                  name="country"
-                  value={formData.country}
-                  onChange={handleInputChange}
-                  className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-black">Address Label</label>
-                <input
-                  name="label"
-                  value={formData.label}
-                  onChange={handleInputChange}
-                  placeholder="e.g. Home, Office"
-                  className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-black">Street Address</label>
-                <input
-                  name="line1"
-                  value={formData.line1}
-                  onChange={handleInputChange}
-                  placeholder="House number, street name"
-                  className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-black">Apartment / Suite (Optional)</label>
-                <input
-                  name="line2"
-                  value={formData.line2 || ''}
-                  onChange={handleInputChange}
-                  className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-1.5">
+              {/* Row 5: City, Province, Postal Code */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">City</label>
                   <input
                     name="city"
                     value={formData.city}
                     onChange={handleInputChange}
-                    className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
                     required
                   />
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">Province</label>
                   <input
                     name="province"
                     value={formData.province}
                     onChange={handleInputChange}
-                    className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
                     required
                   />
                 </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[10px] uppercase tracking-widest font-bold text-black">Postal Code</label>
-                <input
-                  name="postalCode"
-                  value={formData.postalCode}
-                  onChange={handleInputChange}
-                  className="input-underline w-full h-10 text-sm outline-none border-neutral-300 focus:border-black"
-                  required
-                />
+                <div className="space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Postal Code</label>
+                  <input
+                    name="postalCode"
+                    value={formData.postalCode}
+                    onChange={handleInputChange}
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
+                    required
+                  />
+                </div>
               </div>
 
               <div className="flex items-center gap-3 py-2">
@@ -347,11 +353,11 @@ export default function AddressBookPage() {
                 </label>
               </div>
 
-              <DialogFooter className="mt-8">
+              <DialogFooter className="mt-10">
                 <Button
                   type="submit"
                   disabled={isSaving}
-                  className="w-full rounded-[12px] h-14 bg-black text-white hover:bg-neutral-900 uppercase tracking-widest text-[11px] font-bold shadow-xl"
+                  className="w-full rounded-[var(--radius)] h-16 border-2 border-black bg-black text-white hover:bg-white hover:text-black transition-all duration-500 uppercase tracking-widest text-[12px] font-bold shadow-md"
                 >
                   {isSaving ? 'Saving...' : (editingAddress ? 'Update Address' : 'Save Address')}
                 </Button>
@@ -365,7 +371,7 @@ export default function AddressBookPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {addresses.map((address) => (
             <Card key={address.id} className={cn(
-              "rounded-[12px] border-neutral-200 shadow-none transition-all group relative overflow-hidden bg-white",
+              "rounded-[var(--radius)] border-neutral-200 shadow-none transition-all group relative overflow-hidden bg-white",
               address.isDefault && "border-black/30 bg-neutral-50/50"
             )}>
               <CardContent className="p-8">
@@ -415,7 +421,7 @@ export default function AddressBookPage() {
           ))}
         </div>
       ) : (
-        <div className="py-32 text-center border-2 border-dashed border-neutral-200 rounded-[12px] bg-neutral-50/30">
+        <div className="py-32 text-center border-2 border-dashed border-neutral-200 rounded-[var(--radius)] bg-neutral-50/30">
           <MapPin className="w-12 h-12 text-neutral-300 mx-auto mb-6 stroke-[1.5]" />
           <h2 className="font-display text-2xl mb-2 text-black">No addresses found</h2>
           <p className="text-neutral-500 text-sm font-medium max-w-xs mx-auto mb-8">
@@ -424,7 +430,7 @@ export default function AddressBookPage() {
           <Button
             variant="outline"
             onClick={() => setIsDialogOpen(true)}
-            className="rounded-[12px] border-black text-black uppercase tracking-widest text-[10px] font-bold h-12 px-10 hover:bg-black hover:text-white transition-all"
+            className="rounded-[var(--radius)] border-black text-black uppercase tracking-widest text-[10px] font-bold h-12 px-10 hover:bg-black hover:text-white transition-all"
           >
             Add Your First Address
           </Button>

@@ -50,7 +50,8 @@ export async function POST(req: NextRequest) {
         data: {
           name: finalName,
           passwordHash,
-          notes: referredBy ? `Referred by: ${referredBy}` : existingUser.notes
+          notes: referredBy ? `Referred by: ${referredBy}` : existingUser.notes,
+          referralCode: existingUser.referralCode || Math.random().toString(36).substring(2, 10).toUpperCase()
         },
       })
 
@@ -83,7 +84,8 @@ export async function POST(req: NextRequest) {
         email,
         passwordHash,
         role: 'CUSTOMER',
-        notes: referredBy ? `Referred by: ${referredBy}` : null
+        notes: referredBy ? `Referred by: ${referredBy}` : null,
+        referralCode: Math.random().toString(36).substring(2, 10).toUpperCase()
       },
     })
 

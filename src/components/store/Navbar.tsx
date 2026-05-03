@@ -290,7 +290,7 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
 
                   {/* Mega Menu Dropdown */}
                   {getSubcategories(cat.slug).length > 0 && (
-                    <div className="absolute top-full left-0 hidden group-hover:block w-48 bg-white border border-neutral-200 shadow-xl py-4 px-6">
+                    <div className="absolute top-full left-0 hidden group-hover:block w-48 bg-white border border-neutral-200 shadow-xl py-4 px-6 rounded-[var(--radius)]">
                       <div className="flex flex-col gap-3">
                         {getSubcategories(cat.slug).map(sub => (
                           <Link
@@ -357,7 +357,7 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
               >
                 <ShoppingBag className="h-5 w-5 stroke-[1.5]" />
                 {rehydrated && cartCount > 0 && (
-                  <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center bg-black text-[8px] font-bold text-white rounded-none">
+                  <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center bg-black text-[8px] font-bold text-white rounded-full">
                     {cartCount}
                   </span>
                 )}

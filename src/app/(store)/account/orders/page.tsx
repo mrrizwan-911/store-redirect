@@ -133,7 +133,7 @@ export default function OrdersHistoryPage() {
               <Link
                 key={order.id}
                 href={`/account/orders/${order.id}`}
-                className="block p-5 bg-white border border-neutral-200 active:bg-neutral-50 transition-colors rounded-[12px] shadow-sm"
+                className="block p-5 bg-white border border-neutral-200 active:bg-neutral-50 transition-colors rounded-[var(--radius)] shadow-sm"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="space-y-1 text-black">
@@ -184,7 +184,7 @@ export default function OrdersHistoryPage() {
           )}
         </div>
       ) : (
-        <div className="py-32 text-center border-2 border-dashed border-neutral-200 rounded-[12px] bg-neutral-50/30">
+        <div className="py-32 text-center border-2 border-dashed border-neutral-200 rounded-[var(--radius)] bg-neutral-50/30">
           <Package className="w-12 h-12 text-neutral-300 mx-auto mb-6 stroke-[1.5]" />
           <h2 className="font-display text-2xl mb-2 text-black">No orders found</h2>
           <p className="text-neutral-500 text-sm font-medium max-w-xs mx-auto mb-8">
@@ -192,7 +192,7 @@ export default function OrdersHistoryPage() {
           </p>
           <Link
             href="/products"
-            className="rounded-[12px] bg-black text-white h-12 px-10 uppercase tracking-widest text-[10px] font-bold shadow-lg flex items-center justify-center w-fit mx-auto transition-all hover:bg-neutral-900"
+            className="rounded-[var(--radius)] border-2 border-black bg-white text-black h-12 px-10 uppercase tracking-widest text-[10px] font-bold shadow-sm flex items-center justify-center w-fit mx-auto transition-all duration-300 hover:bg-black hover:text-white"
           >
             Start Shopping
           </Link>

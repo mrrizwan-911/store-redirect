@@ -4,6 +4,7 @@ import { logger } from '@/lib/utils/logger'
 import { otpSchema } from '@/lib/validations/auth'
 import { sendWelcomeEmail } from '@/lib/services/email/welcome'
 import { signAccessToken, signRefreshToken } from '@/lib/auth/jwt'
+import { awardPoints } from '@/lib/services/loyalty/award'
 
 export async function POST(req: NextRequest) {
   try {
@@ -64,6 +65,20 @@ export async function POST(req: NextRequest) {
         },
       }),
     ])
+
+    // 3. Handle Referral Points Award
+    if (user.notes && user.notes.startsWith('Referred by:')) {
+      const referralCode = user.notes.replace('Referred by: ', '').trim()
+      const referrer = await db.user.findFirst({
+        where: { referralCode }
+      })
+      if (referrer) {
+        // Award 100 points (PKR 100) to the referrer
+        await awardPoints(referrer.id, 100, `Referral Bonus (New User: ${user.name})`, 'REFERRAL')
+        // Award 100 points (PKR 100) to the referred user too
+        await awardPoints(user.id, 100, `Welcome Bonus (Referred by: ${referrer.name})`, 'REFERRAL')
+      }
+    }
 
     // Send welcome email (fire and forget)
     sendWelcomeEmail(user.email, user.name).catch((err) => {

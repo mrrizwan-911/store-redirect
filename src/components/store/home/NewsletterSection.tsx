@@ -82,7 +82,7 @@ export function NewsletterSection() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={cn(
-                      "h-16 lg:h-14 rounded-none border-0 border-b border-neutral-200 bg-transparent px-0",
+                      "h-16 lg:h-14 rounded-[var(--radius)] border-0 border-b border-neutral-200 bg-transparent px-0",
                       "text-lg lg:text-base focus-visible:ring-0 focus-visible:border-black transition-all duration-500",
                       "placeholder:text-neutral-300 placeholder:uppercase placeholder:tracking-widest placeholder:text-[10px]"
                     )}
@@ -92,7 +92,7 @@ export function NewsletterSection() {
                   type="submit"
                   disabled={isLoading}
                   className={cn(
-                    "h-16 lg:h-14 px-12 rounded-none uppercase tracking-[0.2em] text-[11px] font-bold",
+                    "h-16 lg:h-14 px-12 rounded-[var(--radius)] uppercase tracking-[0.2em] text-[11px] font-bold",
                     "bg-black text-white hover:bg-neutral-900 transition-all duration-500",
                     "active:scale-95 shadow-2xl lg:shadow-none disabled:opacity-70"
                   )}

@@ -6,6 +6,7 @@ interface CartItem {
   name: string
   price: number
   quantity: number
+  stock: number
   imageUrl: string
   variantTitle?: string
 }
@@ -27,7 +28,9 @@ const cartSlice = createSlice({
              i.variantId === action.payload.variantId
       )
       if (existing) {
-        existing.quantity += action.payload.quantity
+        const newQty = existing.quantity + action.payload.quantity
+        existing.quantity = Math.min(newQty, action.payload.stock)
+        existing.stock = action.payload.stock // Update stock in case it changed
       } else {
         state.items.push(action.payload)
       }
@@ -46,7 +49,9 @@ const cartSlice = createSlice({
         i => i.productId === action.payload.productId &&
              i.variantId === action.payload.variantId
       )
-      if (item) item.quantity = action.payload.quantity
+      if (item) {
+        item.quantity = Math.min(action.payload.quantity, item.stock)
+      }
     },
     clearCart(state) {
       state.items = []

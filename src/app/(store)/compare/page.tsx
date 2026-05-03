@@ -16,7 +16,7 @@ export default function ComparePage() {
   if (items.length === 0) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
-        <div className="w-20 h-20 bg-neutral-50 flex items-center justify-center rounded-none mb-8">
+        <div className="w-20 h-20 bg-neutral-50 flex items-center justify-center rounded-[var(--radius)] mb-8">
           <ShoppingBag className="w-8 h-8 text-neutral-300" strokeWidth={1} />
         </div>
         <h1 className="font-display text-4xl mb-4 tracking-tight">Your Comparison is Empty</h1>
@@ -77,12 +77,12 @@ export default function ComparePage() {
                   >
                     <X className="w-4 h-4" />
                   </button>
-                  <div className="aspect-[4/5] relative mb-6 bg-neutral-50 overflow-hidden">
+                  <div className="aspect-[4/5] relative mb-6 bg-neutral-50 overflow-hidden rounded-[var(--radius)]">
                     <Image src={item.imageUrl} alt={item.name} fill className="object-cover transition-transform duration-700 group-hover:scale-105" unoptimized />
                   </div>
                   <h3 className="font-display text-xl mb-2 leading-tight">{item.name}</h3>
                   <Link href={`/products/${item.slug}`}>
-                    <Button variant="outline" className="w-full h-10 border-neutral-200 hover:border-black uppercase text-[9px] tracking-widest font-bold">
+                    <Button variant="outline" className="w-full h-10 border-neutral-200 hover:border-black uppercase text-[9px] tracking-widest font-bold rounded-[var(--radius)]">
                       View Piece
                     </Button>
                   </Link>
@@ -90,7 +90,7 @@ export default function ComparePage() {
               ))}
               {items.length < 3 && Array(3 - items.length).fill(0).map((_, i) => (
                 <th key={`empty-${i}`} className="w-1/4 p-8 border-b border-neutral-100 align-top">
-                  <div className="aspect-[4/5] bg-neutral-50/50 border border-dashed border-neutral-200 flex flex-col items-center justify-center gap-4">
+                  <div className="aspect-[4/5] bg-neutral-50/50 border border-dashed border-neutral-200 flex flex-col items-center justify-center gap-4 rounded-[var(--radius)]">
                      <PlusIcon className="w-6 h-6 text-neutral-300" />
                      <p className="text-[9px] uppercase tracking-widest text-neutral-400 font-bold">Slot Available</p>
                   </div>
@@ -130,11 +130,11 @@ export default function ComparePage() {
             <div key={item.id} className="relative text-center group">
               <button
                 onClick={() => dispatch(removeFromCompare(item.id))}
-                className="absolute -top-1 -right-1 bg-black text-white p-1 z-10"
+                className="absolute -top-1 -right-1 bg-black text-white p-1 z-10 rounded-full"
               >
                 <X className="w-3 h-3" />
               </button>
-              <div className="aspect-[3/4] relative mb-2 bg-neutral-50">
+              <div className="aspect-[3/4] relative mb-2 bg-neutral-50 rounded-[var(--radius)] overflow-hidden">
                 <Image src={item.imageUrl} alt={item.name} fill className="object-cover" unoptimized />
               </div>
               <p className="text-[9px] font-bold leading-tight line-clamp-1 uppercase tracking-tighter">{item.name}</p>

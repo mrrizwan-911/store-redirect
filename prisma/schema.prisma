@@ -323,6 +323,18 @@ model LoyaltyEvent {
   @@index([accountId])
 }
 
+model LoyaltyCampaign {
+  id          String   @id @default(cuid())
+  name        String
+  multiplier  Float    @default(2.0)
+  startTime   DateTime
+  endTime     DateTime
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@index([startTime, endTime])
+}
+
 model Outfit {
   id          String       @id @default(cuid())
   title       String

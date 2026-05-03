@@ -1,5 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { logger } from '@/lib/utils/logger'
+import { Ratelimit } from '@upstash/ratelimit'
+import redis from '@/lib/redis'
+
+// Create different rate limiters for different purposes
+// 1. Strict for Auth & Checkout (prevent brute force/spam)
+const strictRateLimit = redis ? new Ratelimit({
+  redis: redis,
+  limiter: Ratelimit.slidingWindow(10, '10 s'),
+  analytics: true,
+  prefix: 'ratelimit:strict',
+}) : null
+
+// 2. Standard for General API
+const standardRateLimit = redis ? new Ratelimit({
+  redis: redis,
+  limiter: Ratelimit.slidingWindow(100, '1 m'),
+  analytics: true,
+  prefix: 'ratelimit:standard',
+}) : null
 
 // Helper to decode JWT payload without verification (for Edge runtime)
 function decodeJwt(token: string) {
@@ -20,9 +39,52 @@ function decodeJwt(token: string) {
   }
 }
 
-export function proxy(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
+  const ip = (req as any).ip || '127.0.0.1'
 
+  // --- Rate Limiting Logic (Moved from middleware.ts) ---
+  if (redis) {
+    // 1. Strict Rate Limiting for Sensitive Paths
+    if (
+      pathname.startsWith('/api/auth') ||
+      pathname.startsWith('/api/checkout') ||
+      pathname === '/login' ||
+      pathname === '/register'
+    ) {
+      if (strictRateLimit) {
+        const { success, limit, reset, remaining } = await strictRateLimit.limit(ip)
+        if (!success) {
+          return new NextResponse('Too Many Requests', {
+            status: 429,
+            headers: {
+              'X-RateLimit-Limit': limit.toString(),
+              'X-RateLimit-Remaining': remaining.toString(),
+              'X-RateLimit-Reset': reset.toString(),
+            },
+          })
+        }
+      }
+    }
+    // 2. Standard Rate Limiting for other API routes
+    else if (pathname.startsWith('/api')) {
+      if (standardRateLimit) {
+        const { success, limit, reset, remaining } = await standardRateLimit.limit(ip)
+        if (!success) {
+          return new NextResponse('Too Many Requests', {
+            status: 429,
+            headers: {
+              'X-RateLimit-Limit': limit.toString(),
+              'X-RateLimit-Remaining': remaining.toString(),
+              'X-RateLimit-Reset': reset.toString(),
+            },
+          })
+        }
+      }
+    }
+  }
+
+  // --- Original Proxy/Auth Logic ---
   // 1. Get token from cookies or authorization header
   const authHeader = req.headers.get('authorization')
   let token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null
@@ -95,14 +157,17 @@ export function proxy(req: NextRequest) {
 
 export const config = {
   // Matchers for the proxy function
-  // Excludes: api, static files, images, favicon, auth routes
+  // Now includes API routes for rate limiting
   matcher: [
     '/',
+    '/api/:path*',
     '/admin/:path*',
     '/d8f2a1/admin/:path*',
     '/account/:path*',
     '/checkout/:path*',
+    '/login',
+    '/register',
     // General exclusion pattern to avoid running on assets but keep protection logic
-    '/((?!api|_next/static|_next/image|favicon.ico|login|register|forgot-password|reset-password|verify-otp).*)',
+    '/((?!_next/static|_next/image|favicon.ico|forgot-password|reset-password|verify-otp).*)',
   ],
 }

@@ -160,7 +160,8 @@ export function CartPage() {
                     <span className="flex-1 text-center font-bold text-[13px]">{item.quantity}</span>
                     <button
                       onClick={() => handleQuantityChange(item.productId, item.variantId, item.quantity, 1)}
-                      className="w-8 h-full flex justify-center items-center text-[#737373] hover:text-black transition-colors hover:bg-[#FAFAFA]"
+                      className="w-8 h-full flex justify-center items-center text-[#737373] hover:text-black transition-colors hover:bg-[#FAFAFA] disabled:opacity-30"
+                      disabled={item.quantity >= item.stock}
                     >
                       <Plus className="w-3 h-3" />
                     </button>

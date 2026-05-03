@@ -145,7 +145,7 @@ export default function ContactPage() {
                       type="text"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full border-b border-neutral-200 bg-transparent py-2 text-sm focus:outline-none focus:border-black transition-colors rounded-none placeholder:text-neutral-200"
+                      className="w-full border-b border-neutral-200 bg-transparent py-2 text-sm focus:outline-none focus:border-black transition-colors rounded-[var(--radius)] placeholder:text-neutral-200"
                       placeholder="Your name"
                     />
                   </div>
@@ -157,7 +157,7 @@ export default function ContactPage() {
                       type="email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full border-b border-neutral-200 bg-transparent py-2 text-sm focus:outline-none focus:border-black transition-colors rounded-none placeholder:text-neutral-200"
+                      className="w-full border-b border-neutral-200 bg-transparent py-2 text-sm focus:outline-none focus:border-black transition-colors rounded-[var(--radius)] placeholder:text-neutral-200"
                       placeholder="your@email.com"
                     />
                   </div>
@@ -168,7 +168,7 @@ export default function ContactPage() {
                       type="text"
                       value={formData.subject}
                       onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                      className="w-full border-b border-neutral-200 bg-transparent py-2 text-sm focus:outline-none focus:border-black transition-colors rounded-none placeholder:text-neutral-200"
+                      className="w-full border-b border-neutral-200 bg-transparent py-2 text-sm focus:outline-none focus:border-black transition-colors rounded-[var(--radius)] placeholder:text-neutral-200"
                       placeholder="What is this about?"
                     />
                   </div>
@@ -180,7 +180,7 @@ export default function ContactPage() {
                       rows={4}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full border border-neutral-200 bg-white p-3 text-sm focus:outline-none focus:border-black transition-colors resize-none rounded-none placeholder:text-neutral-200"
+                      className="w-full border border-neutral-200 bg-white p-3 text-sm focus:outline-none focus:border-black transition-colors resize-none rounded-[var(--radius)] placeholder:text-neutral-200"
                       placeholder="How can we assist you?"
                     />
                   </div>
@@ -189,7 +189,7 @@ export default function ContactPage() {
                     type="submit"
                     disabled={isSubmitting}
                     className={cn(
-                      "w-full bg-black text-white py-4 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-neutral-900 transition-all rounded-none flex items-center justify-center",
+                      "w-full bg-black text-white py-4 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-neutral-900 transition-all rounded-[var(--radius)] flex items-center justify-center",
                       isSubmitting && "opacity-70 cursor-not-allowed"
                     )}
                   >

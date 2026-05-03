@@ -10,8 +10,20 @@
   --font-display: var(--font-playfair);
   --font-body: var(--font-dm-sans);
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-primary-hover: var(--primary-hover);
   --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-success: var(--success);
@@ -19,6 +31,8 @@
   --color-warning: var(--warning);
   --color-surface: var(--surface);
   --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --radius-none: 0px;
 }
 
@@ -35,7 +49,7 @@
   --success: #1a7a4a;
   --error: #cc2222;
   --warning: #c47d00;
-  --radius: 0px;
+  --radius: 1.5rem;
 
   /* Shadcn variable mappings */
   --card: #FFFFFF;

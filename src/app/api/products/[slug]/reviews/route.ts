@@ -3,6 +3,8 @@ import { db } from '@/lib/db/client'
 import { verifyAccessToken } from '@/lib/auth/jwt'
 import { reviewSchema } from '@/lib/validations/products'
 import { logger } from '@/lib/utils/logger'
+import { awardPoints } from '@/lib/services/loyalty/award'
+import { analyzeSentiment } from '@/lib/services/ai/sentiment'
 
 export async function POST(
   req: NextRequest,
@@ -60,6 +62,16 @@ export async function POST(
       },
     })
 
+    if (!hasPurchased) {
+      return NextResponse.json(
+        { success: false, error: 'You can only review products you have purchased and received.' },
+        { status: 403 }
+      )
+    }
+
+    // AI Sentiment Analysis
+    const sentiment = await analyzeSentiment(`${parsed.data.title} ${parsed.data.body}`)
+
     const review = await db.review.create({
       data: {
         productId: product.id,
@@ -68,9 +80,15 @@ export async function POST(
         title: parsed.data.title,
         body: parsed.data.body,
         isVerified: !!hasPurchased,
+        sentiment: sentiment,
       },
       include: { user: { select: { name: true } } },
     })
+
+    // Award loyalty points for verified reviews
+    if (hasPurchased) {
+      await awardPoints(userId, 5, `Review for ${product.name}`, 'REVIEW')
+    }
 
     return NextResponse.json({ success: true, data: review }, { status: 201 })
   } catch (error) {

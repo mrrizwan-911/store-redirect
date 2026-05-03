@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { Star, CircleCheck } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Star, CircleCheck, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
+import { useSearchParams, useParams } from 'next/navigation'
 import ReviewForm from './ReviewForm'
 
 interface Review {
@@ -12,6 +13,7 @@ interface Review {
   title?: string | null
   body: string
   isVerified: boolean
+  sentiment?: string | null
   createdAt: Date | string
   user: {
     name: string
@@ -29,8 +31,33 @@ export default function ReviewsSection({
   avgRating,
   reviewCount,
 }: ReviewsSectionProps) {
+  const searchParams = useSearchParams()
   const [showForm, setShowForm] = useState(false)
   const [reviews, setReviews] = useState(initialReviews)
+  const [eligibility, setEligibility] = useState<{ eligible: boolean; alreadyReviewed: boolean } | null>(null)
+  const [checkingEligibility, setCheckingEligibility] = useState(true)
+
+  const { slug } = useParams() as { slug: string }
+
+  useEffect(() => {
+    async function checkEligibility() {
+      try {
+        const res = await fetch(`/api/products/${slug}/review-eligibility`)
+        const data = await res.json()
+        setEligibility(data)
+
+        // Auto-open form if review=true is in URL and user is eligible
+        if (searchParams.get('review') === 'true' && data.eligible && !data.alreadyReviewed) {
+          setShowForm(true)
+        }
+      } catch (err) {
+        console.error('Failed to check review eligibility', err)
+      } finally {
+        setCheckingEligibility(false)
+      }
+    }
+    checkEligibility()
+  }, [slug, searchParams])
 
   const ratingCounts = [0, 0, 0, 0, 0]
   reviews.forEach((review) => {
@@ -101,12 +128,33 @@ export default function ReviewsSection({
             })}
           </div>
 
-          <button
-            onClick={() => setShowForm(true)}
-            className="w-full py-4 border border-black text-xs uppercase tracking-[0.2em] font-bold hover:bg-black hover:text-white transition-all"
-          >
-            Write a Review
-          </button>
+          {!checkingEligibility && (
+            <>
+              {eligibility?.eligible && !eligibility?.alreadyReviewed ? (
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="w-full py-4 border border-black text-xs uppercase tracking-[0.2em] font-bold hover:bg-black hover:text-white transition-all flex items-center justify-center gap-2"
+                >
+                  Write a Review
+                </button>
+              ) : eligibility?.alreadyReviewed ? (
+                <div className="w-full py-4 bg-neutral-50 border border-neutral-200 text-[10px] uppercase tracking-widest font-bold text-neutral-400 text-center rounded-[4px] flex items-center justify-center gap-2">
+                  <CircleCheck className="w-3 h-3" /> Review Submitted
+                </div>
+              ) : (
+                <div className="w-full py-4 bg-neutral-50 border border-neutral-200 text-[9px] uppercase tracking-widest font-bold text-neutral-400 text-center rounded-[4px] flex flex-col items-center gap-1 px-4">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-3 h-3" /> Only purchasers can review
+                  </div>
+                  <p className="text-[8px] normal-case font-medium tracking-normal">Purchase this item and have it delivered to unlock reviews.</p>
+                </div>
+              )}
+            </>
+          )}
+
+          {checkingEligibility && (
+            <div className="w-full py-4 bg-neutral-50 border border-neutral-100 animate-pulse rounded-[4px]" />
+          )}
         </div>
 
         {/* Reviews List */}
@@ -148,6 +196,16 @@ export default function ReviewsSection({
                     <div className="flex items-center gap-1 text-success">
                       <CircleCheck className="w-3 h-3" />
                       <span>Verified Purchase</span>
+                    </div>
+                  )}
+                  {review.sentiment && (
+                    <div className={cn(
+                      "px-2 py-0.5 rounded-full text-[8px] font-black tracking-tighter",
+                      review.sentiment === 'POSITIVE' ? "bg-green-50 text-green-700" :
+                      review.sentiment === 'NEGATIVE' ? "bg-red-50 text-red-700" :
+                      "bg-neutral-100 text-neutral-600"
+                    )}>
+                      {review.sentiment}
                     </div>
                   )}
                 </div>

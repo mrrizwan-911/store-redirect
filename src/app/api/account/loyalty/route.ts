@@ -25,6 +25,21 @@ export async function GET(req: NextRequest) {
 
     const userId = payload.userId as string
 
+    let user = await db.user.findUnique({
+      where: { id: userId },
+      select: { id: true, referralCode: true }
+    })
+
+    // Safety net: Generate referral code if missing
+    if (user && !user.referralCode) {
+      const newCode = Math.random().toString(36).substring(2, 10).toUpperCase()
+      user = await db.user.update({
+        where: { id: userId },
+        data: { referralCode: newCode },
+        select: { id: true, referralCode: true }
+      })
+    }
+
     const account = await db.loyaltyAccount.findUnique({
       where: { userId },
       include: {
@@ -34,6 +49,27 @@ export async function GET(req: NextRequest) {
         }
       }
     })
+
+    // Fetch real referral stats
+    let totalReferred = 0
+    let pointsFromReferrals = 0
+
+    if (user?.referralCode) {
+      totalReferred = await db.user.count({
+        where: { notes: { contains: `Referred by: ${user.referralCode}` } }
+      })
+
+      if (account) {
+        const referralEvents = await db.loyaltyEvent.findMany({
+          where: {
+            accountId: account.id,
+            reason: { startsWith: 'Referral Bonus' }
+          },
+          select: { points: true }
+        })
+        pointsFromReferrals = referralEvents.reduce((sum, e) => sum + e.points, 0)
+      }
+    }
 
     if (!account) {
       // Return zero-state if account doesn't exist yet
@@ -46,7 +82,12 @@ export async function GET(req: NextRequest) {
           nextTier: 'SILVER',
           pointsToNextTier: 500,
           progressPct: 0,
-          history: []
+          history: [],
+          referralCode: user?.referralCode,
+          stats: {
+            totalReferred,
+            pointsFromReferrals
+          }
         }
       })
     }
@@ -83,7 +124,12 @@ export async function GET(req: NextRequest) {
         nextTier,
         pointsToNextTier: Math.max(0, pointsToNextTier),
         progressPct,
-        history: account.history
+        history: account.history,
+        referralCode: user?.referralCode,
+        stats: {
+          totalReferred,
+          pointsFromReferrals
+        }
       }
     })
   } catch (err) {

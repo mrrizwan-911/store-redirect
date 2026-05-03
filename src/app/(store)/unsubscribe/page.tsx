@@ -78,7 +78,7 @@ function UnsubscribeContent() {
             </p>
             <Button
               variant="outline"
-              className="rounded-none border-black text-[10px] font-bold uppercase tracking-widest px-8 py-6 h-auto hover:bg-black hover:text-white transition-all"
+              className="rounded-[var(--radius)] border-black text-[10px] font-bold uppercase tracking-widest px-8 py-6 h-auto hover:bg-black hover:text-white transition-all"
               onClick={() => window.location.href = '/'}
             >
               Return to Store
@@ -105,11 +105,11 @@ function UnsubscribeContent() {
                 placeholder="YOUR@EMAIL.COM"
                 value={manualEmail}
                 onChange={(e) => setManualEmail(e.target.value)}
-                className="w-full border-b border-neutral-200 py-3 text-sm text-center focus:outline-none focus:border-black transition-colors rounded-none placeholder:text-neutral-200 uppercase tracking-widest"
+                className="w-full border-b border-neutral-200 py-3 text-sm text-center focus:outline-none focus:border-black transition-colors rounded-[var(--radius)] placeholder:text-neutral-200 uppercase tracking-widest"
               />
               <Button
                 type="submit"
-                className="w-full rounded-none bg-black text-white text-[10px] font-bold uppercase tracking-widest h-12"
+                className="w-full rounded-[var(--radius)] bg-black text-white text-[10px] font-bold uppercase tracking-widest h-12"
               >
                 Confirm Unsubscribe
               </Button>

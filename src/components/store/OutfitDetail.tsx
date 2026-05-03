@@ -17,13 +17,17 @@ export function OutfitDetail({ outfit }: OutfitDetailProps) {
   const handleAddAllToCart = () => {
     outfit.items.forEach((item: any) => {
       const product = item.product
-      const price = product.salePrice ?? product.basePrice
+      const variant = product.variants?.[0]
+      const price = variant?.price ?? product.salePrice ?? product.basePrice
       dispatch(
         addItem({
           productId: product.id,
+          variantId: variant?.id,
+          variantTitle: variant?.title,
           name: product.name,
           price: Number(price),
           quantity: 1,
+          stock: variant?.stock ?? 999,
           imageUrl: product.images?.[0]?.url ?? '',
         })
       )
@@ -32,13 +36,17 @@ export function OutfitDetail({ outfit }: OutfitDetailProps) {
   }
 
   const handleAddSingleToCart = (product: any) => {
-    const price = product.salePrice ?? product.basePrice
+    const variant = product.variants?.[0]
+    const price = variant?.price ?? product.salePrice ?? product.basePrice
     dispatch(
       addItem({
         productId: product.id,
+        variantId: variant?.id,
+        variantTitle: variant?.title,
         name: product.name,
         price: Number(price),
         quantity: 1,
+        stock: variant?.stock ?? 999,
         imageUrl: product.images?.[0]?.url ?? '',
       })
     )

@@ -260,7 +260,7 @@ export default function ProfilePage() {
           <Button
             type="submit"
             disabled={isSaving}
-            className="rounded-[12px] h-[56px] px-10 bg-black text-white hover:bg-neutral-900 uppercase tracking-[0.2em] text-[11px] font-bold transition-all flex items-center gap-3 w-full md:w-auto shadow-xl"
+            className="rounded-[var(--radius)] h-[56px] px-10 border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all duration-500 uppercase tracking-[0.2em] text-[11px] font-bold flex items-center gap-3 w-full md:w-auto shadow-sm"
           >
             {isSaving ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

@@ -5,8 +5,8 @@ export async function redeemPoints(userId: string, points: number, orderId: stri
     return { success: false, error: 'Points must be a multiple of 100' }
   }
 
-  if (points > 500) {
-    return { success: false, error: 'Maximum 500 points can be redeemed per order' }
+  if (points > 2000) {
+    return { success: false, error: 'Maximum 2000 points can be redeemed per order' }
   }
 
   const account = await db.loyaltyAccount.findUnique({ where: { userId } })

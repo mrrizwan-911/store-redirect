@@ -177,7 +177,7 @@ export default function TrackOrderPage() {
                     <p className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Method</p>
                     <p className="text-xs font-bold uppercase">{order.payment?.method.replace('_', ' ')}</p>
                   </div>
-                  <Badge variant="outline" className="ml-auto rounded-none text-[8px] uppercase tracking-widest">{order.payment?.status}</Badge>
+                  <Badge variant="outline" className="ml-auto rounded-[var(--radius)] text-[8px] uppercase tracking-widest">{order.payment?.status}</Badge>
                 </div>
               </div>
             </div>

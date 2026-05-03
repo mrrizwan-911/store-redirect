@@ -5,6 +5,7 @@ import { FeaturedProducts } from '@/components/store/home/FeaturedProducts'
 import { NewArrivalsStrip } from '@/components/store/home/NewArrivalsStrip'
 import { LookbookTeaser } from '@/components/store/home/LookbookTeaser'
 import { NewsletterSection } from '@/components/store/home/NewsletterSection'
+import { RecentlyViewed } from '@/components/store/shared/RecentlyViewed'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,6 +69,7 @@ export default async function Homepage() {
       <FeaturedProducts products={featured} />
       <NewArrivalsStrip products={newArrivals} />
       <LookbookTeaser />
+      <RecentlyViewed />
       <NewsletterSection />
     </main>
   )

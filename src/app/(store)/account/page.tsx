@@ -98,7 +98,7 @@ export default function AccountOverview() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="rounded-[12px] border-neutral-200 shadow-none bg-neutral-50/50">
+        <Card className="rounded-[var(--radius)] border-neutral-200 shadow-none bg-neutral-50/50">
           <CardHeader className="pb-2">
             <CardTitle className="text-[10px] uppercase tracking-widest text-neutral-500 flex items-center gap-2 font-bold">
               <Package className="w-3 h-3 stroke-[2]" /> Total Orders
@@ -109,7 +109,7 @@ export default function AccountOverview() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-[12px] border-neutral-200 shadow-none bg-neutral-50/50">
+        <Card className="rounded-[var(--radius)] border-neutral-200 shadow-none bg-neutral-50/50">
           <CardHeader className="pb-2">
             <CardTitle className="text-[10px] uppercase tracking-widest text-neutral-600 flex items-center gap-2 font-black">
               <Award className="w-3 h-3 stroke-[2.5]" /> Points Balance
@@ -120,7 +120,7 @@ export default function AccountOverview() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-[12px] border-neutral-200 shadow-none bg-neutral-50/50">
+        <Card className="rounded-[var(--radius)] border-neutral-200 shadow-none bg-neutral-50/50">
           <CardHeader className="pb-2">
             <CardTitle className="text-[10px] uppercase tracking-widest text-neutral-600 flex items-center gap-2 font-black">
               <CircleCheck className="w-3 h-3 stroke-[2.5]" /> Member Tier
@@ -149,11 +149,11 @@ export default function AccountOverview() {
           </div>
 
           {data?.latestOrder ? (
-            <Card className="rounded-[12px] border-neutral-200 shadow-none overflow-hidden group">
+            <Card className="rounded-[var(--radius)] border-neutral-200 shadow-none overflow-hidden group">
               <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <Badge variant="outline" className="rounded-[6px] text-[9px] uppercase tracking-widest py-0 border-neutral-300 text-black">
+                    <Badge variant="outline" className="rounded-[var(--radius)] text-[9px] uppercase tracking-widest py-0 border-neutral-300 text-black">
                       {data.latestOrder.status}
                     </Badge>
                     <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">
@@ -174,14 +174,14 @@ export default function AccountOverview() {
                 </div>
                 <Link
                   href={`/account/orders/${data.latestOrder.id}`}
-                  className="rounded-[12px] h-12 px-8 border border-black text-black hover:bg-black hover:text-white transition-all text-[10px] uppercase tracking-widest font-bold flex items-center justify-center"
+                  className="rounded-[var(--radius)] h-12 px-8 border-2 border-black bg-white text-black hover:bg-black hover:text-white transition-all duration-300 text-[10px] uppercase tracking-widest font-bold flex items-center justify-center shadow-sm"
                 >
                   Track Order
                 </Link>
               </div>
             </Card>
           ) : (
-            <div className="py-20 text-center border-2 border-dashed border-neutral-200 rounded-[12px]">
+            <div className="py-20 text-center border-2 border-dashed border-neutral-200 rounded-[var(--radius)]">
               <Package className="w-8 h-8 text-neutral-300 mx-auto mb-4 stroke-[1.5]" />
               <p className="text-neutral-500 text-sm font-medium">No recent orders found.</p>
               <Link
@@ -208,7 +208,7 @@ export default function AccountOverview() {
                 <Link
                   key={link.label}
                   href={link.href}
-                  className="flex items-center justify-between p-4 bg-white border border-neutral-200 hover:border-black transition-all group rounded-[12px]"
+                  className="flex items-center justify-between p-4 bg-white border border-neutral-200 hover:border-black transition-all group rounded-[var(--radius)]"
                 >
                   <span className="text-[11px] uppercase tracking-widest font-bold text-neutral-700 group-hover:text-black">{link.label}</span>
                   <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-black transition-colors" />
@@ -217,13 +217,13 @@ export default function AccountOverview() {
             </div>
           </div>
 
-          <Card className="rounded-[12px] border-neutral-200 shadow-none bg-neutral-950 text-white p-6">
+          <Card className="rounded-[var(--radius)] border-neutral-200 shadow-none bg-neutral-950 text-white p-6">
             <div className="space-y-4">
               <h4 className="font-display text-lg tracking-tight">Need assistance?</h4>
               <p className="text-neutral-300 text-xs leading-relaxed font-light">
                 Our luxury concierge team is available 24/7 to help with your orders or styling advice.
               </p>
-              <Button className="w-full rounded-[12px] bg-white text-black hover:bg-neutral-200 text-[10px] uppercase tracking-widest font-bold h-12 shadow-xl">
+              <Button className="w-full rounded-[var(--radius)] border-2 border-white bg-white text-black hover:bg-black hover:text-white hover:border-black transition-all duration-500 text-[10px] uppercase tracking-widest font-bold h-12 shadow-xl">
                 Contact Support
               </Button>
             </div>

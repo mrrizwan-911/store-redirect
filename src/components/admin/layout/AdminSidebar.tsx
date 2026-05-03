@@ -2,10 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useState } from 'react'
 import {
   BarChart2, Package, ShoppingBag, Users, FileText,
   Archive, Tag, Zap, Shirt, Star, Mail, Settings, LogOut,
-  ExternalLink, FolderTree, Info, Phone
+  ExternalLink, FolderTree, Info, Phone, Menu, ChevronLeft, ChevronRight
 } from 'lucide-react'
 import { useAppDispatch } from '@/store/hooks'
 import { logout } from '@/store/slices/authSlice'
@@ -37,6 +38,7 @@ export function AdminSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   const handleLogout = async () => {
     try {
@@ -52,19 +54,34 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside className="w-56 bg-white border-r border-neutral-100 flex flex-col h-full font-sans">
-      <div className="p-4 border-b border-neutral-100 flex items-center justify-between">
-        <h1 className="text-sm font-bold font-serif tracking-widest uppercase">Admin</h1>
-        <Link
-          href="/"
-          className="text-neutral-400 hover:text-black transition-colors"
-          title="Back to Storefront"
-        >
-          <ExternalLink className="w-3.5 h-3.5" />
-        </Link>
+    <aside
+      className={`${
+        isCollapsed ? 'w-16' : 'w-56'
+      } bg-white border-r border-neutral-100 flex flex-col h-full font-sans transition-all duration-300 ease-in-out relative`}
+    >
+      <div className={`p-4 border-b border-neutral-100 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+        {!isCollapsed && <h1 className="text-sm font-bold font-serif tracking-widest uppercase truncate">Admin</h1>}
+        <div className="flex items-center gap-2">
+          {!isCollapsed && (
+            <Link
+              href="/"
+              className="text-neutral-400 hover:text-black transition-colors"
+              title="Back to Storefront"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+            </Link>
+          )}
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="text-neutral-400 hover:text-black transition-colors p-1"
+            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          >
+            {isCollapsed ? <Menu className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
+        </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-2">
+      <nav className="flex-1 overflow-y-auto py-2 scrollbar-hide">
         <ul className="space-y-0.5">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.route)
@@ -73,14 +90,15 @@ export function AdminSidebar() {
               <li key={item.route} className="px-3">
                 <Link
                   href={item.route}
-                  className={`flex items-center gap-3 px-3 py-1.5 text-xs transition-all duration-200 rounded-md ${
+                  className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-3 py-1.5 text-xs transition-all duration-200 rounded-md ${
                     isActive
                       ? 'bg-neutral-100 text-neutral-900 font-semibold'
                       : 'text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 font-medium'
                   }`}
+                  title={isCollapsed ? item.label : undefined}
                 >
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-neutral-900' : 'text-neutral-400'}`} />
-                  {item.label}
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-neutral-900' : 'text-neutral-400'}`} />
+                  {!isCollapsed && <span className="truncate">{item.label}</span>}
                 </Link>
               </li>
             )
@@ -89,21 +107,24 @@ export function AdminSidebar() {
       </nav>
 
       <div className="p-4 border-t border-neutral-100 mt-auto">
-        <div className="flex items-center gap-2.5 mb-4">
-          <div className="w-7 h-7 bg-neutral-900 text-white flex items-center justify-center text-[10px] font-bold rounded-full">
+        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2.5'} mb-4`}>
+          <div className="w-7 h-7 shrink-0 bg-neutral-900 text-white flex items-center justify-center text-[10px] font-bold rounded-full">
             A
           </div>
-          <div>
-            <p className="text-[11px] font-bold text-neutral-900">Admin User</p>
-            <p className="text-[9px] text-neutral-400">admin@calnza.com</p>
-          </div>
+          {!isCollapsed && (
+            <div className="truncate">
+              <p className="text-[11px] font-bold text-neutral-900 truncate">Admin User</p>
+              <p className="text-[9px] text-neutral-400 truncate">admin@calnza.com</p>
+            </div>
+          )}
         </div>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 text-[11px] font-medium text-neutral-400 hover:text-rose-600 transition-colors"
+          className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'} w-full text-[11px] font-medium text-neutral-400 hover:text-rose-600 transition-colors`}
+          title={isCollapsed ? "Logout" : undefined}
         >
-          <LogOut className="w-3.5 h-3.5" />
-          Logout
+          <LogOut className="w-3.5 h-3.5 shrink-0" />
+          {!isCollapsed && <span>Logout</span>}
         </button>
       </div>
     </aside>
