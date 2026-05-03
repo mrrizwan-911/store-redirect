@@ -189,41 +189,17 @@ export default function AddressBookPage() {
               <Plus className="w-4 h-4 stroke-[2]" /> Add New Address
             </button>
           </DialogTrigger>
-          <DialogContent className="max-w-3xl rounded-[var(--radius)] border-none p-10 bg-white shadow-2xl">
-            <DialogHeader className="mb-8">
-              <DialogTitle className="font-display text-4xl tracking-tight text-black">
+          <DialogContent className="max-w-4xl w-[95vw] rounded-[var(--radius)] border-none p-6 md:p-8 bg-white shadow-2xl overflow-y-auto max-h-[90vh]">
+            <DialogHeader className="mb-6 md:mb-8">
+              <DialogTitle className="font-display text-3xl md:text-4xl tracking-tight text-black">
                 {editingAddress ? 'Edit Address' : 'New Address'}
               </DialogTitle>
             </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Row 1: Label & Company */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Address Label</label>
-                  <input
-                    name="label"
-                    value={formData.label}
-                    onChange={handleInputChange}
-                    placeholder="e.g. Home, Office"
-                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Company (Optional)</label>
-                  <input
-                    name="company"
-                    value={formData.company || ''}
-                    onChange={handleInputChange}
-                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
-                  />
-                </div>
-              </div>
-
-              {/* Row 2: Names & Email */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="space-y-2">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-x-5 gap-y-5">
+                {/* Row 1 */}
+                <div className="sm:col-span-1 md:col-span-1 space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">First Name</label>
                   <input
                     name="firstName"
@@ -233,7 +209,7 @@ export default function AddressBookPage() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="sm:col-span-1 md:col-span-1 space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">Last Name</label>
                   <input
                     name="lastName"
@@ -243,7 +219,7 @@ export default function AddressBookPage() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="sm:col-span-2 md:col-span-2 space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">Email</label>
                   <input
                     name="email"
@@ -253,11 +229,9 @@ export default function AddressBookPage() {
                     className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
                   />
                 </div>
-              </div>
 
-              {/* Row 3: Phone & Country */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-2">
+                {/* Row 2 */}
+                <div className="sm:col-span-1 md:col-span-1 space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">Phone Number</label>
                   <input
                     name="phone"
@@ -268,21 +242,29 @@ export default function AddressBookPage() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Country</label>
+                <div className="sm:col-span-1 md:col-span-1 space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Company</label>
                   <input
-                    name="country"
-                    value={formData.country}
+                    name="company"
+                    value={formData.company || ''}
                     onChange={handleInputChange}
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
+                  />
+                </div>
+                <div className="sm:col-span-2 md:col-span-2 space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Address Label</label>
+                  <input
+                    name="label"
+                    value={formData.label}
+                    onChange={handleInputChange}
+                    placeholder="e.g. Home, Office"
                     className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
                     required
                   />
                 </div>
-              </div>
 
-              {/* Row 4: Street Address & Suite (Combined) */}
-              <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8">
-                <div className="space-y-2">
+                {/* Row 3 */}
+                <div className="sm:col-span-2 md:col-span-2 space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">Street Address</label>
                   <input
                     name="line1"
@@ -293,8 +275,8 @@ export default function AddressBookPage() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Apartment / Suite</label>
+                <div className="sm:col-span-1 md:col-span-1 space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Apt / Suite</label>
                   <input
                     name="line2"
                     value={formData.line2 || ''}
@@ -303,11 +285,19 @@ export default function AddressBookPage() {
                     className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
                   />
                 </div>
-              </div>
+                <div className="sm:col-span-1 md:col-span-1 space-y-2">
+                  <label className="text-[10px] uppercase tracking-widest font-bold text-black">Country</label>
+                  <input
+                    name="country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    className="input-underline w-full h-11 text-sm outline-none border-neutral-300 focus:border-black"
+                    required
+                  />
+                </div>
 
-              {/* Row 5: City, Province, Postal Code */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div className="space-y-2">
+                {/* Row 4 */}
+                <div className="sm:col-span-2 md:col-span-2 space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">City</label>
                   <input
                     name="city"
@@ -317,7 +307,7 @@ export default function AddressBookPage() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="sm:col-span-1 md:col-span-1 space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">Province</label>
                   <input
                     name="province"
@@ -327,7 +317,7 @@ export default function AddressBookPage() {
                     required
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="sm:col-span-1 md:col-span-1 space-y-2">
                   <label className="text-[10px] uppercase tracking-widest font-bold text-black">Postal Code</label>
                   <input
                     name="postalCode"
@@ -339,7 +329,7 @@ export default function AddressBookPage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 py-2">
+              <div className="flex items-center gap-3 py-2 border-t border-neutral-100 mt-6 pt-6">
                 <input
                   id="isDefault"
                   name="isDefault"
@@ -353,11 +343,11 @@ export default function AddressBookPage() {
                 </label>
               </div>
 
-              <DialogFooter className="mt-10">
+              <DialogFooter className="mt-4">
                 <Button
                   type="submit"
                   disabled={isSaving}
-                  className="w-full rounded-[var(--radius)] h-16 border-2 border-black bg-black text-white hover:bg-white hover:text-black transition-all duration-500 uppercase tracking-widest text-[12px] font-bold shadow-md"
+                  className="w-full rounded-[var(--radius)] h-14 md:h-16 border-2 border-black bg-black text-white hover:bg-white hover:text-black transition-all duration-500 uppercase tracking-widest text-[12px] font-bold shadow-md"
                 >
                   {isSaving ? 'Saving...' : (editingAddress ? 'Update Address' : 'Save Address')}
                 </Button>

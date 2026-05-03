@@ -6,7 +6,7 @@ import { ArrowRight } from 'lucide-react'
 
 export function LookbookTeaser() {
   const lookbook1 = '/images/lookbook1.webp'
-  const lookbook2 = '/images/lookbook2.jpg'
+  const lookbook2 = '/images/lookbook2.webp'
   const lookbook3 = '/images/lookbook3.jpg'
 
   return (

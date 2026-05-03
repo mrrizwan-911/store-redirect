@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { logout } from '@/store/slices/authSlice'
 import { clearCart } from '@/store/slices/cartSlice'
+import { clearWishlist } from '@/store/slices/wishlistSlice'
 import { persistor } from '@/store'
 import {
   Sheet,
@@ -73,6 +74,7 @@ export function AccountSidebar({ isCollapsed, onToggle }: AccountSidebarProps) {
     }
     dispatch(logout())
     dispatch(clearCart())
+    dispatch(clearWishlist())
     await persistor.purge()
     router.refresh()
     router.push('/login')

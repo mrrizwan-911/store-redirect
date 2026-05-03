@@ -123,16 +123,16 @@ export function ProductCard({
         </div>
 
         {/* Minimal Actions (hover/focus) */}
-        <div className="absolute top-3 right-3 flex flex-col items-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
           <button
             onClick={handleWishlist}
             className={cn(
-              "h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)]",
+              "h-10 w-10 sm:h-8 sm:w-auto sm:px-2.5 inline-flex items-center justify-center sm:gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)] shadow-sm sm:shadow-none",
               isWishlisted && "border-black text-black"
             )}
             aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
           >
-            <Heart className={cn("w-3.5 h-3.5", isWishlisted && "fill-current")} />
+            <Heart className={cn("w-4 h-4 sm:w-3.5 sm:h-3.5", isWishlisted && "fill-current")} />
             <span className="hidden sm:inline">Save</span>
           </button>
 
@@ -140,21 +140,21 @@ export function ProductCard({
           <button
             onClick={handleCompare}
             className={cn(
-              "h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)]",
+              "h-10 w-10 sm:h-8 sm:w-auto sm:px-2.5 inline-flex items-center justify-center sm:gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)] shadow-sm sm:shadow-none",
               isInCompare && "border-black text-black"
             )}
             aria-label={isInCompare ? "Remove from comparison" : "Add to comparison"}
           >
-            <Scale className={cn("w-3.5 h-3.5", isInCompare && "fill-current")} />
+            <Scale className={cn("w-4 h-4 sm:w-3.5 sm:h-3.5", isInCompare && "fill-current")} />
             <span className="hidden sm:inline">Compare</span>
           </button>
 
           <button
             onClick={handleAddToCart}
-            className="h-8 px-2.5 inline-flex items-center gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)]"
+            className="h-10 w-10 sm:h-8 sm:w-auto sm:px-2.5 inline-flex items-center justify-center sm:gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)] shadow-sm sm:shadow-none"
             aria-label="View Details"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
             <span className="hidden sm:inline">View</span>
           </button>
         </div>

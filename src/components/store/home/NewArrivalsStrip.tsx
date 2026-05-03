@@ -73,15 +73,13 @@ export function NewArrivalsStrip({ products }: NewArrivalsStripProps) {
 
       <div
         ref={scrollContainerRef}
-        className="flex gap-8 md:gap-12 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-12 scroll-smooth"
+        className="flex gap-4 sm:gap-6 md:gap-8 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-12 scroll-smooth px-4 md:px-6 lg:px-[max(1.5rem,calc((100vw-80rem)/2))] scroll-px-4 md:scroll-px-6 lg:scroll-px-[max(1.5rem,calc((100vw-80rem)/2))] after:content-[''] after:w-px after:shrink-0"
       >
-        <div className="min-w-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))] h-1" />
         {products.map((product) => (
-          <div key={product.id} className="min-w-[210px] sm:min-w-[240px] md:min-w-[285px] snap-start">
+          <div key={product.id} className="w-[85vw] sm:w-[280px] md:w-[320px] lg:w-[285px] snap-center sm:snap-start shrink-0">
             <ProductCard {...product} />
           </div>
         ))}
-        <div className="min-w-[max(1.5rem,calc((100vw-80rem)/2+1.5rem))] h-1" />
       </div>
     </section>
   )
