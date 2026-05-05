@@ -6,6 +6,7 @@ export const couponSchema = z.object({
   discountValue: z.number().positive("Discount must be positive"),
   minOrderValue: z.number().nonnegative().optional().nullable(),
   maxUses: z.number().int().positive().optional().nullable(),
+  maxUsesPerUser: z.number().int().positive().optional().nullable(),
   expiresAt: z.string().datetime().optional().nullable(),
   isActive: z.boolean().default(true),
 }).superRefine((data, ctx) => {

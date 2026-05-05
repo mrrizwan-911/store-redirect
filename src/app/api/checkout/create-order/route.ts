@@ -33,6 +33,13 @@ export async function POST(req: NextRequest) {
       giftMessage,
     } = parsed.data
 
+    logger.info('Create order request received', {
+      couponCode,
+      loyaltyPoints,
+      itemsCount: items.length,
+      guestEmail
+    })
+
     const session = await getUserSession()
     let userId = session?.userId
 
@@ -74,14 +81,33 @@ export async function POST(req: NextRequest) {
       })
 
       const now = new Date()
-      const isValid =
+      let isValid =
         coupon &&
         coupon.isActive &&
         (!coupon.expiresAt || coupon.expiresAt > now) &&
         (!coupon.maxUses || coupon.usedCount < coupon.maxUses) &&
         (!coupon.minOrderValue || subtotal >= Number(coupon.minOrderValue))
 
-      if (isValid) {
+      // Check maxUsesPerUser
+      if (isValid && coupon && coupon.maxUsesPerUser && userId) {
+        const usageCount = await db.couponUsage.count({
+          where: {
+            couponId: coupon.id,
+            userId: userId
+          }
+        })
+        if (usageCount >= coupon.maxUsesPerUser) {
+          isValid = false
+        }
+      } else if (isValid && coupon && coupon.maxUsesPerUser && !userId) {
+        // If maxUsesPerUser is set but we still don't have a userId (shouldn't happen here due to guest user creation above, but for safety)
+        return NextResponse.json(
+          { success: false, error: 'Please login to use this coupon' },
+          { status: 400 }
+        )
+      }
+
+      if (isValid && coupon) {
         if (coupon.discountPct) {
           discount = Math.floor((Number(coupon.discountPct) / 100) * subtotal)
         } else if (coupon.discountFlat) {
@@ -210,11 +236,22 @@ export async function POST(req: NextRequest) {
       })
 
       // Increment coupon usage if used
-      if (discount > 0 && couponCode) {
-        await tx.coupon.update({
-          where: { code: couponCode.toUpperCase() },
-          data: { usedCount: { increment: 1 } },
-        })
+      if (discount > 0 && couponCode && userId) {
+        const coupon = await tx.coupon.findUnique({ where: { code: couponCode.toUpperCase() } })
+        if (coupon) {
+          await tx.coupon.update({
+            where: { id: coupon.id },
+            data: { usedCount: { increment: 1 } },
+          })
+
+          await tx.couponUsage.create({
+            data: {
+              couponId: coupon.id,
+              userId: userId,
+              orderId: order.id,
+            }
+          })
+        }
       }
 
       // 5. Deduct Loyalty Points if used

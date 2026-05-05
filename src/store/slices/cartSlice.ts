@@ -14,9 +14,15 @@ interface CartItem {
 interface CartState {
   items: CartItem[]
   isOpen: boolean
+  appliedCoupon: {
+    code: string
+    discountPct: number | null
+    discountFlat: number | null
+    discountAmount: number
+  } | null
 }
 
-const initialState: CartState = { items: [], isOpen: false }
+const initialState: CartState = { items: [], isOpen: false, appliedCoupon: null }
 
 const cartSlice = createSlice({
   name: 'cart',
@@ -34,12 +40,16 @@ const cartSlice = createSlice({
       } else {
         state.items.push(action.payload)
       }
+      // Reset coupon if items change as subtotal might now be below minOrderValue
+      // In a real-world scenario, we'd re-validate, but for now we clear for safety
+      state.appliedCoupon = null
     },
     removeItem(state, action: PayloadAction<{ productId: string; variantId?: string }>) {
       state.items = state.items.filter(
         i => !(i.productId === action.payload.productId &&
                i.variantId === action.payload.variantId)
       )
+      state.appliedCoupon = null
     },
     updateQuantity(
       state,
@@ -52,9 +62,17 @@ const cartSlice = createSlice({
       if (item) {
         item.quantity = Math.min(action.payload.quantity, item.stock)
       }
+      state.appliedCoupon = null
+    },
+    setAppliedCoupon(state, action: PayloadAction<CartState['appliedCoupon']>) {
+      state.appliedCoupon = action.payload
+    },
+    clearAppliedCoupon(state) {
+      state.appliedCoupon = null
     },
     clearCart(state) {
       state.items = []
+      state.appliedCoupon = null
     },
     toggleCart(state) {
       state.isOpen = !state.isOpen
@@ -68,6 +86,6 @@ const cartSlice = createSlice({
   },
 })
 
-export const { addItem, removeItem, updateQuantity, clearCart, toggleCart, openCart, closeCart } =
+export const { addItem, removeItem, updateQuantity, clearCart, toggleCart, openCart, closeCart, setAppliedCoupon, clearAppliedCoupon } =
   cartSlice.actions
 export default cartSlice.reducer

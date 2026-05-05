@@ -16,6 +16,7 @@ export type Coupon = {
   discountFlat: number | null;
   minOrderValue: number | null;
   maxUses: number | null;
+  maxUsesPerUser: number | null;
   usedCount: number;
   expiresAt: string | null;
   isActive: boolean;
@@ -113,6 +114,7 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
               <th className="px-6 py-4 font-medium font-display">Discount</th>
               <th className="px-6 py-4 font-medium font-display">Min Order</th>
               <th className="px-6 py-4 font-medium font-display">Uses</th>
+              <th className="px-6 py-4 font-medium font-display">Max / User</th>
               <th className="px-6 py-4 font-medium font-display">Expires</th>
               <th className="px-6 py-4 font-medium font-display">Status</th>
               <th className="px-6 py-4 font-medium font-display text-right">Actions</th>
@@ -135,6 +137,7 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
                   </td>
                   <td className="px-6 py-4 text-[#737373]">{coupon.minOrderValue ? `Rs. ${coupon.minOrderValue}` : '—'}</td>
                   <td className="px-6 py-4 text-[#737373]">{coupon.usedCount} / {coupon.maxUses || '∞'}</td>
+                  <td className="px-6 py-4 text-[#737373]">{coupon.maxUsesPerUser || '∞'}</td>
                   <td className="px-6 py-4 text-[#737373]">
                     {coupon.expiresAt ? format(new Date(coupon.expiresAt), 'MMM d, yyyy') : 'Never'}
                   </td>

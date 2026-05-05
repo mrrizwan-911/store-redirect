@@ -14,7 +14,8 @@ export async function generateWelcomeCoupon(_email: string) {
       code,
       discountPct: 10,
       minOrderValue: 2000, // Minimum order value of PKR 2,000
-      maxUses: 1,         // Single use only
+      maxUses: 1,         // Single use globally for this specific code
+      maxUsesPerUser: 1,  // Single use per user as an extra safety layer
       isActive: true,
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Valid for 30 days
     }

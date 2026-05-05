@@ -17,9 +17,16 @@ export default async function AdminCouponsPage() {
   }
 
   // Fetch initial coupons
-  const coupons = await db.coupon.findMany({
+  const couponsData = await db.coupon.findMany({
     orderBy: { createdAt: 'desc' },
   });
+
+  // Convert Decimal objects to numbers/strings for Client Component serialization
+  const coupons = couponsData.map(coupon => ({
+    ...coupon,
+    discountFlat: coupon.discountFlat ? Number(coupon.discountFlat) : null,
+    minOrderValue: coupon.minOrderValue ? Number(coupon.minOrderValue) : null,
+  }));
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">

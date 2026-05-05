@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { db } from '@/lib/db/client'
 import { validateCouponSchema } from '@/lib/validations/coupon'
 import { logger } from '@/lib/utils/logger'
+import { verifyRefreshToken } from '@/lib/auth/jwt'
 
 export async function POST(req: NextRequest) {
   let body
@@ -35,6 +37,41 @@ export async function POST(req: NextRequest) {
 
   if (coupon.maxUses && coupon.usedCount >= coupon.maxUses) {
     return NextResponse.json({ success: false, error: 'This coupon is no longer available' }, { status: 400 })
+  }
+
+  // Check maxUsesPerUser
+  if (coupon.maxUsesPerUser) {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('refresh_token')?.value
+
+    if (!token) {
+      return NextResponse.json({
+        success: false,
+        error: 'Please login to use this coupon'
+      }, { status: 401 })
+    }
+
+    try {
+      const payload = verifyRefreshToken(token)
+      const usageCount = await db.couponUsage.count({
+        where: {
+          couponId: coupon.id,
+          userId: payload.userId
+        }
+      })
+
+      if (usageCount >= coupon.maxUsesPerUser) {
+        return NextResponse.json({
+          success: false,
+          error: `You have already used this coupon the maximum number of times (${coupon.maxUsesPerUser})`
+        }, { status: 400 })
+      }
+    } catch (err) {
+      return NextResponse.json({
+        success: false,
+        error: 'Please login to use this coupon'
+      }, { status: 401 })
+    }
   }
 
   if (coupon.minOrderValue && orderValue < Number(coupon.minOrderValue)) {

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Edit, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 interface ProductActionsProps {
   productId: string
@@ -20,9 +21,10 @@ export function ProductActions({ productId, productName }: ProductActionsProps) 
     try {
       const res = await fetch(`/api/admin/products/${productId}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Failed to delete')
+      toast.success('Product deleted successfully')
       router.refresh()
     } catch {
-      alert('Delete failed. Please try again.')
+      toast.error('Delete failed. Please try again.')
       setDeleting(false)
     }
     setShowConfirm(false)

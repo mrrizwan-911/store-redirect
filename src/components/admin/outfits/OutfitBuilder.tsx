@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { SimpleImageUploader } from '../products/SimpleImageUploader'
 import { GripVertical, X, CircleCheck } from 'lucide-react'
+import { toast } from 'sonner'
 
 export function OutfitBuilder({ initialData }: { initialData?: any }) {
   const router = useRouter()
@@ -54,7 +55,7 @@ export function OutfitBuilder({ initialData }: { initialData?: any }) {
       return
     }
     if (selectedProducts.length >= 5) {
-      alert('You can only select up to 5 products.')
+      toast.error('You can only select up to 5 products.')
       return
     }
     setSelectedProducts(prev => [...prev, product])

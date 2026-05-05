@@ -203,7 +203,7 @@ export default function ProductDetailClient({ product, categoryProducts, related
       }
     } else {
       navigator.clipboard.writeText(url)
-      alert('Link copied to clipboard!')
+      toast.success('Link copied to clipboard!')
     }
   }
 

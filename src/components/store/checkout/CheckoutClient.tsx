@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { useRouter } from 'next/navigation'
-import { clearCart } from '@/store/slices/cartSlice'
+import { clearCart, setAppliedCoupon, clearAppliedCoupon } from '@/store/slices/cartSlice'
 import { Check, Star } from 'lucide-react'
+import { toast } from 'sonner'
 import { CreateOrderInput } from '@/lib/validations/checkout'
 import { AddressInput } from '@/lib/validations/address'
 
@@ -13,15 +14,16 @@ type CheckoutStep = 'address' | 'shipping' | 'payment' | 'confirm'
 export function CheckoutClient() {
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const { items } = useAppSelector((state) => state.cart)
+  const { items, appliedCoupon } = useAppSelector((state) => state.cart)
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0)
   const { user, isAuthenticated } = useAppSelector((state) => state.auth)
 
   const [mounted, setMounted] = useState(false)
   const [currentStep, setCurrentStep] = useState<CheckoutStep>('address')
   const [isLoading, setIsLoading] = useState(false)
-  const [showPromo, setShowPromo] = useState(false)
-  const [promoCode, setPromoCode] = useState('')
+  const [showPromo, setShowPromo] = useState(!!appliedCoupon)
+  const [promoCode, setPromoCode] = useState(appliedCoupon?.code || '')
+  const [couponError, setCouponError] = useState<string | null>(null)
   const [loyaltyPoints, setLoyaltyPoints] = useState(0)
   const [redeemPoints, setRedeemPoints] = useState(0)
 
@@ -99,15 +101,41 @@ export function CheckoutClient() {
   }
 
   const shippingCost = shippingMethod === 'express' ? 500 : (shippingMethod === 'standard' ? 200 : 0)
-  const total = Math.max(0, subtotal + shippingCost - redeemPoints)
+  const couponDiscount = appliedCoupon?.discountAmount || 0
+  const total = Math.max(0, subtotal + shippingCost - couponDiscount - redeemPoints)
   const pointsToEarn = Math.floor(subtotal / 100)
+
+  const handleApplyCoupon = async () => {
+    if (!promoCode) return
+    setCouponError(null)
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: promoCode,
+          orderValue: subtotal
+        })
+      })
+      const data = await res.json()
+      if (!res.ok || !data.success) {
+        setCouponError(data.error || 'Invalid coupon')
+        dispatch(clearAppliedCoupon())
+        return
+      }
+      dispatch(setAppliedCoupon(data.data))
+      toast.success('Coupon applied successfully')
+    } catch (err) {
+      setCouponError('Failed to validate coupon')
+    }
+  }
 
   const handlePlaceOrder = async () => {
     // Final client-side stock validation before submission
     const itemsExceedingStock = items.filter(item => item.quantity > item.stock)
     if (itemsExceedingStock.length > 0) {
       const itemNames = itemsExceedingStock.map(i => i.name).join(', ')
-      alert(`Wait! Some items in your cart exceed available stock: ${itemNames}. Please reduce the quantities before placing your order.`)
+      toast.error(`Wait! Some items in your cart exceed available stock: ${itemNames}. Please reduce the quantities before placing your order.`)
       return
     }
 
@@ -125,6 +153,7 @@ export function CheckoutClient() {
         guestPhone: !isAuthenticated ? guestInfo.phone : undefined,
         shippingMethod,
         paymentMethod,
+        couponCode: appliedCoupon?.code,
         loyaltyPoints: redeemPoints > 0 ? redeemPoints : undefined,
         isGift,
         giftMessage: isGift ? giftMessage : undefined,
@@ -151,7 +180,7 @@ export function CheckoutClient() {
         router.push(`/order-confirmation/${data.data.orderId}`)
       }
     } catch (err: any) {
-      alert(err.message)
+      toast.error(err.message)
     } finally {
       setIsLoading(false)
     }
@@ -491,15 +520,29 @@ export function CheckoutClient() {
 
             <div className="border-t border-neutral-200 pt-6">
               {showPromo ? (
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Promo code"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                    className="flex-1 border border-neutral-200 rounded-[var(--radius)] px-3 py-2 text-sm outline-none focus:border-black"
-                  />
-                  <button className="bg-black text-white px-4 py-2 rounded-[var(--radius)] text-sm font-bold hover:bg-neutral-800 transition-colors">Apply</button>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Promo code"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                      className="flex-1 border border-neutral-200 rounded-[var(--radius)] px-3 py-2 text-sm outline-none focus:border-black"
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      className="bg-black text-white px-4 py-2 rounded-[var(--radius)] text-sm font-bold hover:bg-neutral-800 transition-colors"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                  {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
+                  {appliedCoupon && (
+                    <p className="text-xs text-green-600 mt-1">
+                      Coupon <strong>{appliedCoupon.code}</strong> applied!
+                      <button onClick={() => { dispatch(clearAppliedCoupon()); setPromoCode(''); }} className="ml-2 underline">Remove</button>
+                    </p>
+                  )}
                 </div>
               ) : (
                 <button onClick={() => setShowPromo(true)} className="text-sm text-neutral-500 hover:text-black transition-colors underline">
@@ -543,6 +586,12 @@ export function CheckoutClient() {
                 <span>Shipping</span>
                 <span>{shippingCost === 0 ? 'Free' : `PKR ${shippingCost.toLocaleString()}`}</span>
               </div>
+              {appliedCoupon && (
+                <div className="flex justify-between text-green-600 font-medium">
+                  <span>Coupon Discount ({appliedCoupon.code})</span>
+                  <span>- PKR {appliedCoupon.discountAmount.toLocaleString()}</span>
+                </div>
+              )}
               {redeemPoints > 0 && (
                 <div className="flex justify-between text-green-600 font-medium">
                   <span>Loyalty Discount</span>

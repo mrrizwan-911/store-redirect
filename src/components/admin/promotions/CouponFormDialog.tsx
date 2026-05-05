@@ -33,6 +33,7 @@ export function CouponFormDialog({
     discountValue: '',
     minOrderValue: '',
     maxUses: '',
+    maxUsesPerUser: '',
     expiresAt: '',
     isActive: true,
   });
@@ -46,6 +47,7 @@ export function CouponFormDialog({
           discountValue: (editingCoupon.discountPct || editingCoupon.discountFlat || '').toString(),
           minOrderValue: editingCoupon.minOrderValue?.toString() || '',
           maxUses: editingCoupon.maxUses?.toString() || '',
+          maxUsesPerUser: editingCoupon.maxUsesPerUser?.toString() || '',
           expiresAt: editingCoupon.expiresAt ? new Date(editingCoupon.expiresAt).toISOString().split('T')[0] : '',
           isActive: editingCoupon.isActive,
         });
@@ -56,6 +58,7 @@ export function CouponFormDialog({
           discountValue: '',
           minOrderValue: '',
           maxUses: '',
+          maxUsesPerUser: '',
           expiresAt: '',
           isActive: true,
         });
@@ -78,6 +81,7 @@ export function CouponFormDialog({
         discountValue: Number(formData.discountValue),
         minOrderValue: formData.minOrderValue ? Number(formData.minOrderValue) : null,
         maxUses: formData.maxUses ? Number(formData.maxUses) : null,
+        maxUsesPerUser: formData.maxUsesPerUser ? Number(formData.maxUsesPerUser) : null,
         expiresAt: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : null,
         isActive: formData.isActive,
       };
@@ -178,6 +182,7 @@ export function CouponFormDialog({
                 className="rounded-none border-[#E5E5E5] focus-visible:ring-black font-body"
               />
             </div>
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Max Uses</Label>
               <Input
@@ -189,6 +194,18 @@ export function CouponFormDialog({
                 className="rounded-none border-[#E5E5E5] focus-visible:ring-black font-body"
               />
             </div>
+            <div className="space-y-2">
+              <Label>Max Per User</Label>
+              <Input
+                type="number"
+                min="1"
+                placeholder="Unlimited"
+                value={formData.maxUsesPerUser}
+                onChange={(e) => setFormData({...formData, maxUsesPerUser: e.target.value})}
+                className="rounded-none border-[#E5E5E5] focus-visible:ring-black font-body"
+              />
+            </div>
+          </div>
           </div>
 
           <div className="space-y-2">

@@ -31,6 +31,7 @@ model User {
   reviews      Review[]
   wishlist     WishlistItem[]
   passwordResetTokens PasswordResetToken[]
+  couponUsages CouponUsage[]
 
   @@index([email])
   @@index([role])
@@ -225,6 +226,7 @@ model Order {
   user           User?       @relation(fields: [userId], references: [id])
   items          OrderItem[]
   payment        Payment?
+  couponUsage    CouponUsage?
 
   @@index([userId])
   @@index([status])
@@ -378,12 +380,29 @@ model Coupon {
   discountFlat  Decimal?  @db.Decimal(10, 2)
   minOrderValue Decimal?  @db.Decimal(10, 2)
   maxUses       Int?
+  maxUsesPerUser Int?
   usedCount     Int       @default(0)
   expiresAt     DateTime?
   isActive      Boolean   @default(true)
   createdAt     DateTime  @default(now())
+  usages        CouponUsage[]
 
   @@index([code])
+}
+
+model CouponUsage {
+  id        String   @id @default(cuid())
+  couponId  String
+  userId    String
+  orderId   String   @unique
+  usedAt    DateTime @default(now())
+  coupon    Coupon   @relation(fields: [couponId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id])
+
+  @@unique([couponId, userId])
+  @@index([couponId])
+  @@index([userId])
 }
 
 model EmailLog {
