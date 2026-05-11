@@ -84,7 +84,7 @@ export function Footer() {
 
           {/* About */}
           <div className="space-y-8">
-            <a href="/" className="shrink-0 group cursor-pointer flex flex-col items-start gap-3">
+            <Link href="/" className="shrink-0 group cursor-pointer flex flex-col items-start gap-3">
               {/* Logo image — inverted to white on the dark footer */}
               <div className="relative h-12 w-12 opacity-90 group-hover:opacity-100 transition-opacity">
                 <Image
@@ -106,7 +106,7 @@ export function Footer() {
                   {APP_TAGLINE}
                 </span>
               </div>
-            </a>
+            </Link>
             <p className="text-white/40 text-[13px] leading-relaxed max-w-xs font-light font-sans">
               {footerDescription}
             </p>
