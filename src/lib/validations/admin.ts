@@ -49,16 +49,68 @@ export const productSchema = z.object({
 
 export const flashSaleSchema = z.object({
   name: z.string().min(2),
-  discountPct: z.number().int().min(1).max(99),
+  scope: z.enum(['SINGLE', 'MULTIPLE', 'ALL']),
+  discountType: z.enum(['PERCENTAGE', 'FLAT']),
+  discountPct: z.number().optional().nullable(),
+  discountFlat: z.number().optional().nullable(),
   startTime: z.string().min(5, 'Invalid time'),  // ISO UTC string
   endTime: z.string().min(5, 'Invalid time'),
-  productIds: z.array(z.string()).min(1, 'Select at least one product'),
-}).refine(data => new Date(data.endTime) > new Date(data.startTime), {
-  message: 'End time must be after start time',
-  path: ['endTime'],
-}).refine(data => new Date(data.endTime) > new Date(), {
-  message: 'End time must be in the future',
-  path: ['endTime'],
+  productIds: z.array(z.string()).default([]),
+}).superRefine((data, ctx) => {
+  // 1. Validate Discount based on type
+  if (data.discountType === 'PERCENTAGE') {
+    if (data.discountPct === null || data.discountPct === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Percentage is required',
+        path: ['discountPct'],
+      });
+    } else if (data.discountPct < 1 || data.discountPct > 99) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Percentage must be between 1 and 99',
+        path: ['discountPct'],
+      });
+    }
+  } else if (data.discountType === 'FLAT') {
+    if (data.discountFlat === null || data.discountFlat === undefined || data.discountFlat <= 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Flat discount must be positive',
+        path: ['discountFlat'],
+      });
+    }
+  }
+
+  // 2. Validate Times
+  const start = new Date(data.startTime);
+  const end = new Date(data.endTime);
+  const now = new Date();
+
+  if (end <= start) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'End time must be after start time',
+      path: ['endTime'],
+    });
+  }
+
+  if (end <= now) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'End time must be in the future',
+      path: ['endTime'],
+    });
+  }
+
+  // 3. Validate Product Selection
+  if (data.scope !== 'ALL' && data.productIds.length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Select at least one product',
+      path: ['productIds'],
+    });
+  }
 })
 
 export type ProductInput = z.infer<typeof productSchema>

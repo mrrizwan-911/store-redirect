@@ -13,13 +13,7 @@ import { logger } from "@/lib/utils/logger";
 import { toast } from "sonner";
 import { Plus, Trash2, Search, LoaderCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ProductCombobox } from "./ProductCombobox";
 
 interface Product {
   id: string;
@@ -30,9 +24,6 @@ interface Product {
 export const QuotationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
 
   const {
     register,
@@ -57,34 +48,6 @@ export const QuotationForm = () => {
     control,
     name: "items",
   });
-
-  // Fetch initial products or search results
-  const fetchProducts = useCallback(async (query: string) => {
-    setIsSearching(true);
-    try {
-      const res = await fetch(`/api/products?search=${query}&limit=10`);
-      const result = await res.json();
-      if (result.success) {
-        setSearchResults(result.data.products);
-      }
-    } catch (error) {
-      logger.error("Failed to fetch products for quotation form", error as Error);
-    } finally {
-      setIsSearching(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchProducts("");
-  }, [fetchProducts]);
-
-  const handleSearch = (val: string) => {
-    setSearchTerm(val);
-    const timer = setTimeout(() => {
-      fetchProducts(val);
-    }, 500);
-    return () => clearTimeout(timer);
-  };
 
   const onSubmit = async (data: QuotationInput) => {
     setIsSubmitting(true);
@@ -213,39 +176,10 @@ export const QuotationForm = () => {
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                       <div className="md:col-span-7 space-y-2">
                         <Label>Select Product *</Label>
-                        <Select
-                          onValueChange={(val) => val && setValue(`items.${index}.productId`, val)}
-                          defaultValue={field.productId}
-                        >
-                          <SelectTrigger className="rounded-none bg-white border-gray-200 font-body">
-                            <SelectValue placeholder="Search or select a product" />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-none font-body">
-                            <div className="flex items-center px-2 py-2 border-b border-gray-100">
-                              <Search className="size-4 mr-2 text-muted-foreground" />
-                              <input
-                                placeholder="Search products..."
-                                className="w-full text-sm outline-none bg-transparent font-body"
-                                onChange={(e) => handleSearch(e.target.value)}
-                              />
-                            </div>
-                            {isSearching ? (
-                              <div className="flex items-center justify-center py-4">
-                                <LoaderCircle className="size-4 animate-spin" />
-                              </div>
-                            ) : searchResults.length > 0 ? (
-                              searchResults.map((p) => (
-                                <SelectItem key={p.id} value={p.id} className="rounded-none font-body">
-                                  {p.name}
-                                </SelectItem>
-                              ))
-                            ) : (
-                              <div className="py-2 px-2 text-sm text-muted-foreground text-center">
-                                No products found
-                              </div>
-                            )}
-                          </SelectContent>
-                        </Select>
+                        <ProductCombobox
+                          value={field.productId}
+                          onChange={(val) => setValue(`items.${index}.productId`, val)}
+                        />
                         {errors.items?.[index]?.productId && (
                           <p className="text-xs text-red-500 font-body">{errors.items[index]?.productId?.message}</p>
                         )}

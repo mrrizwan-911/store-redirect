@@ -1,6 +1,41 @@
 import { db } from '@/lib/db/client'
 
 /**
+ * Retrieves the currently active flash sale for a given product.
+ * Returns the most recently created sale that is currently within its time window.
+ * Bypasses `isActive` check to avoid race conditions with the cron job.
+ */
+export async function getActiveFlashSaleForProduct(productId: string) {
+  const now = new Date()
+  return db.flashSale.findFirst({
+    where: {
+      startTime: { lte: now },
+      endTime: { gte: now },
+      OR: [
+        { scope: 'ALL' },
+        { productIds: { has: productId } }
+      ]
+    },
+    orderBy: { createdAt: 'desc' }
+  })
+}
+
+/**
+ * Calculates the discounted price based on an active flash sale.
+ */
+export function calculateFlashSalePrice(basePrice: number, activeSale: any): number {
+  if (activeSale.discountType === 'PERCENTAGE') {
+    const discountPct = activeSale.discountPct || 0
+    const discountFactor = 1 - discountPct / 100
+    return Math.round(basePrice * discountFactor)
+  } else if (activeSale.discountType === 'FLAT') {
+    const discountFlat = Number(activeSale.discountFlat || 0)
+    return Math.max(0, Math.round(basePrice - discountFlat))
+  }
+  return Math.round(basePrice)
+}
+
+/**
  * Validates the price of a single product, accounting for active flash sales.
  * Uses server-side UTC time to prevent client-side tampering.
  */
@@ -14,29 +49,53 @@ export async function getValidatedPrice(productId: string): Promise<number> {
     return null as any
   }
 
-  const now = new Date()
-
-  // Check for active flash sale
-  const activeSale = await db.flashSale.findFirst({
-    where: {
-      isActive: true,
-      startTime: { lte: now },
-      endTime: { gte: now },
-      productIds: { has: productId },
-    },
-  })
-
+  const activeSale = await getActiveFlashSaleForProduct(productId)
   const basePrice = Number(product.basePrice)
   const salePrice = product.salePrice ? Number(product.salePrice) : null
 
   if (activeSale) {
-    // Apply flash sale discount to base price
-    const discountFactor = 1 - activeSale.discountPct / 100
-    return Math.round(basePrice * discountFactor * 100) / 100
+    return calculateFlashSalePrice(basePrice, activeSale)
   }
 
   // Return regular sale price if exists, otherwise base price
   return salePrice ?? basePrice
+}
+
+/**
+ * Enriches a list of products with active flash sale information.
+ * Useful for displaying flash sale prices and countdowns on ProductCards.
+ */
+export async function enrichProductsWithFlashSales<T extends { id: string; basePrice: any; salePrice?: any }>(
+  products: T[]
+): Promise<(T & { flashSalePrice?: number; flashSaleEndTime?: string })[]> {
+  const now = new Date()
+  // Fetch all active sales that fall within the current time window, ignoring the cron-dependent 'isActive' field
+  const activeFlashSales = await db.flashSale.findMany({
+    where: {
+      startTime: { lte: now },
+      endTime: { gte: now },
+    },
+    orderBy: { createdAt: 'desc' }
+  })
+
+  if (activeFlashSales.length === 0) return products
+
+  return products.map(product => {
+    // Check if the product falls under any active sale (either targeted or site-wide)
+    const activeSale = activeFlashSales.find(sale =>
+      sale.scope === 'ALL' || sale.productIds.includes(product.id)
+    )
+
+    if (!activeSale) return product
+
+    const flashSalePrice = calculateFlashSalePrice(Number(product.basePrice), activeSale)
+
+    return {
+      ...product,
+      flashSalePrice,
+      flashSaleEndTime: activeSale.endTime.toISOString()
+    }
+  })
 }
 
 /**
@@ -71,8 +130,17 @@ export async function getValidatedCartTotal(
           }
 
           if (variant?.price) {
-            // Variant price override exists — use it (variants typically don't have flash sales)
-            unitPrice = Number(variant.price)
+            // Variant price override exists
+            const baseVariantPrice = Number(variant.price)
+
+            // Fix: Use the unified helper which correctly checks 'ALL' scope and handles FLAT/PERCENTAGE
+            const activeSale = await getActiveFlashSaleForProduct(item.productId)
+
+            if (activeSale) {
+              unitPrice = calculateFlashSalePrice(baseVariantPrice, activeSale)
+            } else {
+              unitPrice = baseVariantPrice
+            }
           } else {
             // No variant override — use base product's validated price
             unitPrice = await getValidatedPrice(item.productId)

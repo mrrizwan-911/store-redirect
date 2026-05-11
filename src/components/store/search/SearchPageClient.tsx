@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Search, LoaderCircle, X, Camera, MessageSquare, Bot, Send } from 'lucide-react'
+import { Search, LoaderCircle, X, Camera, MessageSquare, Bot, Send, ArrowRight } from 'lucide-react'
 import { ProductCard } from '../shared/ProductCard'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'

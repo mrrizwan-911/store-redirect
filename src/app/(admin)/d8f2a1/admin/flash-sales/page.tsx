@@ -1,6 +1,7 @@
 import { db } from '@/lib/db/client'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
+import { FlashSaleActions } from '@/components/admin/promotions/FlashSaleActions'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +15,7 @@ export default async function AdminFlashSalesPage() {
       <div className="flex justify-between items-center border-b border-neutral-100 pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Flash Sales</h1>
         <Link
-          href="/admin/flash-sales/new"
+          href="/d8f2a1/admin/flash-sales/new"
           className="flex items-center gap-2 bg-neutral-900 text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-neutral-800 transition-all shadow-sm"
         >
           <Plus className="h-3.5 w-3.5" />
@@ -29,28 +30,46 @@ export default async function AdminFlashSalesPage() {
               <tr>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Name</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Discount</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Scope</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Start Time</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">End Time</th>
-                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400 text-center">Products</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400 text-center">Status</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400 text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {sales.map((sale) => (
                 <tr key={sale.id} className={`border-b border-neutral-50 last:border-0 hover:bg-neutral-50/50 transition-colors ${sale.isActive ? 'border-l-4 border-l-emerald-500' : ''}`}>
                   <td className="p-4 font-semibold text-neutral-900">{sale.name}</td>
-                  <td className="p-4 text-neutral-900 font-bold">{sale.discountPct}%</td>
+                  <td className="p-4 text-neutral-900 font-bold">
+                    {sale.discountType === 'PERCENTAGE' ? `${sale.discountPct}%` : `PKR ${Number(sale.discountFlat).toLocaleString()}`}
+                  </td>
+                  <td className="p-4 text-neutral-500">
+                    <span className="bg-neutral-100 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest">
+                      {sale.scope === 'ALL' ? 'Site-wide' : sale.scope === 'SINGLE' ? '1 Product' : `${sale.productIds.length} Products`}
+                    </span>
+                  </td>
                   <td className="p-4 text-neutral-500">{new Date(sale.startTime).toLocaleString()}</td>
                   <td className="p-4 text-neutral-500">{new Date(sale.endTime).toLocaleString()}</td>
-                  <td className="p-4 text-neutral-600 text-center font-medium">{sale.productIds.length} items</td>
                   <td className="p-4 text-center">
-                    {sale.isActive ? (
-                      <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border border-emerald-100 shadow-sm">Active</span>
-                    ) : new Date(sale.endTime) < new Date() ? (
-                      <span className="bg-neutral-100 text-neutral-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border border-neutral-200">Expired</span>
-                    ) : (
-                      <span className="bg-amber-50 text-amber-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border border-amber-100 shadow-sm">Upcoming</span>
-                    )}
+                    {(() => {
+                      const now = new Date()
+                      const start = new Date(sale.startTime)
+                      const end = new Date(sale.endTime)
+                      const isActiveNow = now >= start && now <= end
+                      const isExpired = now > end
+
+                      if (isActiveNow) {
+                        return <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border border-emerald-100 shadow-sm">Active</span>
+                      } else if (isExpired) {
+                        return <span className="bg-neutral-100 text-neutral-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border border-neutral-200">Expired</span>
+                      } else {
+                        return <span className="bg-amber-50 text-amber-700 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border border-amber-100 shadow-sm">Upcoming</span>
+                      }
+                    })()}
+                  </td>
+                  <td className="p-4">
+                    <FlashSaleActions saleId={sale.id} saleName={sale.name} />
                   </td>
                 </tr>
               ))}

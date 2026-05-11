@@ -3,6 +3,7 @@ import { db } from '@/lib/db/client'
 import { verifyAccessToken } from '@/lib/auth/jwt'
 import { addItemSchema } from '@/lib/validations/cart'
 import { logger } from '@/lib/utils/logger'
+import { getValidatedCartTotal } from '@/lib/services/payment/priceValidator'
 
 async function getUserIdFromRequest(req: NextRequest): Promise<string | null> {
   const token = req.headers.get('authorization')?.replace('Bearer ', '')
@@ -37,14 +38,39 @@ export async function GET(req: NextRequest) {
     },
   })
 
-  if (!cart) {
+  if (!cart || cart.items.length === 0) {
     return NextResponse.json({ success: true, data: { items: [], subtotal: 0, itemCount: 0 } })
   }
 
-  const subtotal = cart.items.reduce((sum, item) => {
-    const unitPrice = Number(item.variant?.price ?? item.product.salePrice ?? item.product.basePrice)
-    return sum + unitPrice * item.quantity
-  }, 0)
+  // Calculate the cart subtotal using the centralized priceValidator logic
+  // to ensure that Flash Sales are perfectly respected
+  const cartInput = cart.items.map(item => ({
+    productId: item.productId,
+    variantId: item.variantId,
+    quantity: item.quantity
+  }))
+
+  let subtotal = 0
+  try {
+    const { subtotal: validatedSubtotal, lineItems } = await getValidatedCartTotal(cartInput)
+    subtotal = validatedSubtotal
+
+    // Inject the validated price directly into the items returned to the frontend
+    cart.items.forEach(item => {
+      const lineItem = lineItems.find(li => li.productId === item.productId && li.variantId === item.variantId)
+      if (lineItem) {
+        // Safe injection without modifying the Prisma schema
+        ;(item as any).validatedPrice = lineItem.validatedPrice
+      }
+    })
+  } catch (err: any) {
+    logger.error('Cart total validation failed', { error: err.message })
+    // Fallback if price validation fails
+    subtotal = cart.items.reduce((sum, item) => {
+      const unitPrice = Number(item.variant?.price ?? item.product.salePrice ?? item.product.basePrice)
+      return sum + unitPrice * item.quantity
+    }, 0)
+  }
 
   return NextResponse.json({
     success: true,

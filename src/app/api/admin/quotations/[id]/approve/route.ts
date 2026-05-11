@@ -3,7 +3,6 @@ import { db } from '@/lib/db/client'
 import { requireAdmin } from '@/lib/utils/adminAuth'
 import { generateQuotationPDF } from '@/lib/services/pdf/generator'
 import { sendEmail } from '@/lib/services/email/sender'
-import { generateQuotationDraft } from '@/lib/services/ai/quotation-draft'
 import { logger } from '@/lib/utils/logger'
 import { QuotationStatus } from '@prisma/client'
 import { verifyAccessToken } from '@/lib/auth/jwt'
@@ -46,13 +45,35 @@ export async function POST(
       return NextResponse.json({ success: false, error: 'Quotation not found' }, { status: 404 })
     }
 
-    // 1. Generate AI Cover Letter
-    const aiDraft = await generateQuotationDraft(quotation)
+    // 1. Get existing AI Draft (respect admin edits)
+    const aiDraft = quotation.aiDraft || "Please find the formal quotation attached.";
 
-    // 2. Generate PDF
-    const pdfBuffer = generateQuotationPDF(quotation)
+    // 2. Fetch products to enrich the items with real names and prices
+    const rawItems = quotation.items as any[];
+    const productIds = rawItems.map((item: any) => item.productId);
+    const products = await db.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, name: true, basePrice: true }
+    });
 
-    // 3. Send Email with Attachment
+    const enrichedItems = rawItems.map((item: any) => {
+      const p = products.find((prod) => prod.id === item.productId);
+      return {
+        ...item,
+        productName: p?.name || "Unknown Product",
+        unitPrice: p?.basePrice || 0
+      };
+    });
+
+    const enrichedQuotation = {
+      ...quotation,
+      items: enrichedItems
+    };
+
+    // 3. Generate PDF
+    const pdfBuffer = generateQuotationPDF(enrichedQuotation)
+
+    // 4. Send Email with Attachment
     const emailSent = await sendEmail({
       to: quotation.email,
       subject: `Formal Quotation from Calnza — REF: ${id.slice(-8).toUpperCase()}`,
@@ -62,7 +83,7 @@ export async function POST(
           <div style="margin-top: 20px; line-height: 1.6; white-space: pre-wrap;">
             ${aiDraft}
           </div>
-          <div style="margin-top: 30px; border-top: 1px solid #EEE; pt: 10px; font-size: 12px; color: #666;">
+          <div style="margin-top: 30px; border-top: 1px solid #EEE; padding-top: 10px; font-size: 12px; color: #666;">
             Please find the formal quotation attached as a PDF.
           </div>
         </div>
@@ -81,12 +102,11 @@ export async function POST(
       throw new Error('Failed to send quotation email')
     }
 
-    // 4. Update Quotation Status
+    // 5. Update Quotation Status
     const updatedQuotation = await db.quotation.update({
       where: { id },
       data: {
         status: QuotationStatus.SENT,
-        aiDraft: aiDraft
       }
     })
 

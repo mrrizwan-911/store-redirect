@@ -1,6 +1,7 @@
 import { db } from '@/lib/db/client'
 import { ProductListingClient } from '@/components/store/plp/ProductListingClient'
 import { Suspense } from 'react'
+import { enrichProductsWithFlashSales } from '@/lib/services/payment/priceValidator'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,8 +65,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     }),
   ])
 
-  // Process ratings
-  const enrichedProducts = products.map((p) => {
+  // Process ratings and flash sales
+  const enrichedProducts = await enrichProductsWithFlashSales(products.map((p) => {
     const avgRating =
       p.reviews.length > 0 ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length : null
     return {
@@ -76,12 +77,18 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       basePrice: Number(p.basePrice),
       salePrice: p.salePrice ? Number(p.salePrice) : null,
     }
-  })
+  }))
+
+  // Ensure flash sale price is prioritized for the UI components
+  const finalProducts = enrichedProducts.map(p => ({
+    ...p,
+    salePrice: p.flashSalePrice ?? p.salePrice
+  }))
 
   return (
     <Suspense fallback={<div className="h-96 flex items-center justify-center">Loading products...</div>}>
       <ProductListingClient
-        initialProducts={enrichedProducts}
+        initialProducts={finalProducts}
         initialTotal={total}
         categories={categories}
         title="All Products"

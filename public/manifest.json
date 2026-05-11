@@ -1,13 +1,16 @@
 {
-  "name": "Your Fashion Store",
-  "short_name": "Store",
-  "description": "Premium fashion for everyone. Experience seamless shopping with our high-end Pakistani apparel and accessories store.",
+  "id": "/",
+  "name": "Calnza Shop",
+  "short_name": "Calnza Shop",
+  "description": "Modern boutique essentials — premium Pakistani fashion & accessories, curated for you.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#000000",
-  "orientation": "portrait",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
+  "orientation": "portrait-primary",
   "categories": ["fashion", "shopping"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -16,7 +19,7 @@
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-192.png",
+      "src": "/icons/icon-192-maskable.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
@@ -24,6 +27,18 @@
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/apple-touch-icon.png",
+      "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
     }
@@ -34,14 +49,14 @@
       "sizes": "1080x1920",
       "type": "image/jpeg",
       "form_factor": "narrow",
-      "label": "Homepage"
+      "label": "Calnza — Modern Boutique Essentials"
     },
     {
       "src": "/images/lookbook1.webp",
       "sizes": "1080x1920",
       "type": "image/webp",
       "form_factor": "narrow",
-      "label": "Latest Collection"
+      "label": "Calnza — Latest Collection"
     }
   ]
 }

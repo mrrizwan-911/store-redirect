@@ -12,7 +12,7 @@ import { generateWhatsAppCartUrl } from '@/lib/utils/whatsapp'
 
 export function CartPage() {
   const dispatch = useAppDispatch()
-  const { items } = useAppSelector((state) => state.cart)
+  const { items, serverSubtotal } = useAppSelector((state) => state.cart)
 
   const [discount, setDiscount] = useState<{ amount: number; code: string } | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -40,7 +40,7 @@ export function CartPage() {
     dispatch(removeItem({ productId: item.productId, variantId: item.variantId }))
   }
 
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const subtotal = serverSubtotal ?? items.reduce((sum, item) => sum + (item.validatedPrice ?? item.price) * item.quantity, 0)
   const total = Math.max(0, subtotal - (discount?.amount || 0))
 
   const handleWhatsAppOrder = () => {
@@ -49,7 +49,7 @@ export function CartPage() {
         name: i.name,
         variantTitle: i.variantTitle,
         quantity: i.quantity,
-        price: i.price,
+        price: i.validatedPrice ?? i.price,
       })),
       total
     )
@@ -169,7 +169,14 @@ export function CartPage() {
                 </div>
 
                 <div className="col-span-2 text-right text-[#737373] text-[13px] hidden md:block font-medium">
-                  PKR {item.price.toLocaleString()}
+                  <div className="flex flex-col items-end">
+                    <span className={item.validatedPrice && item.validatedPrice < item.price ? "text-black font-bold" : ""}>
+                      PKR {(item.validatedPrice ?? item.price).toLocaleString()}
+                    </span>
+                    {item.validatedPrice && item.validatedPrice < item.price && (
+                      <span className="text-[10px] text-neutral-400 line-through">PKR {item.price.toLocaleString()}</span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="col-span-2 text-right font-bold text-[13px] flex justify-between md:block items-center">
@@ -179,7 +186,7 @@ export function CartPage() {
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
-                  PKR {(item.price * item.quantity).toLocaleString()}
+                  PKR {((item.validatedPrice ?? item.price) * item.quantity).toLocaleString()}
                 </div>
               </div>
             ))}

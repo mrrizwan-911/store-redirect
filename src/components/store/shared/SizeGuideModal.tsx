@@ -40,6 +40,7 @@ export function SizeGuideModal({ categoryId, categorySlug, categoryName = 'cloth
         const res = await fetch(`/api/size-guides?${query}`)
 
         if (res.status === 404) {
+          await res.text() // Consume the stream to prevent unhandled promise rejections in undici
           setDbGuide(null)
           setGuideFound(false)
           return

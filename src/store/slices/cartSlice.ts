@@ -5,6 +5,7 @@ interface CartItem {
   variantId?: string
   name: string
   price: number
+  validatedPrice?: number // Added for flash sale support
   quantity: number
   stock: number
   imageUrl: string
@@ -14,6 +15,7 @@ interface CartItem {
 interface CartState {
   items: CartItem[]
   isOpen: boolean
+  serverSubtotal?: number // Added to match backend exactly
   appliedCoupon: {
     code: string
     discountPct: number | null
@@ -28,6 +30,10 @@ const cartSlice = createSlice({
   name: 'cart',
   initialState,
   reducers: {
+    setCart(state, action: PayloadAction<{ items: CartItem[], subtotal?: number }>) {
+      state.items = action.payload.items
+      state.serverSubtotal = action.payload.subtotal
+    },
     addItem(state, action: PayloadAction<CartItem>) {
       const existing = state.items.find(
         i => i.productId === action.payload.productId &&
@@ -86,6 +92,6 @@ const cartSlice = createSlice({
   },
 })
 
-export const { addItem, removeItem, updateQuantity, clearCart, toggleCart, openCart, closeCart, setAppliedCoupon, clearAppliedCoupon } =
+export const { setCart, addItem, removeItem, updateQuantity, clearCart, toggleCart, openCart, closeCart, setAppliedCoupon, clearAppliedCoupon } =
   cartSlice.actions
 export default cartSlice.reducer

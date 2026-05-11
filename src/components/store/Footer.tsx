@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Camera, Globe, Share2, Phone as WhatsApp, Mail, MapPin, Loader2, Send } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -72,6 +73,10 @@ export function Footer() {
     paymentMethods
   } = settings
 
+  const APP_NAME    = process.env.NEXT_PUBLIC_APP_NAME    || 'Calnza'
+  const LOGO_PATH   = process.env.NEXT_PUBLIC_LOGO_PATH   || '/bgless-logo.png'
+  const APP_TAGLINE = process.env.NEXT_PUBLIC_APP_TAGLINE || 'Curated modern wardrobe'
+
   return (
     <footer className="bg-black text-white pt-32 pb-16">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -79,14 +84,29 @@ export function Footer() {
 
           {/* About */}
           <div className="space-y-8">
-            <Link href="/" className="shrink-0 group cursor-pointer flex flex-col items-start gap-1">
-              <span className="font-serif text-2xl font-medium tracking-[0.2em] text-white uppercase transition-all group-hover:tracking-[0.25em] leading-tight">
-                {footerTitle || 'CALNZA'}
-              </span>
-              <span className="text-[9px] uppercase tracking-[0.3em] text-white/40 font-sans font-medium">
-                Curated modern wardrobe
-              </span>
-            </Link>
+            <a href="/" className="shrink-0 group cursor-pointer flex flex-col items-start gap-3">
+              {/* Logo image — inverted to white on the dark footer */}
+              <div className="relative h-12 w-12 opacity-90 group-hover:opacity-100 transition-opacity">
+                <Image
+                  src={LOGO_PATH}
+                  alt={footerTitle || APP_NAME}
+                  fill
+                  sizes="48px"
+                  className="object-contain"
+                  style={{ filter: 'brightness(0) invert(1)' }} /* white on dark footer */
+                />
+              </div>
+
+              {/* Wordmark */}
+              <div className="flex flex-col gap-0.5">
+                <span className="font-serif text-xl font-medium tracking-[0.25em] text-white uppercase transition-all group-hover:tracking-[0.3em]">
+                  {footerTitle || APP_NAME}
+                </span>
+                <span className="text-[9px] uppercase tracking-[0.3em] text-white/40 font-sans font-medium">
+                  {APP_TAGLINE}
+                </span>
+              </div>
+            </a>
             <p className="text-white/40 text-[13px] leading-relaxed max-w-xs font-light font-sans">
               {footerDescription}
             </p>

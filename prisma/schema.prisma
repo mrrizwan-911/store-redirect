@@ -267,17 +267,31 @@ model Payment {
 }
 
 model FlashSale {
-  id          String   @id @default(cuid())
-  name        String
-  discountPct Int
-  startTime   DateTime
-  endTime     DateTime
-  isActive    Boolean  @default(false)
-  productIds  String[]
-  createdAt   DateTime @default(now())
+  id           String          @id @default(cuid())
+  name         String
+  scope        FlashSaleScope  @default(SINGLE)
+  discountType DiscountType    @default(PERCENTAGE)
+  discountPct  Int?            // Used if PERCENTAGE
+  discountFlat Decimal?        @db.Decimal(10, 2) // Used if FLAT
+  startTime    DateTime
+  endTime      DateTime
+  isActive     Boolean         @default(false)
+  productIds   String[]        // Empty if scope is ALL
+  createdAt    DateTime        @default(now())
 
   @@index([startTime, endTime])
   @@index([isActive])
+}
+
+enum FlashSaleScope {
+  SINGLE
+  MULTIPLE
+  ALL
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FLAT
 }
 
 model Quotation {

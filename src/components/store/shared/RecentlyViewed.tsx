@@ -10,7 +10,7 @@ export function RecentlyViewed() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (viewedIds.length === 0) return
+    if (viewedIds.length === 0 || loading) return
 
     const fetchProducts = async () => {
       setLoading(true)
@@ -20,7 +20,16 @@ export function RecentlyViewed() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ ids: viewedIds }),
         })
+
         const data = await res.json()
+
+        if (res.status === 429) {
+          console.warn('Recently Viewed: Rate limited, will retry on next view change')
+          return
+        }
+
+        if (!res.ok) throw new Error(data.error || 'Failed to fetch')
+
         if (data.success) {
           setProducts(data.data)
         }
@@ -32,7 +41,7 @@ export function RecentlyViewed() {
     }
 
     fetchProducts()
-  }, [viewedIds])
+  }, [viewedIds.join(',')])
 
   if (viewedIds.length === 0 || products.length === 0) return null
 

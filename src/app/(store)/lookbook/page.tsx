@@ -1,6 +1,7 @@
 import { db } from '@/lib/db/client'
 import { OutfitCard } from '@/components/store/OutfitCard'
 import Link from 'next/link'
+import { getValidatedPrice } from '@/lib/services/payment/priceValidator'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,15 +31,18 @@ export default async function LookbookPage({ searchParams }: { searchParams: Pro
     orderBy: { createdAt: 'desc' }
   })
 
-  const mappedOutfits = outfits.map(outfit => {
+  const mappedOutfits = await Promise.all(outfits.map(async (outfit) => {
     const itemCount = outfit.items.length
-    const totalPrice = outfit.items.reduce((sum, item) => {
-      const price = item.product.salePrice ?? item.product.basePrice
-      return sum + Number(price)
-    }, 0)
+
+    // Calculate total price using validated prices (accounting for flash sales)
+    const itemPrices = await Promise.all(
+      outfit.items.map(item => getValidatedPrice(item.product.id))
+    )
+
+    const totalPrice = itemPrices.reduce((sum, price) => sum + price, 0)
 
     return { ...outfit, itemCount, totalPrice }
-  })
+  }))
 
   // Simple tabs for filters (can be expanded)
   const filters = ['All', 'Men', 'Women', 'Casual', 'Formal', 'Festive', 'Winter', 'Summer']

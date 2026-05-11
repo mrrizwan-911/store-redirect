@@ -43,8 +43,21 @@ export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
   const ip = (req as any).ip || '127.0.0.1'
 
+  // 1. Get token from cookies or authorization header
+  const authHeader = req.headers.get('authorization')
+  let token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null
+
+  if (!token) {
+    const cookie = req.cookies.get('access_token')
+    token = cookie?.value || null
+  }
+
+  const payload = token ? decodeJwt(token) : null
+  const isAdmin = payload?.role === 'ADMIN'
+
   // --- Rate Limiting Logic (Moved from middleware.ts) ---
-  if (redis) {
+  // Only apply rate limiting to non-admin users to prevent management tasks from being blocked
+  if (redis && !isAdmin) {
     // 1. Strict Rate Limiting for Sensitive Paths
     if (
       pathname.startsWith('/api/auth') ||
@@ -55,14 +68,17 @@ export async function proxy(req: NextRequest) {
       if (strictRateLimit) {
         const { success, limit, reset, remaining } = await strictRateLimit.limit(ip)
         if (!success) {
-          return new NextResponse('Too Many Requests', {
-            status: 429,
-            headers: {
-              'X-RateLimit-Limit': limit.toString(),
-              'X-RateLimit-Remaining': remaining.toString(),
-              'X-RateLimit-Reset': reset.toString(),
-            },
-          })
+          return NextResponse.json(
+            { success: false, error: 'Too Many Requests' },
+            {
+              status: 429,
+              headers: {
+                'X-RateLimit-Limit': limit.toString(),
+                'X-RateLimit-Remaining': remaining.toString(),
+                'X-RateLimit-Reset': reset.toString(),
+              },
+            }
+          )
         }
       }
     }
@@ -71,29 +87,23 @@ export async function proxy(req: NextRequest) {
       if (standardRateLimit) {
         const { success, limit, reset, remaining } = await standardRateLimit.limit(ip)
         if (!success) {
-          return new NextResponse('Too Many Requests', {
-            status: 429,
-            headers: {
-              'X-RateLimit-Limit': limit.toString(),
-              'X-RateLimit-Remaining': remaining.toString(),
-              'X-RateLimit-Reset': reset.toString(),
-            },
-          })
+          return NextResponse.json(
+            { success: false, error: 'Too Many Requests' },
+            {
+              status: 429,
+              headers: {
+                'X-RateLimit-Limit': limit.toString(),
+                'X-RateLimit-Remaining': remaining.toString(),
+                'X-RateLimit-Reset': reset.toString(),
+              },
+            }
+          )
         }
       }
     }
   }
 
   // --- Original Proxy/Auth Logic ---
-  // 1. Get token from cookies or authorization header
-  const authHeader = req.headers.get('authorization')
-  let token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null
-
-  if (!token) {
-    const cookie = req.cookies.get('access_token')
-    token = cookie?.value || null
-  }
-
   // 2. Define protected routes
   const isAdminRoute = pathname.startsWith('/d8f2a1/admin')
   const isProtectedUserRoute = pathname.startsWith('/account')

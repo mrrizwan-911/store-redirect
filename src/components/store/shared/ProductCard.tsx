@@ -20,6 +20,8 @@ interface ProductCardProps {
   secondaryImageUrl?: string
   price: number
   salePrice?: number
+  flashSalePrice?: number
+  flashSaleEndTime?: string
   category: string
   sku: string
   description?: string
@@ -31,6 +33,8 @@ interface ProductCardProps {
   stockCount?: number
 }
 
+import { useFlashSaleTimer } from '@/hooks/useFlashSaleTimer'
+
 export function ProductCard({
   id,
   name,
@@ -39,6 +43,8 @@ export function ProductCard({
   secondaryImageUrl,
   price,
   salePrice,
+  flashSalePrice,
+  flashSaleEndTime,
   category,
   sku,
   description,
@@ -58,6 +64,11 @@ export function ProductCard({
   const [mounted, setMounted] = useState(false)
   const isWishlisted = mounted && isInWishlist
   const [isHovered, setIsHovered] = useState(false)
+
+  const { hours, minutes, seconds, isExpired } = useFlashSaleTimer(flashSaleEndTime)
+  const hasActiveFlashSale = !!flashSalePrice && !!flashSaleEndTime && !isExpired
+
+  const pad = (num: number) => num.toString().padStart(2, '0')
 
   useEffect(() => {
     setMounted(true)
@@ -115,12 +126,26 @@ export function ProductCard({
               New
             </span>
           )}
-          {isBadgeSale && (
+          {(isBadgeSale || hasActiveFlashSale) && (
             <span className="bg-[#E05252] text-white text-[9px] font-bold uppercase tracking-widest px-2 py-1">
-              Sale
+              {hasActiveFlashSale ? 'Flash Sale' : 'Sale'}
             </span>
           )}
         </div>
+
+        {/* Flash Sale Countdown Overlay */}
+        {hasActiveFlashSale && (
+          <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm text-white py-2 px-3 flex items-center justify-between z-10 transition-transform duration-500 group-hover:translate-y-full">
+            <span className="text-[10px] uppercase tracking-widest font-bold text-[#E8D5B0]">Ends in</span>
+            <div className="flex items-center gap-1.5 font-mono text-xs font-bold">
+              <span>{pad(hours)}</span>
+              <span className="opacity-50">:</span>
+              <span>{pad(minutes)}</span>
+              <span className="opacity-50">:</span>
+              <span>{pad(seconds)}</span>
+            </div>
+          </div>
+        )}
 
         {/* Minimal Actions (hover/focus) */}
         <div className="absolute top-3 right-3 flex flex-col items-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
@@ -190,7 +215,12 @@ export function ProductCard({
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {salePrice ? (
+            {hasActiveFlashSale ? (
+              <>
+                <span className="text-sm font-bold text-black font-sans">PKR {flashSalePrice.toLocaleString()}</span>
+                <span className="text-xs text-neutral-400 line-through font-sans">PKR {price.toLocaleString()}</span>
+              </>
+            ) : salePrice ? (
               <>
                 <span className="text-sm font-bold text-black font-sans">PKR {salePrice.toLocaleString()}</span>
                 <span className="text-xs text-neutral-400 line-through font-sans">PKR {price.toLocaleString()}</span>

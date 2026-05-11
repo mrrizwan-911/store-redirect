@@ -10,7 +10,7 @@ import Link from 'next/link'
 
 export function CartDrawer() {
   const dispatch = useAppDispatch()
-  const { items, isOpen } = useAppSelector((state) => state.cart)
+  const { items, isOpen, serverSubtotal } = useAppSelector((state) => state.cart)
 
   // Debounced quantity update wrapper
   const handleQuantityChange = (productId: string, variantId: string | undefined, currentQty: number, change: number) => {
@@ -29,7 +29,7 @@ export function CartDrawer() {
     dispatch(removeItem({ productId: item.productId, variantId: item.variantId }))
   }
 
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  const subtotal = serverSubtotal ?? items.reduce((sum, item) => sum + (item.validatedPrice ?? item.price) * item.quantity, 0)
 
   if (!isOpen) return null
 
@@ -98,7 +98,12 @@ export function CartDrawer() {
                         Variant: {item.variantTitle}
                       </p>
                     ) : null}
-                    <p className="mt-2 font-bold text-[12px] tracking-tight">PKR {item.price.toLocaleString()}</p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <p className="font-bold text-[12px] tracking-tight">PKR {(item.validatedPrice ?? item.price).toLocaleString()}</p>
+                      {item.validatedPrice && item.validatedPrice < item.price && (
+                        <p className="text-[10px] text-neutral-400 line-through">PKR {item.price.toLocaleString()}</p>
+                      )}
+                    </div>
                     <button
                       onClick={() => handleMoveToWishlist(item)}
                       className="mt-2 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.18em] text-neutral-400 hover:text-black transition-colors"

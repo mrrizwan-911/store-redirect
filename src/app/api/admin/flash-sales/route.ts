@@ -43,21 +43,26 @@ export async function POST(req: Request) {
     const startTime = new Date(data.startTime)
     const endTime = new Date(data.endTime)
 
-    // Check if products exist
-    const products = await db.product.findMany({
-      where: { id: { in: data.productIds } },
-    })
-    if (products.length !== data.productIds.length) {
-      return NextResponse.json({ success: false, error: 'Some products do not exist' }, { status: 400 })
+    // Check if products exist if scope is not ALL
+    if (data.scope !== 'ALL' && data.productIds.length > 0) {
+      const products = await db.product.findMany({
+        where: { id: { in: data.productIds } },
+      })
+      if (products.length !== data.productIds.length) {
+        return NextResponse.json({ success: false, error: 'Some products do not exist' }, { status: 400 })
+      }
     }
 
     const flashSale = await db.flashSale.create({
       data: {
         name: data.name,
+        scope: data.scope,
+        discountType: data.discountType,
         discountPct: data.discountPct,
+        discountFlat: data.discountFlat,
         startTime,
         endTime,
-        productIds: data.productIds,
+        productIds: data.scope === 'ALL' ? [] : data.productIds,
         isActive: startTime <= now && endTime >= now,
       },
     })

@@ -1,30 +1,139 @@
-import type { Metadata } from "next";
-import { Playfair_Display, DM_Sans } from "next/font/google";
-import "./globals.css";
-import { Toaster } from "@/components/ui/sonner";
-import { ReduxProvider } from "@/components/shared/ReduxProvider";
-import { FloatingWhatsApp } from "@/components/store/shared/FloatingWhatsApp";
-import { CartDrawer } from "@/components/store/cart/CartDrawer";
+import type { Metadata, Viewport } from 'next'
+import { Playfair_Display, DM_Sans } from 'next/font/google'
+import './globals.css'
+import { Toaster } from '@/components/ui/sonner'
+import { ReduxProvider } from '@/components/shared/ReduxProvider'
+import { FloatingWhatsApp } from '@/components/store/shared/FloatingWhatsApp'
+import { CartDrawer } from '@/components/store/cart/CartDrawer'
+import { SWRegistrar } from '@/components/shared/SWRegistrar'
 
+// ─── Fonts ───────────────────────────────────────────────────────────────────
 const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-});
+  variable: '--font-playfair',
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin"],
-});
+  variable: '--font-dm-sans',
+  subsets: ['latin'],
+  display: 'swap',
+})
 
+// ─── App config from env (never hardcoded) ───────────────────────────────────
+const rawAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calnza.com'
+const APP_URL = rawAppUrl.startsWith('http') ? rawAppUrl : `http://${rawAppUrl}`
+const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Calnza'
+const APP_DESCRIPTION =
+  process.env.NEXT_PUBLIC_APP_DESCRIPTION ||
+  'Modern boutique essentials — premium Pakistani fashion & accessories.'
+
+// ─── Viewport ─────────────────────────────────────────────────────────────────
+// Exported separately as required by Next.js 14 App Router
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  minimumScale: 1,
+  viewportFit: 'cover',          // iPhone safe-area / Dynamic Island support
+  themeColor: '#0A0A0A',
+}
+
+// ─── Metadata ─────────────────────────────────────────────────────────────────
 export const metadata: Metadata = {
-  title: "Calnza",
-  description: "A full-stack e-commerce platform for clothes, shoes, apparel, and accessories.",
-};
+  metadataBase: new URL(APP_URL),
+  title: {
+    default: APP_NAME,
+    template: `%s | ${APP_NAME}`,
+  },
+  description: APP_DESCRIPTION,
+  applicationName: APP_NAME,
+  keywords: ['fashion', 'Pakistani apparel', 'boutique', 'clothes', 'accessories', 'calnza'],
+  authors: [{ name: APP_NAME, url: APP_URL }],
 
+  // ── PWA / manifest ──
+  manifest: '/manifest.json',
+
+  // ── Open Graph ──
+  openGraph: {
+    type: 'website',
+    siteName: APP_NAME,
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
+    url: APP_URL,
+    images: [
+      {
+        url: '/images/hero-boutique.jpg',
+        width: 1200,
+        height: 630,
+        alt: APP_NAME,
+      },
+    ],
+  },
+
+  // ── Twitter/X Card ──
+  twitter: {
+    card: 'summary_large_image',
+    title: APP_NAME,
+    description: APP_DESCRIPTION,
+  },
+
+  // ── Apple Web App ──
+  appleWebApp: {
+    capable: true,
+    title: APP_NAME,
+    statusBarStyle: 'black-translucent',
+    startupImage: [
+      // iPhone 14 Pro Max
+      {
+        url: '/splash/apple-splash-1290x2796.png',
+        media:
+          'screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)',
+      },
+      // iPhone 14 / 13 / 12
+      {
+        url: '/splash/apple-splash-1170x2532.png',
+        media:
+          'screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)',
+      },
+      // iPhone SE 3rd gen
+      {
+        url: '/splash/apple-splash-750x1334.png',
+        media:
+          'screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)',
+      },
+    ],
+  },
+
+  // ── Icons ──
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      {
+        rel: 'mask-icon',
+        url: '/icons/icon-512-maskable.png',
+      },
+    ],
+  },
+
+  // ── Robots ──
+  robots: {
+    index: true,
+    follow: true,
+  },
+}
+
+// ─── Root Layout ──────────────────────────────────────────────────────────────
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html
@@ -32,15 +141,6 @@ export default function RootLayout({
       className={`${playfair.variable} ${dmSans.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#000000" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="Calnza" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-      </head>
       <body
         className="min-h-full flex flex-col font-body bg-background text-text-primary"
         suppressHydrationWarning
@@ -51,7 +151,9 @@ export default function RootLayout({
           <FloatingWhatsApp />
         </ReduxProvider>
         <Toaster />
+        {/* Registers the service worker client-side after hydration */}
+        <SWRegistrar />
       </body>
     </html>
-  );
+  )
 }

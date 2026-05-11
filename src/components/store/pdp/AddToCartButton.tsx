@@ -22,6 +22,7 @@ interface AddToCartButtonProps {
     price?: number | null
   } | null
   quantity: number
+  priceOverride?: number // Added for flash sale support
   className?: string
 }
 
@@ -29,6 +30,7 @@ export default function AddToCartButton({
   product,
   selectedVariant,
   quantity,
+  priceOverride,
   className,
 }: AddToCartButtonProps) {
   const dispatch = useAppDispatch()
@@ -57,7 +59,8 @@ export default function AddToCartButton({
           productId: product.id,
           variantId: selectedVariant.id,
           name: product.name,
-          price: Number(selectedVariant.price || product.salePrice || product.basePrice),
+          price: priceOverride ?? Number(selectedVariant.price || product.salePrice || product.basePrice),
+          validatedPrice: priceOverride, // Store the validated price if available
           quantity: quantity,
           stock: availableStock,
           imageUrl: product.images[0]?.url || '',

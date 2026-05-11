@@ -2,6 +2,7 @@ import { db } from '@/lib/db/client'
 import { ProductListingClient } from '@/components/store/plp/ProductListingClient'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
+import { enrichProductsWithFlashSales } from '@/lib/services/payment/priceValidator'
 
 export const dynamic = 'force-dynamic'
 
@@ -106,8 +107,8 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
     }),
   ])
 
-  // Process products
-  const enrichedProducts = products.map((p) => {
+  // Process products and flash sales
+  const enrichedProducts = await enrichProductsWithFlashSales(products.map((p) => {
     const avgRating =
       p.reviews.length > 0 ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length : null
     return {
@@ -118,13 +119,19 @@ export default async function SubcategoryPage({ params, searchParams }: Subcateg
       basePrice: Number(p.basePrice),
       salePrice: p.salePrice ? Number(p.salePrice) : null,
     }
-  })
+  }))
+
+  // Ensure flash sale price is prioritized for the UI components
+  const finalProducts = enrichedProducts.map(p => ({
+    ...p,
+    salePrice: p.flashSalePrice ?? p.salePrice
+  }))
 
   return (
     <div className="max-w-7xl mx-auto px-6 md:px-8 py-8">
       <Suspense fallback={<div className="h-96 flex items-center justify-center">Loading collection...</div>}>
         <ProductListingClient
-          initialProducts={enrichedProducts}
+          initialProducts={finalProducts}
           initialTotal={total}
           categories={siblings}
           title={subcategory.name}

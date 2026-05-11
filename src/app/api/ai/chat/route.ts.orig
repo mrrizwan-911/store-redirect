@@ -3,7 +3,6 @@ import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { aiConfig } from '@/lib/services/ai/config'
 import { analyzeImage } from '@/lib/services/ai/visual-search'
-import { parseSearchIntent } from '@/lib/services/ai/intent-parser'
 
 export const dynamic = 'force-dynamic'
 
@@ -54,7 +53,7 @@ export async function POST(req: NextRequest) {
       `${guide.title}${guide.category ? ` (Category: ${guide.category.name})` : ''}:\n${guide.content}`
     )).join('\n---\n')
 
-    // 3. Load Product Context (if any)
+    // 2. Load Product Context (if any)
     let productContext = ''
     if (productId) {
       const product = await db.product.findUnique({
@@ -71,46 +70,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 4. Dynamic Product Search based on query intent
-    let searchContext = ''
-    try {
-      // Quickly parse intent to see if user is looking for products
-      const intent = await parseSearchIntent(message)
-      if (intent.category || intent.colors?.length || intent.subCategory || message.toLowerCase().includes('show me') || message.toLowerCase().includes('find')) {
-        const where: any = { isActive: true }
-        if (intent.category) {
-            where.category = { name: { contains: intent.category, mode: 'insensitive' } }
-        }
-        if (intent.colors?.length) {
-            where.variants = { some: { color: { in: intent.colors, mode: 'insensitive' } } }
-        }
-        
-        // Fallback text search if no strong intent but looks like a search
-        if (Object.keys(intent).length === 0) {
-           where.OR = [
-             { name: { contains: message, mode: 'insensitive' } },
-             { description: { contains: message, mode: 'insensitive' } }
-           ]
-        }
-
-        const foundProducts = await db.product.findMany({
-            where,
-            take: 5,
-            select: { id: true, name: true, basePrice: true, salePrice: true, category: { select: { name: true } } }
-        })
-        
-        if (foundProducts.length > 0) {
-            const productList = foundProducts.map(p => 
-                `- ${p.name} (PKR ${p.salePrice || p.basePrice}) [Use tag: [PRODUCT:${p.id}]]`
-            ).join('\n')
-            searchContext = `\nI found these relevant products in our catalog:\n${productList}\n\nIMPORTANT: When you want to show a product to the user, you MUST use the exact tag [PRODUCT:id] in your response. Do not use markdown links, just the raw tag. Example: "I recommend the [PRODUCT:123] for you."`
-        }
-      }
-    } catch (err) {
-       logger.error('Failed to parse intent for chat search', err)
-    }
-
-    // 5. Build System Prompt
+    // 3. Build System Prompt
     const systemPrompt = `
 You are a helpful shopping assistant for Calnza, a fashion store in Pakistan.
 You help customers find products, understand sizing, and make purchase decisions.
@@ -119,8 +79,6 @@ You have access to the following size guides from the store:
 ${sizeGuideBlock}
 
 ${productContext}
-
-${searchContext}
 
 ${visualContext}
 

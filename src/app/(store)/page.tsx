@@ -6,6 +6,7 @@ import { NewArrivalsStrip } from '@/components/store/home/NewArrivalsStrip'
 import { LookbookTeaser } from '@/components/store/home/LookbookTeaser'
 import { NewsletterSection } from '@/components/store/home/NewsletterSection'
 import { RecentlyViewed } from '@/components/store/shared/RecentlyViewed'
+import { enrichProductsWithFlashSales } from '@/lib/services/payment/priceValidator'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,6 +46,7 @@ export default async function Homepage() {
       slug: p.slug,
       imageUrl: primaryImage?.url ?? '/placeholder.png',
       secondaryImageUrl: secondaryImage?.url,
+      basePrice: Number(p.basePrice),
       price: Number(p.basePrice),
       salePrice: p.salePrice ? Number(p.salePrice) : undefined,
       category: p.category.name,
@@ -59,8 +61,8 @@ export default async function Homepage() {
     }
   }
 
-  const featured = featuredRaw.map(mapProduct)
-  const newArrivals = newArrivalsRaw.map(mapProduct)
+  const featured = await enrichProductsWithFlashSales(featuredRaw.map(mapProduct))
+  const newArrivals = await enrichProductsWithFlashSales(newArrivalsRaw.map(mapProduct))
 
   return (
     <main>

@@ -3,10 +3,14 @@
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { setUser, setToken, logout } from '@/store/slices/authSlice'
+import { useCartSync } from '@/hooks/useCartSync'
 
 export function AuthInitializer() {
   const dispatch = useAppDispatch()
   const { isAuthenticated, user, accessToken } = useAppSelector((state) => state.auth)
+
+  // Initialize cart sync
+  useCartSync()
 
   useEffect(() => {
     // If we have no accessToken but think we are authenticated (e.g. after page reload),

@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { db } from '@/lib/db/client'
 import ProductDetailClient from '@/components/store/pdp/ProductDetailClient'
 import { Metadata } from 'next'
+import { enrichProductsWithFlashSales, getActiveFlashSaleForProduct, calculateFlashSalePrice } from '@/lib/services/payment/priceValidator'
 
 export const dynamic = 'force-dynamic'
 
@@ -80,6 +81,9 @@ export default async function ProductPage({ params }: Props) {
     take: 4,
   })
 
+  // Fetch active flash sale for this product
+  const activeSale = await getActiveFlashSaleForProduct(product.id)
+
   const enrichedProduct = {
     ...product,
     avgRating,
@@ -90,20 +94,29 @@ export default async function ProductPage({ params }: Props) {
     variants: product.variants.map(v => ({
       ...v,
       price: v.price ? Number(v.price) : null
-    }))
+    })),
+    activeSale: activeSale ? {
+      id: activeSale.id,
+      name: activeSale.name,
+      discountPct: activeSale.discountPct,
+      discountType: activeSale.discountType,
+      discountFlat: activeSale.discountFlat ? Number(activeSale.discountFlat) : null,
+      flashSalePrice: calculateFlashSalePrice(Number(product.basePrice), activeSale),
+      endTime: activeSale.endTime.toISOString()
+    } : null
   }
 
-  const enrichedCategoryProducts = categoryProducts.map(p => ({
+  const enrichedCategoryProducts = await enrichProductsWithFlashSales(categoryProducts.map(p => ({
     ...p,
     basePrice: Number(p.basePrice),
     salePrice: p.salePrice ? Number(p.salePrice) : null,
-  }))
+  })))
 
-  const enrichedRelatedProducts = relatedProducts.map(p => ({
+  const enrichedRelatedProducts = await enrichProductsWithFlashSales(relatedProducts.map(p => ({
     ...p,
     basePrice: Number(p.basePrice),
     salePrice: p.salePrice ? Number(p.salePrice) : null,
-  }))
+  })))
 
   return (
     <main className="min-h-screen bg-background pt-4">

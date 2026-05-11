@@ -6,13 +6,22 @@ import { ProductActions } from '@/components/admin/products/ProductActions'
 export const dynamic = 'force-dynamic'
 
 export default async function AdminProductsPage() {
-  const products = await db.product.findMany({
-    orderBy: { createdAt: 'desc' },
-    include: {
-      category: true,
-      variants: true,
-    },
-  })
+  const [products, activeFlashSales] = await Promise.all([
+    db.product.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        category: true,
+        variants: true,
+      },
+    }),
+    db.flashSale.findMany({
+      where: {
+        startTime: { lte: new Date() },
+        endTime: { gte: new Date() },
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+  ])
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 font-sans">
@@ -36,6 +45,7 @@ export default async function AdminProductsPage() {
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">SKU</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Category</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Price</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Flash Sale</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Stock</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Status</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Actions</th>
@@ -44,6 +54,22 @@ export default async function AdminProductsPage() {
             <tbody>
               {products.map((product) => {
                 const totalStock = product.variants.reduce((acc, v) => acc + v.stock, 0)
+                const basePrice = Number(product.basePrice)
+
+                // Find active flash sale for this product
+                const activeSale = activeFlashSales.find(sale =>
+                  sale.scope === 'ALL' || sale.productIds.includes(product.id)
+                )
+
+                let flashPrice = null
+                if (activeSale) {
+                  if (activeSale.discountType === 'PERCENTAGE') {
+                    flashPrice = Math.round(basePrice * (1 - (activeSale.discountPct || 0) / 100) * 100) / 100
+                  } else {
+                    flashPrice = Math.max(0, Math.round((basePrice - Number(activeSale.discountFlat || 0)) * 100) / 100)
+                  }
+                }
+
                 return (
                   <tr
                     key={product.id}
@@ -52,7 +78,26 @@ export default async function AdminProductsPage() {
                     <td className="p-4 font-semibold text-neutral-900 text-xs">{product.name}</td>
                     <td className="p-4 text-neutral-500 text-xs">{product.sku}</td>
                     <td className="p-4 text-neutral-500 text-xs">{product.category.name}</td>
-                    <td className="p-4 text-neutral-900 font-medium text-xs">PKR {Number(product.basePrice).toLocaleString()}</td>
+                    <td className="p-4 text-xs">
+                      {flashPrice !== null ? (
+                        <div className="flex flex-col">
+                          <span className="text-neutral-900 font-bold">PKR {flashPrice.toLocaleString()}</span>
+                          <span className="text-neutral-400 line-through text-[10px]">PKR {basePrice.toLocaleString()}</span>
+                        </div>
+                      ) : (
+                        <span className="text-neutral-900 font-medium font-sans">PKR {basePrice.toLocaleString()}</span>
+                      )}
+                    </td>
+                    <td className="p-4 text-xs">
+                      {activeSale ? (
+                        <div className="flex flex-col">
+                          <span className="text-amber-600 font-bold uppercase text-[9px] tracking-tight">Ends in {Math.ceil((new Date(activeSale.endTime).getTime() - new Date().getTime()) / (1000 * 60 * 60))}h</span>
+                          <span className="text-neutral-400 text-[9px]">{new Date(activeSale.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                      ) : (
+                        <span className="text-neutral-300 text-[10px]">—</span>
+                      )}
+                    </td>
                     <td className="p-4">
                       <span
                         className={`text-xs font-medium ${

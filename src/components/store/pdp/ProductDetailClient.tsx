@@ -9,6 +9,7 @@ import ReviewsSection from './ReviewsSection'
 import { ProductCard } from '../shared/ProductCard'
 import { SizeGuideModal } from '../shared/SizeGuideModal'
 import { RecentlyViewed } from '../shared/RecentlyViewed'
+import { FlashSaleCountdown } from '../FlashSaleCountdown'
 import { useWishlist } from '@/hooks/useWishlist'
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed'
 import { cn } from '@/lib/utils'
@@ -39,6 +40,15 @@ interface Product {
   shortDescription?: string | null
   basePrice: any // Decimal from Prisma
   salePrice?: any | null
+  activeSale?: {
+    id: string
+    name: string
+    discountPct: number | null
+    discountType: string
+    discountFlat: number | null
+    flashSalePrice: number
+    endTime: string
+  } | null
   sku: string
   category: {
     name: string
@@ -132,8 +142,29 @@ export default function ProductDetailClient({ product, categoryProducts, related
     }) || null
   }, [product.variants, selectedOptions])
 
-  const currentPrice = Number(selectedVariant?.price || product.salePrice || product.basePrice)
-  const originalPrice = product.salePrice ? Number(product.basePrice) : null
+  const currentPrice = useMemo(() => {
+    const baseUnitPrice = Number(selectedVariant?.price || product.salePrice || product.basePrice)
+
+    // If there's an active sale, we need to apply its logic to the baseUnitPrice
+    // which might be a variant price override
+    if (product.activeSale) {
+      if (product.activeSale.discountType === 'PERCENTAGE') {
+        const discountPct = product.activeSale.discountPct || 0
+        return Math.round(baseUnitPrice * (1 - discountPct / 100) * 100) / 100
+      } else if (product.activeSale.discountType === 'FLAT') {
+        const discountFlat = Number(product.activeSale.discountFlat || 0)
+        return Math.max(0, Math.round((baseUnitPrice - discountFlat) * 100) / 100)
+      }
+    }
+
+    return baseUnitPrice
+  }, [selectedVariant, product.salePrice, product.basePrice, product.activeSale])
+
+  const originalPrice = useMemo(() => {
+    // Show original if we are in a flash sale OR if there's a regular salePrice
+    if (product.activeSale) return Number(selectedVariant?.price || product.basePrice)
+    return product.salePrice ? Number(product.basePrice) : null
+  }, [selectedVariant, product.basePrice, product.salePrice, product.activeSale])
 
   const handleQuantityChange = (type: 'inc' | 'dec') => {
     if (type === 'inc') {
@@ -283,6 +314,17 @@ export default function ProductDetailClient({ product, categoryProducts, related
             />
           </div>
 
+          {/* Flash Sale Countdown */}
+          {product.activeSale && (
+            <div className="animate-in fade-in slide-in-from-top-4 duration-1000">
+              <FlashSaleCountdown
+                saleEndTimeUTC={product.activeSale.endTime}
+                saleName={product.activeSale.name}
+                discountPct={product.activeSale.discountPct || 0}
+              />
+            </div>
+          )}
+
           <div className="space-y-6 pt-4">
             {/* Quantity Stepper */}
             <div className="flex items-center gap-4">
@@ -330,6 +372,7 @@ export default function ProductDetailClient({ product, categoryProducts, related
                 product={product}
                 selectedVariant={selectedVariant}
                 quantity={quantity}
+                priceOverride={currentPrice}
               />
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button

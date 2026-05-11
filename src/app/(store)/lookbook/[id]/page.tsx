@@ -1,6 +1,7 @@
 import { db } from '@/lib/db/client'
 import { OutfitDetail } from '@/components/store/OutfitDetail'
 import { notFound } from 'next/navigation'
+import { getValidatedPrice } from '@/lib/services/payment/priceValidator'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,19 +34,23 @@ export default async function SingleOutfitPage({ params }: { params: Promise<{ i
   }
 
   const itemCount = outfit.items.length
-  const totalPrice = outfit.items.reduce((sum, item) => {
-    const price = item.product.salePrice ?? item.product.basePrice
-    return sum + Number(price)
-  }, 0)
+
+  // Calculate prices using validated prices (accounting for flash sales)
+  const itemPrices = await Promise.all(
+    outfit.items.map(item => getValidatedPrice(item.product.id))
+  )
+
+  const totalPrice = itemPrices.reduce((sum, price) => sum + price, 0)
 
   const mappedOutfit = {
     ...outfit,
-    items: outfit.items.map(item => ({
+    items: outfit.items.map((item, index) => ({
       ...item,
       product: {
         ...item.product,
-        basePrice: item.product.basePrice.toString(),
-        salePrice: item.product.salePrice ? item.product.salePrice.toString() : null,
+        basePrice: Number(item.product.basePrice),
+        // Use the validated price as the sale price if it's lower than base
+        salePrice: itemPrices[index] < Number(item.product.basePrice) ? itemPrices[index] : (item.product.salePrice ? Number(item.product.salePrice) : null),
       }
     })),
     itemCount,

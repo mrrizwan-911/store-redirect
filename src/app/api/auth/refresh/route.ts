@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
     })
 
     await db.$transaction([
-      db.refreshToken.delete({ where: { id: stored.id } }),
+      db.refreshToken.deleteMany({ where: { id: stored.id } }),
       db.refreshToken.create({
         data: {
           userId: payload.userId,
