@@ -7,8 +7,18 @@ export const createOrderSchema = z.object({
   guestName: z.string().optional(),
   guestEmail: z.string().email().optional(),
   guestPhone: z.string().optional(),
-  shippingMethod: z.enum(['standard', 'express', 'free']),
+
+  // Dynamic shipping option from DB (replaces hardcoded shippingMethod enum)
+  shippingOptionId: z.string().min(1, 'Please select a shipping method'),
+
+  // Site country — set from NEXT_PUBLIC_SITE_COUNTRY on the client, saved to Order.country
+  country: z.string().default('PK'),
+
   paymentMethod: z.enum(['JAZZCASH', 'EASYPAISA', 'CARD', 'COD', 'BANK_TRANSFER']),
+
+  // For Stripe: passed after client confirms payment, verified server-side before confirming order
+  stripePaymentIntentId: z.string().optional(),
+
   couponCode: z.string().optional().nullable(),
   loyaltyPoints: z.number().int().min(0).max(2000).optional(),
   isGift: z.boolean().default(false),

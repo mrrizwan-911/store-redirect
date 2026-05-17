@@ -9,11 +9,11 @@ import {
   Truck,
   CreditCard,
   MapPin,
-  Clock,
-  ChevronRight,
   ExternalLink,
   MessageCircle,
-  CircleCheck
+  CircleCheck,
+  Download,
+  LoaderCircle,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -22,6 +22,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import Image from 'next/image'
 import { useAppSelector } from '@/store/hooks'
 import { cn } from '@/lib/utils'
+import { generateWhatsAppOrderConfirmationUrl } from '@/lib/utils/whatsapp'
 
 interface OrderDetail {
   id: string
@@ -70,6 +71,7 @@ export default function OrderDetailPage() {
   const { isAuthenticated } = useAppSelector((state) => state.auth)
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [downloadingInvoice, setDownloadingInvoice] = useState(false)
 
   useEffect(() => {
     async function fetchOrderDetail() {
@@ -90,6 +92,41 @@ export default function OrderDetailPage() {
     }
     fetchOrderDetail()
   }, [params.id, router])
+
+  async function handleDownloadInvoice() {
+    if (!order) return
+    setDownloadingInvoice(true)
+    const toastId = toast.loading('Preparing invoice…')
+    try {
+      const res = await fetch(`/api/orders/${order.id}/invoice`)
+      if (!res.ok) throw new Error('Failed to generate invoice')
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Calnza-Invoice-${order.orderNumber}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Invoice downloaded', { id: toastId })
+    } catch (e: any) {
+      toast.error(e.message || 'Could not download invoice', { id: toastId })
+    } finally {
+      setDownloadingInvoice(false)
+    }
+  }
+
+  function handleWhatsApp() {
+    if (!order) return
+    const url = generateWhatsAppOrderConfirmationUrl({
+      orderNumber: order.orderNumber,
+      total: Number(order.total),
+      paymentMethod: order.payment.method.replace(/_/g, ' '),
+      itemsCount: order.items.length,
+    })
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
 
   if (isLoading) {
     return (
@@ -136,10 +173,23 @@ export default function OrderDetailPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Button variant="outline" className="rounded-[12px] h-12 px-6 border-neutral-300 text-[10px] uppercase tracking-widest font-bold text-black hover:bg-black hover:text-white transition-all">
+            <Button
+              variant="outline"
+              onClick={handleDownloadInvoice}
+              disabled={downloadingInvoice}
+              className="rounded-[12px] h-12 px-6 border-neutral-300 text-[10px] uppercase tracking-widest font-bold text-black hover:bg-black hover:text-white transition-all flex items-center gap-2"
+            >
+              {downloadingInvoice ? (
+                <LoaderCircle className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
               Download Invoice
             </Button>
-            <Button className="rounded-[12px] h-12 px-6 bg-[#25D366] text-white hover:bg-[#20bd5a] uppercase tracking-widest text-[10px] font-bold border-none flex items-center gap-2 shadow-lg shadow-green-500/20">
+            <Button
+              onClick={handleWhatsApp}
+              className="rounded-[12px] h-12 px-6 bg-[#25D366] text-white hover:bg-[#20bd5a] uppercase tracking-widest text-[10px] font-bold border-none flex items-center gap-2 shadow-lg shadow-green-500/20"
+            >
               <MessageCircle className="w-4 h-4 fill-current" /> Help on WhatsApp
             </Button>
           </div>
@@ -205,14 +255,16 @@ export default function OrderDetailPage() {
           <div className="divide-y divide-neutral-100">
             {order.items.map((item) => (
               <div key={item.id} className="py-6 flex gap-6">
-                <div className="relative w-24 h-32 bg-neutral-50 flex-shrink-0 border border-neutral-100 rounded-[8px] overflow-hidden">
-                  {item.product.images[0]?.url && (
+                <div className="relative w-24 h-32 bg-neutral-50 flex-shrink-0 border border-neutral-100 rounded-[8px] overflow-hidden flex items-center justify-center">
+                  {item.product.images[0]?.url ? (
                     <Image
                       src={item.product.images[0].url}
                       alt={item.product.name}
                       fill
                       className="object-cover"
                     />
+                  ) : (
+                    <Package className="w-8 h-8 text-neutral-300 stroke-[1.5]" />
                   )}
                 </div>
                 <div className="flex-1 flex flex-col justify-between py-1">

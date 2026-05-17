@@ -1,11 +1,12 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useDispatch } from 'react-redux'
 import { addItem, openCart } from '@/store/slices/cartSlice'
-import { MessageCircle, Share2, Link as LinkIcon } from 'lucide-react'
+import { MessageCircle, Share2, Link as LinkIcon, ShoppingBag, Check, ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 interface OutfitDetailProps {
   outfit: any
@@ -13,127 +14,301 @@ interface OutfitDetailProps {
 
 export function OutfitDetail({ outfit }: OutfitDetailProps) {
   const dispatch = useDispatch()
+  const router = useRouter()
+  const [addedAll, setAddedAll] = useState(false)
+  const [copiedLink, setCopiedLink] = useState(false)
+  const [addedItems, setAddedItems] = useState<Set<string>>(new Set())
+
+  // Safe price extractor — prevents the PKR 0 bug
+  // Prisma Decimal objects must be converted via Number() BEFORE being stored in Redux
+  const getSafePrice = (product: any): number => {
+    // By the time it reaches here from [id]/page.tsx, these are already JS numbers
+    // but we do a double-safe conversion just in case
+    const salePrice = product.salePrice != null ? Number(product.salePrice) : null
+    const basePrice = Number(product.basePrice)
+    const resolved = (salePrice && salePrice > 0) ? salePrice : basePrice
+    // Extra safety: if still 0 or NaN, return basePrice
+    return (resolved && resolved > 0 && !isNaN(resolved)) ? resolved : basePrice
+  }
 
   const handleAddAllToCart = () => {
     outfit.items.forEach((item: any) => {
       const product = item.product
-      const variant = product.variants?.[0]
-      const price = variant?.price ?? product.salePrice ?? product.basePrice
+      const price = getSafePrice(product)
       dispatch(
         addItem({
           productId: product.id,
-          variantId: variant?.id,
-          variantTitle: variant?.title,
+          variantId: undefined,
+          variantTitle: undefined,
           name: product.name,
-          price: Number(price),
+          price,
           quantity: 1,
-          stock: variant?.stock ?? 999,
+          stock: 999,
           imageUrl: product.images?.[0]?.url ?? '',
         })
       )
     })
+    setAddedAll(true)
+    setTimeout(() => setAddedAll(false), 2500)
     dispatch(openCart())
   }
 
   const handleAddSingleToCart = (product: any) => {
-    const variant = product.variants?.[0]
-    const price = variant?.price ?? product.salePrice ?? product.basePrice
+    const price = getSafePrice(product)
     dispatch(
       addItem({
         productId: product.id,
-        variantId: variant?.id,
-        variantTitle: variant?.title,
+        variantId: undefined,
+        variantTitle: undefined,
         name: product.name,
-        price: Number(price),
+        price,
         quantity: 1,
-        stock: variant?.stock ?? 999,
+        stock: 999,
         imageUrl: product.images?.[0]?.url ?? '',
       })
     )
+    setAddedItems(prev => new Set(prev).add(product.id))
+    setTimeout(() => {
+      setAddedItems(prev => {
+        const next = new Set(prev)
+        next.delete(product.id)
+        return next
+      })
+    }, 2000)
     dispatch(openCart())
   }
 
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href).catch(() => {})
+    setCopiedLink(true)
+    setTimeout(() => setCopiedLink(false), 2000)
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* Left: Hero Image */}
-        <div className="lg:col-span-7">
-          <div className="relative aspect-[3/4] w-full bg-[#FAFAFA]">
-            {outfit.imageUrl ? (
-              <Image src={outfit.imageUrl} alt={outfit.title} fill className="object-cover" />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-[#A3A3A3]">
-                No Image
-              </div>
-            )}
-          </div>
-        </div>
+    <div className="min-h-screen bg-white">
+      {/* Back nav */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center gap-2 text-neutral-400 hover:text-black transition-colors text-xs uppercase tracking-widest font-medium"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Back to Lookbook
+        </button>
+      </div>
 
-        {/* Right: Details & Items */}
-        <div className="lg:col-span-5 flex flex-col">
-          <div className="border-b border-[#E5E5E5] pb-6 mb-6">
-            <h1 className="text-4xl font-playfair font-bold mb-4">{outfit.title}</h1>
-            <div className="flex gap-2 text-xs uppercase tracking-widest text-[#737373] mb-4">
-              <span className="px-2 py-1 bg-[#FAFAFA] border border-[#E5E5E5]">{outfit.gender}</span>
-              <span className="px-2 py-1 bg-[#FAFAFA] border border-[#E5E5E5]">{outfit.season}</span>
-              <span className="px-2 py-1 bg-[#FAFAFA] border border-[#E5E5E5]">{outfit.occasion}</span>
-            </div>
-            {outfit.description && <p className="text-[#000000] leading-relaxed">{outfit.description}</p>}
-          </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
 
-          <div className="mb-8">
-            <h2 className="text-xl font-playfair font-bold mb-4">Items in this look ({outfit.itemCount})</h2>
-            <div className="space-y-4">
-              {outfit.items.map((item: any) => (
-                <div key={item.id} className="flex gap-4 border border-[#E5E5E5] p-3 bg-white hover:border-[#000000] transition-colors">
-                  <Link href={`/products/${item.product.slug}`} className="relative w-24 h-32 bg-[#FAFAFA] flex-shrink-0">
-                    {item.product.images?.[0]?.url && (
-                      <Image src={item.product.images[0].url} alt={item.product.name} fill className="object-cover" />
-                    )}
-                  </Link>
-                  <div className="flex-1 flex flex-col justify-center">
-                    <Link href={`/products/${item.product.slug}`} className="font-medium hover:underline text-lg">
-                      {item.product.name}
-                    </Link>
-                    <div className="text-[#737373] mt-1 mb-3">
-                      {item.product.salePrice ? (
-                        <>
-                          <span className="line-through mr-2">PKR {item.product.basePrice}</span>
-                          <span className="text-[#000000]">PKR {item.product.salePrice}</span>
-                        </>
-                      ) : (
-                        <span>PKR {item.product.basePrice}</span>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleAddSingleToCart(item.product)}
-                      className="mt-auto self-start text-sm uppercase tracking-wider font-medium border-b border-black pb-0.5 hover:text-[#737373] hover:border-[#737373] transition-colors"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
+          {/* Left: Hero Image */}
+          <div className="w-full lg:w-[55%] flex-shrink-0">
+            <div className="relative w-full aspect-[3/4] bg-neutral-100 overflow-hidden">
+              {outfit.imageUrl ? (
+                <Image
+                  src={outfit.imageUrl}
+                  alt={outfit.title}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 55vw"
+                  className="object-cover"
+                  priority
+                />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-neutral-300">
+                  <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-xs uppercase tracking-widest">No Image</span>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
-          <div className="mt-auto pt-6 border-t border-[#E5E5E5]">
-            <div className="flex justify-between items-center mb-6">
-              <span className="text-lg text-[#737373]">Complete look</span>
-              <span className="text-2xl font-bold">PKR {outfit.totalPrice.toLocaleString()}</span>
-            </div>
-            <button
-              onClick={handleAddAllToCart}
-              className="w-full bg-[#000000] text-white py-4 font-medium uppercase tracking-widest hover:bg-[#262626] transition-colors mb-6"
-            >
-              Add All to Cart
-            </button>
+          {/* Right: Details */}
+          <div className="w-full lg:flex-1 flex flex-col">
 
-            <div className="flex items-center justify-center gap-4 text-[#A3A3A3]">
-              <span className="text-sm">Share:</span>
-              <button className="hover:text-black transition-colors"><MessageCircle className="w-5 h-5" /></button>
-              <button className="hover:text-black transition-colors"><Share2 className="w-5 h-5" /></button>
-              <button className="hover:text-black transition-colors"><LinkIcon className="w-5 h-5" /></button>
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2 mb-5">
+              {outfit.gender && (
+                <span className="text-[9px] uppercase tracking-[0.25em] font-bold text-neutral-400 border border-neutral-200 px-3 py-1.5 rounded-full">
+                  {outfit.gender}
+                </span>
+              )}
+              {outfit.season && (
+                <span className="text-[9px] uppercase tracking-[0.25em] font-bold text-neutral-400 border border-neutral-200 px-3 py-1.5 rounded-full">
+                  {outfit.season}
+                </span>
+              )}
+              {outfit.occasion && (
+                <span className="text-[9px] uppercase tracking-[0.25em] font-bold text-neutral-400 border border-neutral-200 px-3 py-1.5 rounded-full">
+                  {outfit.occasion}
+                </span>
+              )}
+            </div>
+
+            {/* Title */}
+            <h1 className="text-3xl sm:text-4xl font-playfair font-bold text-neutral-900 leading-tight mb-4">
+              {outfit.title}
+            </h1>
+
+            {/* Description */}
+            {outfit.description && (
+              <p className="text-neutral-500 text-sm leading-relaxed mb-6 border-b border-neutral-100 pb-6">
+                {outfit.description}
+              </p>
+            )}
+
+            {/* Items list */}
+            <div className="mb-8">
+              <p className="text-[9px] uppercase tracking-[0.3em] font-bold text-neutral-300 mb-4">
+                {outfit.itemCount} {outfit.itemCount === 1 ? 'Item' : 'Items'} in this Look
+              </p>
+
+              <div className="space-y-3">
+                {outfit.items.map((item: any) => {
+                  const product = item.product
+                  const price = getSafePrice(product)
+                  const hasDiscount =
+                    product.salePrice != null &&
+                    Number(product.salePrice) > 0 &&
+                    Number(product.salePrice) < Number(product.basePrice)
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-4 p-3 border border-neutral-100 hover:border-neutral-300 transition-colors bg-white group/item"
+                    >
+                      {/* Product image */}
+                      <Link
+                        href={`/products/${product.slug}`}
+                        className="relative w-16 h-20 flex-shrink-0 bg-neutral-50 overflow-hidden"
+                      >
+                        {product.images?.[0]?.url ? (
+                          <Image
+                            src={product.images[0].url}
+                            alt={product.name}
+                            fill
+                            sizes="64px"
+                            className="object-cover group-hover/item:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 bg-neutral-100" />
+                        )}
+                      </Link>
+
+                      {/* Product info */}
+                      <div className="flex-1 min-w-0">
+                        <Link
+                          href={`/products/${product.slug}`}
+                          className="text-sm font-medium text-neutral-900 hover:underline underline-offset-2 line-clamp-2 leading-tight"
+                        >
+                          {product.name}
+                        </Link>
+                        <div className="flex items-center gap-2 mt-1">
+                          {hasDiscount ? (
+                            <>
+                              <span className="text-xs text-neutral-400 line-through tabular-nums">
+                                PKR {Number(product.basePrice).toLocaleString()}
+                              </span>
+                              <span className="text-xs font-semibold text-neutral-900 tabular-nums">
+                                PKR {price.toLocaleString()}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-xs text-neutral-600 tabular-nums">
+                              PKR {price.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Add single item */}
+                      <button
+                        onClick={() => handleAddSingleToCart(product)}
+                        className={`flex-shrink-0 p-2 rounded-full border transition-all duration-200 ${
+                          addedItems.has(product.id)
+                            ? 'bg-black border-black text-white'
+                            : 'border-neutral-200 text-neutral-400 hover:border-black hover:text-black'
+                        }`}
+                        title="Add to cart"
+                      >
+                        {addedItems.has(product.id) ? (
+                          <Check className="w-3.5 h-3.5" />
+                        ) : (
+                          <ShoppingBag className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Total & CTA */}
+            <div className="mt-auto">
+              <div className="flex items-end justify-between mb-5 pb-5 border-b border-neutral-100">
+                <div>
+                  <p className="text-[9px] uppercase tracking-[0.3em] text-neutral-400 font-bold mb-1">
+                    Complete Look
+                  </p>
+                  <p className="text-2xl font-playfair font-bold text-neutral-900 tabular-nums">
+                    PKR {outfit.totalPrice.toLocaleString()}
+                  </p>
+                </div>
+                <p className="text-[10px] text-neutral-400">
+                  {outfit.itemCount} items included
+                </p>
+              </div>
+
+              <button
+                onClick={handleAddAllToCart}
+                className={`w-full py-4 font-bold text-[11px] uppercase tracking-[0.3em] transition-all duration-300 flex items-center justify-center gap-3 ${
+                  addedAll
+                    ? 'bg-neutral-900 text-white'
+                    : 'bg-black text-white hover:bg-neutral-800 active:scale-[0.99]'
+                }`}
+              >
+                {addedAll ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Added to Cart
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="w-4 h-4" />
+                    Add Full Look to Cart
+                  </>
+                )}
+              </button>
+
+              {/* Share */}
+              <div className="flex items-center justify-center gap-6 mt-6 text-neutral-300">
+                <span className="text-[9px] uppercase tracking-[0.3em] font-bold">Share</span>
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(outfit.title + ' — ' + (typeof window !== 'undefined' ? window.location.href : ''))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-black transition-colors"
+                  title="Share on WhatsApp"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                </a>
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== 'undefined' ? window.location.href : '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-black transition-colors"
+                  title="Share on Facebook"
+                >
+                  <Share2 className="w-4 h-4" />
+                </a>
+                <button
+                  onClick={handleCopyLink}
+                  className="hover:text-black transition-colors"
+                  title="Copy link"
+                >
+                  {copiedLink ? <Check className="w-4 h-4 text-black" /> : <LinkIcon className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
           </div>
         </div>

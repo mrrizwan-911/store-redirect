@@ -7,6 +7,12 @@ import { requireAdmin } from '@/lib/utils/adminAuth'
 const settingsSchema = z.object({
   announcementText: z.string().optional(),
   showAnnouncement: z.boolean().optional(),
+  announcementBars: z.array(z.object({
+    id: z.string(),
+    text: z.string(),
+    target: z.enum(['pakistan', 'uk', 'both']),
+    isActive: z.boolean()
+  })).optional(),
   footerLogo: z.string().optional().nullable(),
   footerTitle: z.string().optional(),
   footerDescription: z.string().optional(),

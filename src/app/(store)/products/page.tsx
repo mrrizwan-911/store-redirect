@@ -14,38 +14,33 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   // Parse search params
   const category = (resolvedSearchParams.category as string) || undefined
+  const subCategory = (resolvedSearchParams.subCategory as string) || undefined
   const minPrice = Number(resolvedSearchParams.minPrice) || 0
   const maxPrice = Number(resolvedSearchParams.maxPrice) || 20000
-  const size = (resolvedSearchParams.size as string) || undefined
-  const color = (resolvedSearchParams.color as string) || undefined
   const sort = (resolvedSearchParams.sort as string) || 'createdAt_desc'
   const [sortField, sortDir] = sort.split('_') as [string, 'asc' | 'desc']
 
-  // Construct Prisma where clause
-  const where = {
+  // Build where clause
+  // If subCategory is set → filter by exact subcategory slug
+  // Else if category is set → filter by parent OR its children
+  const where: any = {
     isActive: true,
-    ...(category && {
-      OR: [
-        { category: { slug: category } },
-        { category: { parent: { slug: category } } }
-      ]
-    }),
-    basePrice: { gte: minPrice, lte: maxPrice },
-    ...(size || color
+    ...(subCategory
+      ? { category: { slug: subCategory } }
+      : category
       ? {
-          variants: {
-            some: {
-              ...(size && { size: { in: size.split(',') } }),
-              ...(color && { color: { in: color.split(',') } }),
-              stock: { gt: 0 },
-            },
-          },
+          OR: [
+            { category: { slug: category } },
+            { category: { parent: { slug: category } } },
+          ],
         }
       : {}),
+    basePrice: { gte: minPrice, lte: maxPrice },
+    variants: { some: { stock: { gt: 0 } } },
   }
 
   // Fetch data in parallel
-  const [products, total, categories] = await Promise.all([
+  const [products, total, parentCategories] = await Promise.all([
     db.product.findMany({
       where,
       include: {
@@ -58,39 +53,49 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       take: 24,
     }),
     db.product.count({ where }),
+    // Only root (parent) categories for the filter
     db.category.findMany({
-      where: { isActive: true },
-      select: { name: true, slug: true },
+      where: { isActive: true, parentId: null },
+      select: { id: true, name: true, slug: true },
       orderBy: { sortOrder: 'asc' },
     }),
   ])
 
   // Process ratings and flash sales
-  const enrichedProducts = await enrichProductsWithFlashSales(products.map((p) => {
-    const avgRating =
-      p.reviews.length > 0 ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length : null
-    return {
-      ...p,
-      avgRating,
-      reviewCount: p.reviews.length,
-      reviews: undefined,
-      basePrice: Number(p.basePrice),
-      salePrice: p.salePrice ? Number(p.salePrice) : null,
-    }
-  }))
+  const enrichedProducts = await enrichProductsWithFlashSales(
+    products.map((p) => {
+      const avgRating =
+        p.reviews.length > 0
+          ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
+          : null
+      return {
+        ...p,
+        avgRating,
+        reviewCount: p.reviews.length,
+        reviews: undefined,
+        basePrice: Number(p.basePrice),
+        salePrice: p.salePrice ? Number(p.salePrice) : null,
+      }
+    })
+  )
 
-  // Ensure flash sale price is prioritized for the UI components
-  const finalProducts = enrichedProducts.map(p => ({
+  const finalProducts = enrichedProducts.map((p) => ({
     ...p,
-    salePrice: p.flashSalePrice ?? p.salePrice
+    salePrice: p.flashSalePrice ?? p.salePrice,
   }))
 
   return (
-    <Suspense fallback={<div className="h-96 flex items-center justify-center">Loading products...</div>}>
+    <Suspense
+      fallback={
+        <div className="h-96 flex items-center justify-center">
+          Loading products...
+        </div>
+      }
+    >
       <ProductListingClient
         initialProducts={finalProducts}
         initialTotal={total}
-        categories={categories}
+        parentCategories={parentCategories}
         title="All Products"
         subtitle="Refined essentials for the modern wardrobe."
       />

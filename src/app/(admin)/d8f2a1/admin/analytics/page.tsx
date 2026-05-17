@@ -1,5 +1,5 @@
 import { validateAdmin } from '@/lib/auth/serverAuth'
-import { getRevenueStats, getOrdersByStatus, getTopProducts, getAbandonedCartStats } from '@/lib/services/admin/analytics'
+import { getKpiSummary, getRevenueSeries, getOrdersAnalytics, getProductAnalytics, getAbandonedCartStats } from '@/lib/services/admin/analytics'
 import { KpiCard } from '@/components/admin/dashboard/KpiCard'
 import { RevenueChart } from '@/components/admin/dashboard/RevenueChart'
 import { OrderStatusChart } from '@/components/admin/dashboard/OrderStatusChart'
@@ -10,18 +10,29 @@ export default async function AnalyticsPage() {
   // 1. Validate Admin Session (Redirects to login if invalid)
   await validateAdmin()
 
+  // Default to last 30 days
+  const endDate = new Date()
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - 30)
+
+  // Compare previous period
+  const compareEnd = new Date(startDate)
+  const compareStart = new Date(startDate)
+  compareStart.setDate(compareStart.getDate() - 30)
+
   // 2. Fetch data directly from services (No internal HTTP calls)
-  const [revenueData, statusData, topProductsData, abandonedData] = await Promise.all([
-    getRevenueStats(),
-    getOrdersByStatus(),
-    getTopProducts(),
+  const [kpiData, revenueData, ordersData, productData, abandonedData] = await Promise.all([
+    getKpiSummary({ startDate, endDate, compareStart, compareEnd }),
+    getRevenueSeries({ startDate, endDate, granularity: 'day' }),
+    getOrdersAnalytics({ startDate, endDate }),
+    getProductAnalytics({ startDate, endDate }),
     getAbandonedCartStats()
   ])
 
-  // Process data for charts
-  // The daily revenue chart needs last 30 days data.
-  // For now we use an empty series as the service doesn't provide time-series yet.
-  const emptyRevenueSeries: { date: string; revenue: number }[] = []
+  // Extract KPI values
+  const kpi = kpiData || { revenue: { current: 0 }, orders: { current: 0 }, activeOrders: 0 }
+  const ordersByStatus = ordersData?.byStatus || []
+  const topProducts = productData?.topProducts?.slice(0, 5) || []
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 font-sans">
@@ -32,71 +43,53 @@ export default async function AnalyticsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           label="Today's Revenue"
-          value={`PKR ${revenueData?.today?.revenue?.toLocaleString() || 0}`}
+          value={`PKR ${kpi.revenue?.current?.toLocaleString() || 0}`}
         />
         <KpiCard
           label="This Month"
-          value={`PKR ${revenueData?.thisMonth?.revenue?.toLocaleString() || 0}`}
+          value={`PKR ${kpi.revenue?.current?.toLocaleString() || 0}`}
         />
         <KpiCard
           label="YTD Revenue"
-          value={`PKR ${revenueData?.ytd?.revenue?.toLocaleString() || 0}`}
+          value={`PKR ${kpi.revenue?.current?.toLocaleString() || 0}`}
         />
         <KpiCard
           label="Active Orders"
-          value={revenueData?.activeOrders || 0}
+          value={kpi.activeOrders || 0}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-          <h2 className="text-[10px] uppercase tracking-widest font-bold mb-6 text-neutral-400">Revenue (30 Days)</h2>
-          <RevenueChart data={emptyRevenueSeries} />
+      {/* Revenue Chart */}
+      <div className="border border-neutral-200 p-4">
+        <h2 className="text-lg font-semibold mb-4">Revenue Trend (Last 30 Days)</h2>
+        <RevenueChart data={(revenueData || []).map((d: any) => ({ date: d.date, revenue: d.total || 0 }))} />
+      </div>
+
+      {/* Order Status & Payment Methods */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="border border-neutral-200 p-4">
+          <h2 className="text-lg font-semibold mb-4">Orders by Status</h2>
+          <OrderStatusChart data={ordersByStatus} />
         </div>
-        <div className="bg-white p-6 rounded-xl border border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-          <OrderStatusChart data={statusData || []} />
+        <div className="border border-neutral-200 p-4">
+          <h2 className="text-lg font-semibold mb-4">Top Products</h2>
+          {topProducts.length > 0 ? (
+            <div className="space-y-2">
+              {topProducts.map((p: any, i: number) => (
+                <div key={i} className="flex justify-between text-sm">
+                  <span className="truncate max-w-[200px]">{p.name}</span>
+                  <span className="font-mono">{p.totalUnits} sold</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-neutral-500 text-sm">No product data available</p>
+          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <PaymentMethodChart data={revenueData?.byPaymentMethod || []} />
-        <ForecastAlerts />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-          <h3 className="text-[10px] uppercase tracking-widest font-bold mb-6 text-neutral-400">Top Selling Products</h3>
-          <div className="w-full h-80 overflow-y-auto border border-neutral-100 rounded-lg">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-neutral-50 border-b border-neutral-100 sticky top-0">
-                <tr>
-                  <th className="p-3 font-bold uppercase text-[10px] tracking-wider text-neutral-500">Product</th>
-                  <th className="p-3 font-bold uppercase text-[10px] tracking-wider text-neutral-500 text-center">Sold</th>
-                  <th className="p-3 font-bold uppercase text-[10px] tracking-wider text-neutral-500 text-right">Revenue</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(!topProductsData || topProductsData.length === 0) ? (
-                  <tr>
-                    <td colSpan={3} className="p-4 text-center text-neutral-400 italic">No product data available.</td>
-                  </tr>
-                ) : (
-                  topProductsData.map((prod: any, idx: number) => (
-                    <tr key={idx} className="border-b border-neutral-50 last:border-0 hover:bg-neutral-50/50 transition-colors">
-                      <td className="p-3">
-                        <div className="font-semibold text-neutral-800">{prod.name}</div>
-                        <div className="text-[10px] text-neutral-400">{prod.category}</div>
-                      </td>
-                      <td className="p-3 text-center text-neutral-600">{prod.unitsSold}</td>
-                      <td className="p-3 text-right font-medium text-neutral-900">PKR {prod.revenue?.toLocaleString()}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      {/* Abandoned Cart */}
+      <ForecastAlerts />
     </div>
   )
 }

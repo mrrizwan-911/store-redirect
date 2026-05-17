@@ -29,14 +29,14 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
   if (products.length === 0) return null
 
   return (
-    <section className="py-24 bg-white">
+    <section className="py-16 md:py-24 bg-background overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
-          <div className="space-y-4 max-w-2xl">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-20 gap-6 md:gap-8">
+          <div className="space-y-3 sm:space-y-4 max-w-2xl">
             <span className="text-[10px] uppercase tracking-[0.4em] text-neutral-400 font-bold block ml-1">
               Curated Selection
             </span>
-            <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-medium text-black uppercase tracking-tight leading-[0.9]">
+            <h2 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium text-black uppercase tracking-tight leading-[0.9]">
               Featured <br className="hidden md:block" /> This Week
             </h2>
           </div>
@@ -49,7 +49,7 @@ export function FeaturedProducts({ products }: FeaturedProductsProps) {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 md:gap-x-8 gap-y-12 md:gap-y-16">
           {products.map((product) => (
             <ProductCard key={product.id} {...product} />
           ))}

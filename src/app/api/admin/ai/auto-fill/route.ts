@@ -37,25 +37,38 @@ export async function POST(req: Request) {
     // Use OpenAI GPT-4o
     const openai = aiConfig.getOpenAI()
 
-    const prompt = `You are an expert e-commerce merchandiser. I am providing an image of a product.
-Here is the data the admin has already provided (use this as context to guide your generation):
+    const prompt = `You are a world-class e-commerce copywriter and product merchandiser specializing in fashion and apparel. You write compelling, SEO-optimized product content that converts browsers into buyers.
+
+I am providing an image of a clothing/fashion product. Here is the data the admin has already provided (use this as context):
 ${JSON.stringify(currentData, null, 2)}
 
-Please analyze the image and the existing data. Your task is to generate a complete product profile.
-If the admin has already provided a specific field (like the name or tags), incorporate it into your thinking.
+Analyze the image carefully — note the style, fabric appearance, color, cut, silhouette, details (stitching, buttons, embellishments), occasion suitability, and target demographic.
 
-Respond ONLY with a valid, raw JSON object matching this exact structure (no markdown tags, no explanations):
+Generate a COMPLETE, RICH product profile. The description fields must be detailed and compelling:
+
+- **name**: A catchy, brand-aligned product name (enhance existing if provided, otherwise create a memorable one)
+- **shortDescription**: One punchy sentence (max 20 words) that captures the essence and main appeal — think of it as a tagline
+- **description**: A RICH, DETAILED description of at least 150-200 words. This is the main product page description. Structure it as flowing paragraphs (no bullet points) covering:
+  1. Opening hook — what makes this piece special or desirable
+  2. Style & design details — silhouette, cut, fabric feel/texture (as you can observe), color description, key design elements
+  3. Versatility & styling — how to wear it, what occasions it suits, what to pair it with
+  4. Who it's for — the target customer / lifestyle this piece represents
+  5. Closing value statement — why it belongs in their wardrobe
+- **tags**: 8-12 highly relevant SEO tags as an array (include style type, occasion, fabric type if identifiable, color, gender, season)
+- **suggestedCategory**: Best matching category from: "Men's Clothing", "Women's Clothing", "Kids' Clothing", "Tops", "Bottoms", "Dresses", "Outerwear", "Footwear", "Accessories", "Activewear", "Formal Wear", "Casual Wear", "Ethnic Wear"
+
+Respond ONLY with a valid, raw JSON object — no markdown, no backticks, no explanations:
 {
-  "name": "Catchy, brand-aligned product name (enhance existing if provided)",
-  "shortDescription": "One sentence summary highlighting the main appeal",
-  "description": "2-3 sentence compelling description focused on benefits and style. No bullet points.",
-  "tags": ["tag1", "tag2", "tag3"],
-  "suggestedCategory": "A category name like 'Clothes', 'Shoes', 'Accessories', 'Apparel', etc."
+  "name": "...",
+  "shortDescription": "...",
+  "description": "...",
+  "tags": ["tag1", "tag2", ...],
+  "suggestedCategory": "..."
 }`
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
-      max_tokens: 500,
+      max_tokens: 1200,
       messages: [
         {
           role: 'user',
@@ -68,6 +81,7 @@ Respond ONLY with a valid, raw JSON object matching this exact structure (no mar
               type: 'image_url',
               image_url: {
                 url: `data:${mediaType};base64,${base64Image}`,
+                detail: 'high',
               },
             },
           ],
@@ -76,7 +90,7 @@ Respond ONLY with a valid, raw JSON object matching this exact structure (no mar
     })
 
     const responseText = response.choices[0]?.message?.content || ''
-    
+
     // Attempt to parse the JSON (handle potential markdown formatting from AI)
     let parsedJson
     try {

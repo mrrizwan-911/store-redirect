@@ -22,7 +22,7 @@ export function CategoryTiles() {
     {
       name: 'Shoes',
       slug: 'shoes',
-      image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&q=80&w=1200',
+      image: '/images/shoes.avif',
       gridClass: 'col-span-12 md:col-span-6 md:row-span-1',
       textClass: 'text-4xl italic',
       overlayClass: 'bg-black/20 group-hover:bg-black/30',
@@ -47,21 +47,24 @@ export function CategoryTiles() {
       textClass: 'text-2xl',
       overlayClass: 'bg-black/20 group-hover:bg-black/30',
       contentClass: 'bottom-6 left-6 items-start justify-end',
-      mobileBg: 'bg-[#C5A059]', // Darker/Richer Gold for better contrast
+      mobileBg: 'bg-[#C5A059]',
     },
   ]
 
   return (
-    <section className="py-20 px-4 md:px-6 max-w-7xl mx-auto">
-      {/* Mobile Layout (One per row, sharp rectangular shape) */}
-      <div className="flex flex-col gap-4 md:hidden">
+    /* overflow-hidden prevents any image from causing horizontal scroll */
+    <section className="py-16 md:py-20 px-4 md:px-6 max-w-7xl mx-auto overflow-hidden">
+
+      {/* ── Mobile Layout (one per row, clean rectangular cards) ── */}
+      <div className="flex flex-col gap-3 md:hidden">
         {categories.map((cat) => (
           <Link
             key={cat.slug}
             href={`/categories/${cat.slug}`}
             className={cn(
-              "group relative h-32 flex items-center justify-between px-8 rounded-none overflow-hidden transition-all duration-500 active:scale-[0.98] border border-border bg-white",
-              "hover:border-black"
+              'group relative h-28 flex items-center justify-between px-6 sm:px-8',
+              'overflow-hidden transition-all duration-500 active:scale-[0.98]',
+              'border border-border bg-white hover:border-black',
             )}
           >
             <div className="relative z-10">
@@ -77,29 +80,30 @@ export function CategoryTiles() {
               <ArrowRight className="text-black size-5 stroke-[1.5] transition-transform duration-300 group-hover:rotate-[-45deg]" />
             </div>
 
-            {/* Subtle background image or minimal color */}
+            {/* Subtle background image */}
             <div className="absolute right-0 top-0 h-full w-1/2 opacity-10 group-hover:opacity-20 transition-opacity duration-500 grayscale">
-               <Image
+              <Image
                 src={cat.image}
                 alt=""
                 fill
                 unoptimized
                 className="object-cover"
-               />
+              />
             </div>
           </Link>
         ))}
       </div>
 
-      {/* Desktop Layout (Original Grid) */}
-      <div className="hidden md:grid grid-cols-12 gap-6 h-[630px]">
+      {/* ── Desktop Layout (original grid) ── */}
+      {/* h-[580px] on md prevents overflow on iPads, h-[630px] on lg for full desktop */}
+      <div className="hidden md:grid grid-cols-12 gap-6 md:h-[580px] lg:h-[630px]">
         {categories.map((cat) => (
           <Link
             key={cat.slug}
             href={`/categories/${cat.slug}`}
             className={cn(
-              "group relative overflow-hidden bg-neutral-100 border border-border rounded-none",
-              cat.gridClass
+              'group relative overflow-hidden bg-neutral-100 border border-border rounded-none',
+              cat.gridClass,
             )}
           >
             <Image
@@ -114,20 +118,17 @@ export function CategoryTiles() {
             {/* Overlay */}
             <div
               className={cn(
-                "absolute inset-0 transition-all duration-500",
-                cat.overlayClass
+                'absolute inset-0 transition-all duration-500',
+                cat.overlayClass,
               )}
             />
 
             {/* Content */}
-            <div className={cn(
-              "absolute inset-0 flex flex-col p-6 md:p-12",
-              cat.contentClass
-            )}>
+            <div className={cn('absolute inset-0 flex flex-col p-6 md:p-12', cat.contentClass)}>
               <h3
                 className={cn(
-                  "font-display text-white font-medium drop-shadow-2xl transition-transform duration-700",
-                  cat.textClass
+                  'font-display text-white font-medium drop-shadow-2xl transition-transform duration-700',
+                  cat.textClass,
                 )}
               >
                 {cat.name}

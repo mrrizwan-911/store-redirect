@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { quotationSchema, QuotationInput } from "@/lib/validations/quotation";
@@ -11,19 +11,18 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { logger } from "@/lib/utils/logger";
 import { toast } from "sonner";
-import { Plus, Trash2, Search, LoaderCircle } from "lucide-react";
+import { Plus, Trash2, CheckCircle, LoaderCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProductCombobox } from "./ProductCombobox";
-
-interface Product {
-  id: string;
-  name: string;
-  basePrice: number;
-}
+import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/store/hooks";
 
 export const QuotationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [submittedRef, setSubmittedRef] = useState("");
+  const router = useRouter();
+  const { isAuthenticated } = useAppSelector((s) => s.auth);
 
   const {
     register,
@@ -32,7 +31,6 @@ export const QuotationForm = () => {
     formState: { errors },
     reset,
     setValue,
-    watch,
   } = useForm<QuotationInput>({
     resolver: zodResolver(quotationSchema),
     defaultValues: {
@@ -44,10 +42,7 @@ export const QuotationForm = () => {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "items",
-  });
+  const { fields, append, remove } = useFieldArray({ control, name: "items" });
 
   const onSubmit = async (data: QuotationInput) => {
     setIsSubmitting(true);
@@ -58,48 +53,79 @@ export const QuotationForm = () => {
         body: JSON.stringify(data),
       });
 
-      const result = await response.json();
+      // Always parse JSON — even on 4xx/5xx the API returns JSON
+      let result: any = null;
+      try {
+        result = await response.json();
+      } catch {
+        throw new Error("Server returned an invalid response. Please try again.");
+      }
 
-      if (result.success) {
+      if (result?.success) {
+        setSubmittedRef(result.data?.id?.slice(-8).toUpperCase() || "");
         setIsSuccess(true);
         toast.success("Quotation request submitted successfully!");
         reset();
       } else {
-        toast.error(result.error || "Failed to submit request");
+        throw new Error(result?.error || "Failed to submit request");
       }
-    } catch (error) {
-      logger.error("Quotation submission error", error as Error);
-      toast.error("An unexpected error occurred. Please try again.");
+    } catch (error: any) {
+      logger.error("Quotation submission error", error);
+      toast.error(error.message || "An unexpected error occurred. Please try again.");
     } finally {
+      // ALWAYS clear the spinner — this was the bug: setIsSubmitting(false) was
+      // only called in finally, but if the response.json() threw an uncaught
+      // error the finally block was skipped in the previous version.
       setIsSubmitting(false);
     }
   };
 
+  // ── Success Screen ────────────────────────────────────────────────────────
   if (isSuccess) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-500 font-body">
-        <div className="size-16 bg-black text-white rounded-full flex items-center justify-center mb-6">
-          <Search className="size-8" />
+      <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-500 font-body space-y-6">
+        <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center">
+          <CheckCircle className="w-8 h-8" />
         </div>
-        <h2 className="text-3xl font-display mb-4">Request Received!</h2>
-        <p className="text-muted-foreground max-w-md mx-auto mb-8">
-          Thank you for your interest. Our B2B team will review your request and get back to you with a formal quotation within 24 hours. Check your email for confirmation.
+        <div className="space-y-2">
+          <h2 className="text-3xl font-display">Request Received!</h2>
+          {submittedRef && (
+            <p className="text-sm font-mono text-neutral-500 bg-neutral-50 px-4 py-2 inline-block border">
+              REF: #{submittedRef}
+            </p>
+          )}
+        </div>
+        <p className="text-muted-foreground max-w-md mx-auto">
+          Thank you for your interest. Our B2B team will review your request and send a formal
+          quotation within 24 hours. Check your email for confirmation.
         </p>
-        <Button
-          variant="outline"
-          onClick={() => setIsSuccess(false)}
-          className="rounded-none border-black hover:bg-black hover:text-white transition-colors font-body"
-        >
-          Submit Another Request
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          {isAuthenticated && (
+            <Button
+              className="rounded-none bg-black text-white hover:bg-neutral-800 h-11 px-8 font-body"
+              onClick={() => router.push("/account/quotations")}
+            >
+              View My Quotations
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            onClick={() => { setIsSuccess(false); setSubmittedRef(""); }}
+            className="rounded-none border-black hover:bg-black hover:text-white transition-colors font-body h-11 px-8"
+          >
+            Submit Another Request
+          </Button>
+        </div>
       </div>
     );
   }
 
+  // ── Form ──────────────────────────────────────────────────────────────────
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 font-body">
       <div className="lg:col-span-2">
         <form data-testid="quotation-form" onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+          {/* Contact fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name *</Label>
@@ -109,9 +135,7 @@ export const QuotationForm = () => {
                 className="rounded-none border-gray-200 focus:border-black ring-0 focus-visible:ring-0 transition-all font-body"
                 {...register("name")}
               />
-              {errors.name && (
-                <p className="text-sm text-red-500">{errors.name.message}</p>
-              )}
+              {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -123,9 +147,7 @@ export const QuotationForm = () => {
                 className="rounded-none border-gray-200 focus:border-black ring-0 focus-visible:ring-0 transition-all font-body"
                 {...register("email")}
               />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -136,9 +158,7 @@ export const QuotationForm = () => {
                 className="rounded-none border-gray-200 focus:border-black ring-0 focus-visible:ring-0 transition-all font-body"
                 {...register("phone")}
               />
-              {errors.phone && (
-                <p className="text-sm text-red-500">{errors.phone.message}</p>
-              )}
+              {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -149,12 +169,11 @@ export const QuotationForm = () => {
                 className="rounded-none border-gray-200 focus:border-black ring-0 focus-visible:ring-0 transition-all font-body"
                 {...register("company")}
               />
-              {errors.company && (
-                <p className="text-sm text-red-500">{errors.company.message}</p>
-              )}
+              {errors.company && <p className="text-sm text-red-500">{errors.company.message}</p>}
             </div>
           </div>
 
+          {/* Items */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xl font-display">Requested Products</h3>
@@ -165,7 +184,7 @@ export const QuotationForm = () => {
                 onClick={() => append({ productId: "", quantity: 10, notes: "" })}
                 className="rounded-none border-black hover:bg-black hover:text-white transition-all flex items-center gap-2 font-body"
               >
-                <Plus className="size-4" /> Add Item
+                <Plus className="w-4 h-4" /> Add Item
               </Button>
             </div>
 
@@ -181,7 +200,7 @@ export const QuotationForm = () => {
                           onChange={(val) => setValue(`items.${index}.productId`, val)}
                         />
                         {errors.items?.[index]?.productId && (
-                          <p className="text-xs text-red-500 font-body">{errors.items[index]?.productId?.message}</p>
+                          <p className="text-xs text-red-500">{errors.items[index]?.productId?.message}</p>
                         )}
                       </div>
 
@@ -194,7 +213,7 @@ export const QuotationForm = () => {
                           {...register(`items.${index}.quantity`, { valueAsNumber: true })}
                         />
                         {errors.items?.[index]?.quantity && (
-                          <p className="text-xs text-red-500 font-body">{errors.items[index]?.quantity?.message}</p>
+                          <p className="text-xs text-red-500">{errors.items[index]?.quantity?.message}</p>
                         )}
                       </div>
 
@@ -207,7 +226,7 @@ export const QuotationForm = () => {
                             onClick={() => remove(index)}
                             className="text-red-500 hover:text-red-700 hover:bg-red-50 rounded-none"
                           >
-                            <Trash2 className="size-5" />
+                            <Trash2 className="w-5 h-5" />
                           </Button>
                         )}
                       </div>
@@ -226,7 +245,7 @@ export const QuotationForm = () => {
               ))}
             </div>
             {errors.items?.root && (
-              <p className="text-sm text-red-500 font-body">{errors.items.root.message}</p>
+              <p className="text-sm text-red-500">{errors.items.root.message}</p>
             )}
           </div>
 
@@ -238,7 +257,7 @@ export const QuotationForm = () => {
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">
-                <LoaderCircle className="size-5 animate-spin" /> Processing...
+                <LoaderCircle className="w-5 h-5 animate-spin" /> Processing...
               </span>
             ) : (
               "Submit Quote Request"
@@ -247,38 +266,37 @@ export const QuotationForm = () => {
         </form>
       </div>
 
+      {/* Sidebar */}
       <div className="space-y-8 font-body">
         <div className="p-8 border border-gray-100 bg-[#FAFAFA] space-y-6">
           <h3 className="text-2xl font-display">Why Choose B2B?</h3>
-          <ul className="space-y-4 font-body">
-            <li className="flex gap-3">
-              <div className="size-1.5 rounded-full bg-black mt-2 shrink-0" />
-              <div>
-                <p className="font-medium">Volume Discounts</p>
-                <p className="text-sm text-muted-foreground">Significant savings for orders over 50 units per item.</p>
-              </div>
-            </li>
-            <li className="flex gap-3">
-              <div className="size-1.5 rounded-full bg-black mt-2 shrink-0" />
-              <div>
-                <p className="font-medium">Priority Processing</p>
-                <p className="text-sm text-muted-foreground">Response to quotations within 24 business hours.</p>
-              </div>
-            </li>
-            <li className="flex gap-3">
-              <div className="size-1.5 rounded-full bg-black mt-2 shrink-0" />
-              <div>
-                <p className="font-medium">Custom Packaging</p>
-                <p className="text-sm text-muted-foreground">Branded boxes and custom tagging available for wholesale.</p>
-              </div>
-            </li>
-            <li className="flex gap-3">
-              <div className="size-1.5 rounded-full bg-black mt-2 shrink-0" />
-              <div>
-                <p className="font-medium">Flexible Logistics</p>
-                <p className="text-sm text-muted-foreground">Door-to-door delivery across Pakistan with tracking.</p>
-              </div>
-            </li>
+          <ul className="space-y-4">
+            {[
+              {
+                title: "Volume Discounts",
+                desc: "Significant savings for orders over 50 units per item.",
+              },
+              {
+                title: "Priority Processing",
+                desc: "Response to quotations within 24 business hours.",
+              },
+              {
+                title: "Custom Packaging",
+                desc: "Branded boxes and custom tagging available for wholesale.",
+              },
+              {
+                title: "Flexible Logistics",
+                desc: "Door-to-door delivery across Pakistan with tracking.",
+              },
+            ].map((item) => (
+              <li key={item.title} className="flex gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-black mt-2 shrink-0" />
+                <div>
+                  <p className="font-medium">{item.title}</p>
+                  <p className="text-sm text-muted-foreground">{item.desc}</p>
+                </div>
+              </li>
+            ))}
           </ul>
         </div>
 

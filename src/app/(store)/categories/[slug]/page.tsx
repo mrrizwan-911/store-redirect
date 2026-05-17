@@ -11,11 +11,14 @@ interface CategoryPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
+export default async function CategoryPage({
+  params,
+  searchParams,
+}: CategoryPageProps) {
   const { slug } = await params
   const resolvedSearchParams = await searchParams
 
-  // Verify category exists
+  // Verify the parent category exists
   const activeCategory = await db.category.findUnique({
     where: { slug, isActive: true },
     select: { id: true, name: true, description: true },
@@ -26,99 +29,103 @@ export default async function CategoryPage({ params, searchParams }: CategoryPag
   }
 
   // Parse search params
+  const subCategory = (resolvedSearchParams.subCategory as string) || undefined
   const minPrice = Number(resolvedSearchParams.minPrice) || 0
   const maxPrice = Number(resolvedSearchParams.maxPrice) || 20000
-  const filterParam = (resolvedSearchParams.filter as string) || undefined
-  const sort = (resolvedSearchParams.sort as string) || 'createdAt_desc'
   const rating = Number(resolvedSearchParams.rating) || undefined
+  const sort = (resolvedSearchParams.sort as string) || 'createdAt_desc'
   let [sortField, sortDir] = sort.split('_') as [string, 'asc' | 'desc']
 
-  // Map generic sort fields to database columns
   if (sortField === 'price') sortField = 'basePrice'
   if (sortField === 'date') sortField = 'createdAt'
 
-  // Construct Prisma where clause
+  // Build where clause
+  // If subCategory selected → filter by exact sub-category under this parent
+  // Else → filter all products in this parent category (direct + children)
   const where: any = {
     isActive: true,
-    OR: [
-      { category: { slug: slug } },
-      { category: { parent: { slug: slug } } }
-    ],
-    basePrice: { gte: minPrice, lte: maxPrice },
-    ...(filterParam
+    ...(subCategory
       ? {
-          variants: {
-            some: {
-              stock: { gt: 0 },
-              optionValues: { path: [], string_contains: filterParam.split(',')[0] },
-            },
+          category: {
+            slug: subCategory,
+            parent: { slug: slug },
           },
         }
       : {
-          variants: { some: { stock: { gt: 0 } } },
+          OR: [
+            { category: { slug: slug } },
+            { category: { parent: { slug: slug } } },
+          ],
         }),
+    basePrice: { gte: minPrice, lte: maxPrice },
+    variants: { some: { stock: { gt: 0 } } },
   }
 
-  // Filter by rating if provided
   if (rating) {
-    where.reviews = {
-      some: {
-        rating: { gte: rating }
-      }
-    }
+    where.reviews = { some: { rating: { gte: rating } } }
   }
 
   // Fetch data
-  const [products, total, subcategories] = await Promise.all([
+  const [products, total] = await Promise.all([
     db.product.findMany({
       where,
       include: {
         images: { where: { isPrimary: true }, take: 1 },
         category: { select: { name: true, slug: true } },
-        variants: { select: { title: true, optionValues: true,  stock: true } },
+        variants: { select: { title: true, optionValues: true, stock: true } },
         reviews: { select: { rating: true } },
       },
       orderBy: { [sortField]: sortDir },
       take: 24,
     }),
     db.product.count({ where }),
-    db.category.findMany({
-      where: { parentId: activeCategory.id, isActive: true },
-      orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }],
-      select: { id: true, name: true, slug: true },
-    }),
+    // Note: sub-categories are fetched client-side via /api/categories/children
+    // No need to pass them here anymore
   ])
 
-  // Process products and flash sales
-  const enrichedProducts = await enrichProductsWithFlashSales(products.map((p) => {
-    const avgRating =
-      p.reviews.length > 0 ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length : null
-    return {
-      ...p,
-      avgRating,
-      reviewCount: p.reviews.length,
-      reviews: undefined,
-      basePrice: Number(p.basePrice),
-      salePrice: p.salePrice ? Number(p.salePrice) : null,
-    }
-  }))
+  // Process
+  const enrichedProducts = await enrichProductsWithFlashSales(
+    products.map((p) => {
+      const avgRating =
+        p.reviews.length > 0
+          ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
+          : null
+      return {
+        ...p,
+        avgRating,
+        reviewCount: p.reviews.length,
+        reviews: undefined,
+        basePrice: Number(p.basePrice),
+        salePrice: p.salePrice ? Number(p.salePrice) : null,
+      }
+    })
+  )
 
-  // Ensure flash sale price is prioritized for the UI components
-  const finalProducts = enrichedProducts.map(p => ({
+  const finalProducts = enrichedProducts.map((p) => ({
     ...p,
-    salePrice: p.flashSalePrice ?? p.salePrice
+    salePrice: p.flashSalePrice ?? p.salePrice,
   }))
 
   return (
-    <div className="max-w-7xl mx-auto px-6 md:px-8 py-8">
-      <Suspense fallback={<div className="h-96 flex items-center justify-center">Loading collection...</div>}>
+    <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+      <Suspense
+        fallback={
+          <div className="h-96 flex items-center justify-center">
+            Loading collection...
+          </div>
+        }
+      >
         <ProductListingClient
           initialProducts={finalProducts}
           initialTotal={total}
-          categories={subcategories}
+          parentCategories={[]} // no free-form parent selection on category page
           title={activeCategory.name}
-          subtitle={activeCategory.description || `Refined collection in ${activeCategory.name}.`}
-          baseCategorySlug={slug}
+          subtitle={
+            activeCategory.description ||
+            `Refined collection in ${activeCategory.name}.`
+          }
+          lockedParentSlug={slug}
+          lockedParentName={activeCategory.name}
         />
       </Suspense>
     </div>

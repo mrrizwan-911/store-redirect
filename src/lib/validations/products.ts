@@ -20,7 +20,10 @@ export const productFilterSchema = z
       .optional()
       .transform((val) => (val ? Number(val) : undefined))
       .pipe(z.number().int().positive().optional()),
+    /** Parent category slug */
     category: z.string().optional(),
+    /** Sub-category slug (child of `category`) */
+    subCategory: z.string().optional(),
     minPrice: z
       .string()
       .optional()
@@ -38,10 +41,13 @@ export const productFilterSchema = z
       .pipe(z.number().min(1).max(5).optional()),
     sort: z.string().optional(),
     search: z.string().optional(),
+    q: z.string().optional(),
     featured: z
       .string()
       .optional()
-      .transform((val) => (val === 'true' ? true : val === 'false' ? false : undefined))
+      .transform((val) =>
+        val === 'true' ? true : val === 'false' ? false : undefined
+      )
       .pipe(z.boolean().optional()),
   })
   .refine(

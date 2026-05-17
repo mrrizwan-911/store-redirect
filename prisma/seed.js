@@ -328,6 +328,32 @@ async function main() {
       id: 'global',
       announcementText: 'Free delivery on orders over PKR 3,000 | New arrivals every Friday',
       showAnnouncement: true,
+      announcementBars: [
+        {
+          id: 'seed-announcement-1',
+          text: 'Free delivery on orders over PKR 3,000 | New arrivals every Friday',
+          target: 'both',
+          isActive: true
+        },
+        {
+          id: 'seed-announcement-2',
+          text: '🔥 47 people browsing right now',
+          target: 'both',
+          isActive: true
+        },
+        {
+          id: 'seed-announcement-3',
+          text: '⚡ Last order placed 8 minutes ago',
+          target: 'uk',
+          isActive: true
+        },
+        {
+          id: 'seed-announcement-4',
+          text: '🇵🇰 Special Linen Collection launching in Lahore soon!',
+          target: 'pakistan',
+          isActive: true
+        }
+      ],
       footerTitle: 'CALNZA',
       footerDescription: 'Redefining luxury fashion for the modern era. Curated with surgical precision and ethical craftsmanship in Pakistan.',
       footerLinks: {

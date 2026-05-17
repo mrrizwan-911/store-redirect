@@ -1,0 +1,69 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db/client'
+import { getUserSession } from '@/lib/auth/session'
+import { createPaymentIntent } from '@/lib/services/payment/stripe'
+import { logger } from '@/lib/utils/logger'
+
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getUserSession()
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { orderId } = await req.json()
+    if (!orderId) {
+      return NextResponse.json({ success: false, error: 'orderId is required' }, { status: 400 })
+    }
+
+    // Fetch order — amount always comes from DB, never from client
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      include: { user: { select: { email: true } } },
+    })
+
+    if (!order) {
+      return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 })
+    }
+
+    if (order.userId !== session.userId) {
+      return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 })
+    }
+
+    if (order.status !== 'PENDING') {
+      return NextResponse.json(
+        { success: false, error: 'Order is already processed' },
+        { status: 400 }
+      )
+    }
+
+    const { clientSecret, paymentIntentId } = await createPaymentIntent({
+      orderId: order.id,
+      amountInLocalCurrency: Number(order.total),
+      customerEmail: order.user?.email ?? undefined,
+    })
+
+    // Store paymentIntentId on the payment record for later webhook matching
+    await db.payment.upsert({
+      where: { orderId: order.id },
+      update: { gatewayRef: paymentIntentId },
+      create: {
+        orderId: order.id,
+        method: 'CARD',
+        status: 'PENDING',
+        amount: order.total,
+        gatewayRef: paymentIntentId,
+      },
+    })
+
+    logger.info('[STRIPE] PaymentIntent created', { orderId, paymentIntentId })
+
+    return NextResponse.json({
+      success: true,
+      data: { clientSecret },
+    })
+  } catch (error) {
+    logger.error('[STRIPE CREATE-INTENT] Error', { error })
+    return NextResponse.json({ success: false, error: 'Failed to create payment intent' }, { status: 500 })
+  }
+}

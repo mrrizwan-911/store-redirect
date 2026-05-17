@@ -36,38 +36,77 @@
   --radius-none: 0px;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   EYE-COMFORT WARM THEME
+   Always-on. No toggle. Pure CSS. Works before JS hydration.
+   Reduces blue-light fatigue with a warm cream/linen palette.
+   Black brand moments (hero, lookbook, footer, announcement) are untouched.
+   ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  --background: #FFFFFF;
-  --foreground: #0A0A0A;
-  --surface: #F8F8F8;
-  --border: #E5E5E5;
-  --primary: #0A0A0A;
-  --primary-hover: #222222;
-  --accent: #0A0A0A;
-  --text-primary: #0A0A0A;
-  --text-secondary: #666666;
+  /* ── Page chrome ── */
+  --background: #FAF7F2;          /* warm cream — replaces harsh #FFFFFF        */
+  --foreground: #1A1614;          /* warm near-black — replaces pure #0A0A0A    */
+
+  /* ── Surfaces ── */
+  --surface:  #F5F0E8;            /* warm off-white for cards, drawers           */
+  --border:   #DDD8CF;            /* warm border tint                            */
+  --input:    #DDD8CF;            /* form field borders                          */
+
+  /* ── Brand primary (stays black for strong contrast) ── */
+  --primary:       #1A1614;
+  --primary-hover: #2E2926;
+  --accent:        #1A1614;
+
+  /* ── Text ── */
+  --text-primary:   #1A1614;      /* warm dark text                              */
+  --text-secondary: #6B6460;      /* warm mid-grey                               */
+
+  /* ── Status ── */
   --success: #1a7a4a;
-  --error: #cc2222;
+  --error:   #cc2222;
   --warning: #c47d00;
+
+  /* ── Radius ── */
   --radius: 1.5rem;
 
-  /* Shadcn variable mappings */
-  --card: #FFFFFF;
-  --card-foreground: #0A0A0A;
-  --popover: #FFFFFF;
-  --popover-foreground: #0A0A0A;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F4F4F4;
-  --secondary-foreground: #0A0A0A;
-  --muted: #F4F4F4;
-  --muted-foreground: #666666;
-  --accent-foreground: #FFFFFF;
-  --destructive: #cc2222;
-  --destructive-foreground: #FFFFFF;
-  --input: #E5E5E5;
-  --ring: #0A0A0A;
+  /* ── Shadcn mappings ── */
+  --card:                  #FAF7F2;
+  --card-foreground:       #1A1614;
+  --popover:               #FAF7F2;
+  --popover-foreground:    #1A1614;
+  --primary-foreground:    #FAF7F2;
+  --secondary:             #EDE8DF;
+  --secondary-foreground:  #1A1614;
+  --muted:                 #EDE8DF;
+  --muted-foreground:      #6B6460;
+  --accent-foreground:     #FAF7F2;
+  --destructive:           #cc2222;
+  --destructive-foreground:#FAF7F2;
+  --ring:                  #1A1614;
+
+  /* ── Scroll behaviour ── */
+  scroll-behavior: smooth;
 }
 
+/* ─── Global base overrides ─────────────────────────────────────────────────── */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    /* Prevent any component from causing horizontal scroll on mobile */
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  /* Warm focus ring instead of default blue */
+  *:focus-visible {
+    outline-color: #1A1614;
+  }
+}
+
+/* ─── Reusable component utilities ──────────────────────────────────────────── */
 @layer components {
   .input-underline {
     @apply border-0 border-b-2 border-neutral-200 bg-transparent px-0 transition-all duration-500 focus:border-black focus:ring-0 rounded-none;
@@ -79,6 +118,15 @@
     display: none;
   }
   .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Alias for clarity */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }

@@ -5,6 +5,7 @@ import { reviewSchema } from '@/lib/validations/products'
 import { logger } from '@/lib/utils/logger'
 import { awardPoints } from '@/lib/services/loyalty/award'
 import { analyzeSentiment } from '@/lib/services/ai/sentiment'
+import { stripHtml } from '@/lib/utils/sanitize'
 
 export async function POST(
   req: NextRequest,
@@ -54,6 +55,9 @@ export async function POST(
       )
     }
 
+    const sanitizedBody = stripHtml(parsed.data.body)
+    const sanitizedTitle = parsed.data.title ? stripHtml(parsed.data.title) : undefined
+
     // Check if user purchased this product
     const hasPurchased = await db.orderItem.findFirst({
       where: {
@@ -77,8 +81,8 @@ export async function POST(
         productId: product.id,
         userId,
         rating: parsed.data.rating,
-        title: parsed.data.title,
-        body: parsed.data.body,
+        title: sanitizedTitle,
+        body: sanitizedBody,
         isVerified: !!hasPurchased,
         sentiment: sentiment,
       },

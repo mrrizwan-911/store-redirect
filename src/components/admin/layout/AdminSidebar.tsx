@@ -2,11 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   BarChart2, Package, ShoppingBag, Users, FileText,
   Archive, Tag, Zap, Shirt, Star, Mail, Settings, LogOut,
-  ExternalLink, FolderTree, Info, Phone, Menu, ChevronLeft, ChevronRight
+  ExternalLink, FolderTree, Info, Phone, Menu, ChevronLeft, X
 } from 'lucide-react'
 import { useAppDispatch } from '@/store/hooks'
 import { logout } from '@/store/slices/authSlice'
@@ -34,11 +34,56 @@ const navItems = [
   { icon: Settings, label: 'Settings', route: '/d8f2a1/admin/settings' },
 ]
 
+// Shared nav list used by both desktop sidebar and mobile drawer
+function NavList({ onNavClick }: { onNavClick?: () => void }) {
+  const pathname = usePathname()
+  return (
+    <ul className="space-y-0.5">
+      {navItems.map((item) => {
+        const isActive = pathname.startsWith(item.route)
+        const Icon = item.icon
+        return (
+          <li key={item.route} className="px-3">
+            <Link
+              href={item.route}
+              onClick={onNavClick}
+              className={`flex items-center gap-3 px-3 py-2 text-xs transition-all duration-200 rounded-md ${
+                isActive
+                  ? 'bg-neutral-100 text-neutral-900 font-semibold'
+                  : 'text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 font-medium'
+              }`}
+            >
+              <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-neutral-900' : 'text-neutral-400'}`} />
+              <span className="truncate">{item.label}</span>
+            </Link>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
+
 export function AdminSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const dispatch = useAppDispatch()
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Close mobile drawer on route change
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [pathname])
+
+  // Prevent body scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [mobileOpen])
 
   const handleLogout = async () => {
     try {
@@ -54,79 +99,148 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside
-      className={`${
-        isCollapsed ? 'w-16' : 'w-56'
-      } bg-white border-r border-neutral-100 flex flex-col h-full font-sans transition-all duration-300 ease-in-out relative`}
-    >
-      <div className={`p-4 border-b border-neutral-100 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
-        {!isCollapsed && <h1 className="text-sm font-bold font-serif tracking-widest uppercase truncate">Admin</h1>}
-        <div className="flex items-center gap-2">
-          {!isCollapsed && (
-            <Link
-              href="/"
-              className="text-neutral-400 hover:text-black transition-colors"
-              title="Back to Storefront"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-            </Link>
-          )}
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-neutral-400 hover:text-black transition-colors p-1"
-            title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-          >
-            {isCollapsed ? <Menu className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          </button>
-        </div>
+    <>
+      {/* ─── Mobile top bar (visible only on small screens) ─── */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 bg-white border-b border-neutral-100">
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="p-1.5 text-neutral-500 hover:text-black transition-colors"
+          aria-label="Open navigation menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <span className="text-xs font-bold font-serif tracking-widest uppercase">Admin</span>
+        <Link href="/" className="p-1.5 text-neutral-400 hover:text-black transition-colors" title="Back to Storefront">
+          <ExternalLink className="w-4 h-4" />
+        </Link>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-2 scrollbar-hide">
-        <ul className="space-y-0.5">
-          {navItems.map((item) => {
-            const isActive = pathname.startsWith(item.route)
-            const Icon = item.icon
-            return (
-              <li key={item.route} className="px-3">
-                <Link
-                  href={item.route}
-                  className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} px-3 py-1.5 text-xs transition-all duration-200 rounded-md ${
-                    isActive
-                      ? 'bg-neutral-100 text-neutral-900 font-semibold'
-                      : 'text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 font-medium'
-                  }`}
-                  title={isCollapsed ? item.label : undefined}
-                >
-                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-neutral-900' : 'text-neutral-400'}`} />
-                  {!isCollapsed && <span className="truncate">{item.label}</span>}
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
-      </nav>
+      {/* ─── Mobile drawer overlay ─── */}
+      {mobileOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-50 bg-black/50"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
 
-      <div className="p-4 border-t border-neutral-100 mt-auto">
-        <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2.5'} mb-4`}>
-          <div className="w-7 h-7 shrink-0 bg-neutral-900 text-white flex items-center justify-center text-[10px] font-bold rounded-full">
-            A
-          </div>
-          {!isCollapsed && (
+      {/* ─── Mobile drawer panel ─── */}
+      <div
+        className={`lg:hidden fixed top-0 left-0 bottom-0 z-50 w-72 bg-white flex flex-col transition-transform duration-300 ease-in-out ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
+          <h1 className="text-sm font-bold font-serif tracking-widest uppercase">Admin Panel</h1>
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="p-1.5 text-neutral-400 hover:text-black transition-colors"
+            aria-label="Close navigation menu"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <nav className="flex-1 overflow-y-auto py-2 scrollbar-hide">
+          <NavList onNavClick={() => setMobileOpen(false)} />
+        </nav>
+        <div className="p-4 border-t border-neutral-100">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-7 h-7 shrink-0 bg-neutral-900 text-white flex items-center justify-center text-[10px] font-bold rounded-full">
+              A
+            </div>
             <div className="truncate">
               <p className="text-[11px] font-bold text-neutral-900 truncate">Admin User</p>
               <p className="text-[9px] text-neutral-400 truncate">admin@calnza.com</p>
             </div>
-          )}
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 w-full text-[11px] font-medium text-neutral-400 hover:text-rose-600 transition-colors"
+          >
+            <LogOut className="w-3.5 h-3.5 shrink-0" />
+            <span>Logout</span>
+          </button>
         </div>
-        <button
-          onClick={handleLogout}
-          className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'} w-full text-[11px] font-medium text-neutral-400 hover:text-rose-600 transition-colors`}
-          title={isCollapsed ? "Logout" : undefined}
-        >
-          <LogOut className="w-3.5 h-3.5 shrink-0" />
-          {!isCollapsed && <span>Logout</span>}
-        </button>
       </div>
-    </aside>
+
+      {/* ─── Desktop sidebar (hidden on mobile) ─── */}
+      <aside
+        className={`hidden lg:flex ${
+          isCollapsed ? 'w-16' : 'w-56'
+        } bg-white border-r border-neutral-100 flex-col h-full font-sans transition-all duration-300 ease-in-out relative`}
+      >
+        <div className={`p-4 border-b border-neutral-100 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+          {!isCollapsed && <h1 className="text-sm font-bold font-serif tracking-widest uppercase truncate">Admin</h1>}
+          <div className="flex items-center gap-2">
+            {!isCollapsed && (
+              <Link
+                href="/"
+                className="text-neutral-400 hover:text-black transition-colors"
+                title="Back to Storefront"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+            )}
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="text-neutral-400 hover:text-black transition-colors p-1"
+              title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+            >
+              {isCollapsed ? <Menu className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto py-2 scrollbar-hide">
+          {isCollapsed ? (
+            // Collapsed: icons only
+            <ul className="space-y-0.5">
+              {navItems.map((item) => {
+                const isActive = pathname.startsWith(item.route)
+                const Icon = item.icon
+                return (
+                  <li key={item.route} className="px-3">
+                    <Link
+                      href={item.route}
+                      className={`flex items-center justify-center px-3 py-1.5 text-xs transition-all duration-200 rounded-md ${
+                        isActive
+                          ? 'bg-neutral-100 text-neutral-900 font-semibold'
+                          : 'text-neutral-500 hover:bg-neutral-50 hover:text-neutral-900 font-medium'
+                      }`}
+                      title={item.label}
+                    >
+                      <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-neutral-900' : 'text-neutral-400'}`} />
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          ) : (
+            <NavList />
+          )}
+        </nav>
+
+        <div className="p-4 border-t border-neutral-100 mt-auto">
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2.5'} mb-4`}>
+            <div className="w-7 h-7 shrink-0 bg-neutral-900 text-white flex items-center justify-center text-[10px] font-bold rounded-full">
+              A
+            </div>
+            {!isCollapsed && (
+              <div className="truncate">
+                <p className="text-[11px] font-bold text-neutral-900 truncate">Admin User</p>
+                <p className="text-[9px] text-neutral-400 truncate">admin@calnza.com</p>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={handleLogout}
+            className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-2'} w-full text-[11px] font-medium text-neutral-400 hover:text-rose-600 transition-colors`}
+            title={isCollapsed ? 'Logout' : undefined}
+          >
+            <LogOut className="w-3.5 h-3.5 shrink-0" />
+            {!isCollapsed && <span>Logout</span>}
+          </button>
+        </div>
+      </aside>
+    </>
   )
 }

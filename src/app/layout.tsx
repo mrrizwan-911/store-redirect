@@ -6,6 +6,8 @@ import { ReduxProvider } from '@/components/shared/ReduxProvider'
 import { FloatingWhatsApp } from '@/components/store/shared/FloatingWhatsApp'
 import { CartDrawer } from '@/components/store/cart/CartDrawer'
 import { SWRegistrar } from '@/components/shared/SWRegistrar'
+import { ScrollProgress } from '@/components/store/shared/ScrollProgress'
+import { ExitIntentPopup } from '@/components/store/shared/ExitIntentPopup'
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const playfair = Playfair_Display({
@@ -29,13 +31,14 @@ const APP_DESCRIPTION =
   'Modern boutique essentials — premium Pakistani fashion & accessories.'
 
 // ─── Viewport ─────────────────────────────────────────────────────────────────
-// Exported separately as required by Next.js 14 App Router
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   minimumScale: 1,
   viewportFit: 'cover',          // iPhone safe-area / Dynamic Island support
-  themeColor: '#0A0A0A',
+  // Warm cream matches the new eye-comfort background
+  // Change back to '#0A0A0A' if you prefer the black browser chrome look
+  themeColor: '#FAF7F2',
 }
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────
@@ -146,6 +149,10 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ReduxProvider>
+          {/* Scroll progress bar + back-to-top button */}
+          <ScrollProgress />
+          {/* Exit intent popup — fires once per session on leave intent */}
+          <ExitIntentPopup />
           {children}
           <CartDrawer />
           <FloatingWhatsApp />

@@ -1,13 +1,14 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { FileText, Search, ChevronRight, Clock, MessageCircle } from 'lucide-react'
+import { FileText, MessageCircle, ArrowRight, Package, Clock } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import Link from 'next/link'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { useAppSelector } from '@/store/hooks'
 
 interface Quotation {
   id: string
@@ -17,33 +18,37 @@ interface Quotation {
   company: string | null
 }
 
-const statusMap: Record<string, { label: string, variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  PENDING: { label: 'Pending Review', variant: 'outline' },
-  SENT: { label: 'Quote Sent', variant: 'secondary' },
-  ACCEPTED: { label: 'Accepted', variant: 'default' },
-  REJECTED: { label: 'Rejected', variant: 'destructive' },
-  CONVERTED: { label: 'Converted to Order', variant: 'default' },
-  EXPIRED: { label: 'Expired', variant: 'outline' },
+const statusMap: Record<string, { label: string; color: string }> = {
+  PENDING:   { label: 'Pending Review',       color: 'bg-amber-50 text-amber-700 border-amber-200' },
+  SENT:      { label: 'Quote Sent',           color: 'bg-blue-50 text-blue-700 border-blue-200' },
+  ACCEPTED:  { label: 'Accepted',             color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  REJECTED:  { label: 'Rejected',             color: 'bg-rose-50 text-rose-700 border-rose-200' },
+  CONVERTED: { label: 'Converted to Order',   color: 'bg-black text-white border-black' },
+  EXPIRED:   { label: 'Expired',              color: 'bg-neutral-100 text-neutral-500 border-neutral-200' },
+}
+
+function itemCount(items: any): number {
+  return Array.isArray(items) ? items.length : 0
 }
 
 export default function MyQuotationsPage() {
   const [quotations, setQuotations] = useState<Quotation[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const { isAuthenticated } = useAppSelector((s) => s.auth)
 
   useEffect(() => {
-    async function fetchQuotations() {
-      try {
-        const res = await fetch('/api/account/quotations')
-        const result = await res.json()
-        if (result.success) setQuotations(result.data)
-      } catch (error) {
-        toast.error('Failed to load quotations')
-      } finally {
-        setIsLoading(false)
-      }
+    if (!isAuthenticated) {
+      setIsLoading(false)
+      return
     }
-    fetchQuotations()
-  }, [])
+    fetch('/api/account/quotations')
+      .then((r) => r.json())
+      .then((result) => {
+        if (result.success) setQuotations(result.data)
+      })
+      .catch(() => toast.error('Failed to load quotations'))
+      .finally(() => setIsLoading(false))
+  }, [isAuthenticated])
 
   if (isLoading) {
     return (
@@ -54,96 +59,171 @@ export default function MyQuotationsPage() {
   }
 
   return (
-    <div className="space-y-12 animate-in fade-in duration-700 text-black">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-bold">B2B Portal</p>
-          <h1 className="font-display text-4xl md:text-5xl tracking-tight text-black">Your Quotations</h1>
+    <div className="space-y-10 animate-in fade-in duration-700 text-black">
+      {/* ── Header ───────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5">
+        <div className="space-y-1.5">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-bold">
+            B2B Portal
+          </p>
+          <h1 className="font-display text-3xl md:text-4xl tracking-tight text-black">
+            Your Quotations
+          </h1>
         </div>
         <Link
           href="/quotation"
-          className="rounded-[12px] h-14 px-8 bg-black text-white hover:bg-neutral-900 uppercase tracking-widest text-[10px] font-bold transition-all shadow-lg flex items-center justify-center"
+          className="self-start sm:self-auto inline-flex items-center justify-center h-12 px-8 bg-black text-white hover:bg-neutral-900 uppercase tracking-widest text-[10px] font-bold transition-all shadow-lg rounded-none"
         >
           Request New Quote
         </Link>
       </div>
 
       {quotations.length > 0 ? (
-        <div className="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0 scrollbar-hide">
-          <table className="w-full text-left border-collapse min-w-[600px] md:min-w-0">
-            <thead>
-              <tr className="border-b border-neutral-200">
-                <th className="py-4 text-[10px] uppercase tracking-widest font-bold text-neutral-500">Request ID</th>
-                <th className="py-4 text-[10px] uppercase tracking-widest font-bold text-neutral-500">Date</th>
-                <th className="py-4 text-[10px] uppercase tracking-widest font-bold text-neutral-500">Company</th>
-                <th className="py-4 text-[10px] uppercase tracking-widest font-bold text-neutral-500">Status</th>
-                <th className="py-4 text-right text-[10px] uppercase tracking-widest font-bold text-neutral-500">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100 text-black font-medium">
-              {quotations.map((q) => (
-                <tr key={q.id} className="group hover:bg-neutral-50 transition-colors">
-                  <td className="py-6 align-middle">
-                    <span className="text-[11px] font-bold tracking-widest uppercase">#{q.id.slice(-8)}</span>
-                  </td>
-                  <td className="py-6 align-middle">
-                    <span className="text-xs text-neutral-600 font-bold">{new Date(q.createdAt).toLocaleDateString()}</span>
-                  </td>
-                  <td className="py-6 align-middle">
-                    <span className="text-xs text-black uppercase font-bold tracking-wider">{q.company || 'Personal'}</span>
-                  </td>
-                  <td className="py-6 align-middle">
-                    <Badge
-                      variant={statusMap[q.status]?.variant || 'outline'}
-                      className="rounded-[4px] text-[8px] uppercase tracking-widest px-2 py-0 border-neutral-300 font-bold"
+        <>
+          {/* ── Desktop Table (md+) ──────────────────────────────────── */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-neutral-200">
+                  {['Request ID', 'Date', 'Items', 'Company', 'Status', 'Action'].map((h) => (
+                    <th
+                      key={h}
+                      className="py-4 text-[10px] uppercase tracking-widest font-bold text-neutral-500"
                     >
-                      {statusMap[q.status]?.label || q.status}
-                    </Badge>
-                  </td>
-                  <td className="py-6 text-right align-middle">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" className="h-10 px-4 rounded-[8px] text-[10px] uppercase tracking-widest font-bold border border-transparent hover:border-black transition-all text-neutral-500 hover:text-black">
-                        View Details
-                      </Button>
-                      <Button variant="ghost" className="h-10 w-10 p-0 rounded-[8px] bg-neutral-50 hover:bg-[#25D366] hover:text-white transition-all text-neutral-400">
-                        <MessageCircle className="w-4 h-4 stroke-[2]" />
-                      </Button>
-                    </div>
-                  </td>
+                      {h}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {quotations.map((q) => {
+                  const s = statusMap[q.status] || { label: q.status, color: 'bg-neutral-100 text-neutral-600 border-neutral-200' }
+                  return (
+                    <tr key={q.id} className="group hover:bg-neutral-50 transition-colors">
+                      <td className="py-5 align-middle">
+                        <span className="text-[11px] font-mono font-bold tracking-widest text-neutral-700">
+                          #{q.id.slice(-8)}
+                        </span>
+                      </td>
+                      <td className="py-5 align-middle">
+                        <span className="text-[11px] text-neutral-600 font-bold">
+                          {new Date(q.createdAt).toLocaleDateString()}
+                        </span>
+                      </td>
+                      <td className="py-5 align-middle">
+                        <span className="text-[11px] font-bold text-black">{itemCount(q.items)}</span>
+                      </td>
+                      <td className="py-5 align-middle">
+                        <span className="text-[11px] text-black uppercase font-bold tracking-wider">
+                          {q.company || '—'}
+                        </span>
+                      </td>
+                      <td className="py-5 align-middle">
+                        <span
+                          className={cn(
+                            'inline-block px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest border rounded-full',
+                            s.color
+                          )}
+                        >
+                          {s.label}
+                        </span>
+                      </td>
+                      <td className="py-5 align-middle text-right">
+                        <div className="flex justify-end items-center gap-2">
+                          <Link
+                            href={`/account/quotations/${q.id}`}
+                            className="inline-flex items-center gap-1.5 h-9 px-4 border border-neutral-200 hover:border-black transition-all text-[10px] font-bold uppercase tracking-widest text-neutral-600 hover:text-black"
+                          >
+                            View Details
+                            <ArrowRight className="w-3 h-3" />
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ── Mobile Cards ─────────────────────────────────────────── */}
+          <div className="md:hidden space-y-3">
+            {quotations.map((q) => {
+              const s = statusMap[q.status] || { label: q.status, color: 'bg-neutral-100 text-neutral-600 border-neutral-200' }
+              return (
+                <Link
+                  key={q.id}
+                  href={`/account/quotations/${q.id}`}
+                  className="block bg-white border border-neutral-200 p-4 active:bg-neutral-50 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div>
+                      <p className="text-[11px] font-mono font-bold tracking-widest text-neutral-700">
+                        #{q.id.slice(-8)}
+                      </p>
+                      {q.company && (
+                        <p className="text-[11px] font-bold text-black mt-0.5 uppercase tracking-wide">
+                          {q.company}
+                        </p>
+                      )}
+                    </div>
+                    <span
+                      className={cn(
+                        'inline-block px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-widest border rounded-full shrink-0',
+                        s.color
+                      )}
+                    >
+                      {s.label}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 text-[10px] text-neutral-500 font-bold uppercase tracking-wide">
+                    <span className="flex items-center gap-1">
+                      <Package className="w-3 h-3" />
+                      {itemCount(q.items)} items
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {new Date(q.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </>
       ) : (
-        <div className="py-32 text-center border-2 border-dashed border-neutral-200 rounded-[12px] bg-neutral-50/30">
-          <FileText className="w-12 h-12 text-neutral-300 mx-auto mb-6 stroke-[1.5]" />
+        /* ── Empty State ─────────────────────────────────────────────── */
+        <div className="py-28 text-center border-2 border-dashed border-neutral-200 bg-neutral-50/30">
+          <FileText className="w-12 h-12 text-neutral-300 mx-auto mb-5 stroke-[1.5]" />
           <h2 className="font-display text-2xl mb-2 text-black">No active quotations</h2>
           <p className="text-neutral-500 text-sm font-medium max-w-xs mx-auto mb-8">
-            Looking for bulk orders or wholesale pricing? Request a customized quotation from our team.
+            Looking for bulk orders or wholesale pricing? Request a customised quotation.
           </p>
           <Link
             href="/quotation"
-            className="rounded-[12px] border border-black text-black hover:bg-black hover:text-white uppercase tracking-widest text-[10px] font-bold h-12 px-10 transition-all flex items-center justify-center w-fit mx-auto"
+            className="inline-flex items-center justify-center h-12 px-10 border border-black text-black hover:bg-black hover:text-white uppercase tracking-widest text-[10px] font-bold transition-all"
           >
             Request A Quote
           </Link>
         </div>
       )}
 
-      {/* Support Panel */}
-      <Card className="rounded-[12px] border-neutral-200 shadow-none bg-neutral-950 text-white p-8 md:p-12 relative overflow-hidden mt-12">
-        <div className="max-w-xl space-y-6 relative z-10">
-          <h3 className="font-display text-3xl text-white">Corporate & Wholesale</h3>
+      {/* ── Support Banner ────────────────────────────────────────────── */}
+      <div className="bg-neutral-950 text-white px-6 md:px-10 py-8 md:py-12 relative overflow-hidden">
+        <div className="max-w-lg space-y-5 relative z-10">
+          <h3 className="font-display text-2xl md:text-3xl text-white">
+            Corporate &amp; Wholesale
+          </h3>
           <p className="text-neutral-300 text-sm font-light leading-relaxed">
-            Our B2B team specializes in providing tailored solutions for corporate gifting, uniform requirements, and bulk wholesale orders with dedicated logistics support.
+            Our B2B team specialises in corporate gifting, uniform requirements, and bulk
+            wholesale orders with dedicated logistics support.
           </p>
-          <Button className="rounded-[12px] h-12 px-8 bg-white text-black hover:bg-neutral-200 uppercase tracking-widest text-[10px] font-bold transition-all shadow-2xl">
+          <Button className="h-12 px-8 bg-white text-black hover:bg-neutral-200 uppercase tracking-widest text-[10px] font-bold transition-all rounded-none">
             Talk to an Expert
           </Button>
         </div>
-        <FileText className="absolute -bottom-6 -right-6 w-48 h-48 text-white opacity-[0.05] -z-0" />
-      </Card>
+        <FileText className="absolute -bottom-6 -right-6 w-40 h-40 text-white opacity-[0.04]" />
+      </div>
     </div>
   )
 }

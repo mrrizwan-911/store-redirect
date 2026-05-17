@@ -55,14 +55,14 @@ export function ProductCard({
   isLowStock,
   stockCount,
 }: ProductCardProps) {
-  const router = useRouter()
+  const router   = useRouter()
   const dispatch = useAppDispatch()
   const { items: compareItems } = useAppSelector((state) => state.compare)
   const isInCompare = compareItems.some((item) => item.id === id)
 
   const { isInWishlist, toggle: handleWishlistToggle } = useWishlist(id)
-  const [mounted, setMounted] = useState(false)
-  const isWishlisted = mounted && isInWishlist
+  const [mounted, setMounted]   = useState(false)
+  const isWishlisted            = mounted && isInWishlist
   const [isHovered, setIsHovered] = useState(false)
 
   const { hours, minutes, seconds, isExpired } = useFlashSaleTimer(flashSaleEndTime)
@@ -70,9 +70,7 @@ export function ProductCard({
 
   const pad = (num: number) => num.toString().padStart(2, '0')
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  useEffect(() => { setMounted(true) }, [])
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -95,20 +93,21 @@ export function ProductCard({
         return
       }
       dispatch(addToCompare({
-        id, name, slug, price, salePrice, imageUrl, category, sku, description, avgRating, reviewCount
+        id, name, slug, price, salePrice, imageUrl, category, sku, description, avgRating, reviewCount,
       }))
       toast.success('Added to comparison')
     }
   }
 
   return (
+    /* min-w-0 prevents this card from blowing out flex containers (e.g. carousel) */
     <div
-      className="group relative bg-white rounded-[var(--radius)] border border-[#E5E5E5] transition-colors duration-300 hover:border-black/25 overflow-hidden"
+      className="group relative bg-card rounded-[var(--radius)] border border-border transition-colors duration-300 hover:border-black/25 overflow-hidden min-w-0"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Image Container */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#FAFAFA] rounded-t-[var(--radius)]">
+      <div className="relative aspect-[4/5] overflow-hidden bg-surface rounded-t-[var(--radius)]">
         <Link href={`/products/${slug}`} className="block h-full w-full relative">
           <Image
             src={(isHovered && secondaryImageUrl) ? secondaryImageUrl : (imageUrl || '/placeholder.png')}
@@ -152,31 +151,30 @@ export function ProductCard({
           <button
             onClick={handleWishlist}
             className={cn(
-              "h-10 w-10 sm:h-8 sm:w-auto sm:px-2.5 inline-flex items-center justify-center sm:gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)] shadow-sm sm:shadow-none",
-              isWishlisted && "border-black text-black"
+              'h-10 w-10 sm:h-8 sm:w-auto sm:px-2.5 inline-flex items-center justify-center sm:gap-2 bg-white/95 text-neutral-700 border border-border uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)] shadow-sm sm:shadow-none',
+              isWishlisted && 'border-black text-black',
             )}
-            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           >
-            <Heart className={cn("w-4 h-4 sm:w-3.5 sm:h-3.5", isWishlisted && "fill-current")} />
+            <Heart className={cn('w-4 h-4 sm:w-3.5 sm:h-3.5', isWishlisted && 'fill-current')} />
             <span className="hidden sm:inline">Save</span>
           </button>
 
-          {/* Comparison Toggle */}
           <button
             onClick={handleCompare}
             className={cn(
-              "h-10 w-10 sm:h-8 sm:w-auto sm:px-2.5 inline-flex items-center justify-center sm:gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)] shadow-sm sm:shadow-none",
-              isInCompare && "border-black text-black"
+              'h-10 w-10 sm:h-8 sm:w-auto sm:px-2.5 inline-flex items-center justify-center sm:gap-2 bg-white/95 text-neutral-700 border border-border uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)] shadow-sm sm:shadow-none',
+              isInCompare && 'border-black text-black',
             )}
-            aria-label={isInCompare ? "Remove from comparison" : "Add to comparison"}
+            aria-label={isInCompare ? 'Remove from comparison' : 'Add to comparison'}
           >
-            <Scale className={cn("w-4 h-4 sm:w-3.5 sm:h-3.5", isInCompare && "fill-current")} />
+            <Scale className={cn('w-4 h-4 sm:w-3.5 sm:h-3.5', isInCompare && 'fill-current')} />
             <span className="hidden sm:inline">Compare</span>
           </button>
 
           <button
             onClick={handleAddToCart}
-            className="h-10 w-10 sm:h-8 sm:w-auto sm:px-2.5 inline-flex items-center justify-center sm:gap-2 bg-white/95 text-neutral-700 border border-[#E5E5E5] uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)] shadow-sm sm:shadow-none"
+            className="h-10 w-10 sm:h-8 sm:w-auto sm:px-2.5 inline-flex items-center justify-center sm:gap-2 bg-white/95 text-neutral-700 border border-border uppercase tracking-[0.18em] text-[9px] font-bold hover:border-black/30 hover:text-black transition-colors rounded-[var(--radius)] shadow-sm sm:shadow-none"
             aria-label="View Details"
           >
             <Plus className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
@@ -187,7 +185,7 @@ export function ProductCard({
         {/* Quick Add Button */}
         <button
           onClick={handleAddToCart}
-          className="absolute bottom-0 left-0 right-0 bg-white text-black py-3.5 text-[10px] font-bold uppercase tracking-[0.18em] transition-transform duration-500 translate-y-full group-hover:translate-y-0 border-t border-[#E5E5E5] hover:bg-black hover:text-white z-20"
+          className="absolute bottom-0 left-0 right-0 bg-white text-black py-3.5 text-[10px] font-bold uppercase tracking-[0.18em] transition-transform duration-500 translate-y-full group-hover:translate-y-0 border-t border-border hover:bg-black hover:text-white z-20"
         >
           View Details
         </button>
@@ -196,45 +194,44 @@ export function ProductCard({
       {/* Product Details */}
       <div className="pt-4 pb-4 px-4 flex flex-col gap-1.5">
         <div className="flex justify-between items-center">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-medium">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-400 font-medium truncate mr-2">
             {category}
           </span>
           {avgRating && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
               <Star className="w-2.5 h-2.5 fill-neutral-400 text-neutral-400" />
               <span className="text-[10px] font-bold text-black">{avgRating}</span>
             </div>
           )}
         </div>
 
-        <Link href={`/products/${slug}`} className="block">
-          <h3 className="font-display text-lg md:text-xl font-medium tracking-tight group-hover:text-neutral-600 transition-colors">
+        <Link href={`/products/${slug}`} className="block min-w-0">
+          <h3 className="font-display text-lg md:text-xl font-medium tracking-tight group-hover:text-neutral-600 transition-colors truncate">
             {name}
           </h3>
         </Link>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             {hasActiveFlashSale ? (
               <>
-                <span className="text-sm font-bold text-black font-sans">PKR {flashSalePrice.toLocaleString()}</span>
-                <span className="text-xs text-neutral-400 line-through font-sans">PKR {price.toLocaleString()}</span>
+                <span className="text-sm font-bold text-black font-sans whitespace-nowrap">PKR {flashSalePrice.toLocaleString()}</span>
+                <span className="text-xs text-neutral-400 line-through font-sans whitespace-nowrap">PKR {price.toLocaleString()}</span>
               </>
             ) : salePrice ? (
               <>
-                <span className="text-sm font-bold text-black font-sans">PKR {salePrice.toLocaleString()}</span>
-                <span className="text-xs text-neutral-400 line-through font-sans">PKR {price.toLocaleString()}</span>
+                <span className="text-sm font-bold text-black font-sans whitespace-nowrap">PKR {salePrice.toLocaleString()}</span>
+                <span className="text-xs text-neutral-400 line-through font-sans whitespace-nowrap">PKR {price.toLocaleString()}</span>
               </>
             ) : (
-              <span className="text-sm font-bold text-black font-sans">PKR {price.toLocaleString()}</span>
+              <span className="text-sm font-bold text-black font-sans whitespace-nowrap">PKR {price.toLocaleString()}</span>
             )}
           </div>
 
-          {/* Low Stock Indicator */}
           {isLowStock && (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 shrink-0">
               <div className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-pulse" />
-              <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
+              <span className="text-[10px] text-neutral-500 font-bold uppercase tracking-wider whitespace-nowrap">
                 Only {stockCount} left
               </span>
             </div>

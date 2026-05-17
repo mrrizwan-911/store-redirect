@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 export function NewsletterSection() {
-  const [email, setEmail] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail]           = useState('')
+  const [isLoading, setIsLoading]   = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,8 +41,8 @@ export function NewsletterSection() {
   }
 
   return (
-    <section className="py-24 md:py-32 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 md:px-10">
+    <section className="py-20 md:py-24 lg:py-32 bg-background overflow-hidden">
+      <div className="max-w-7xl mx-auto px-5 sm:px-6 md:px-10">
         {isSubmitted ? (
           <div className="animate-in fade-in zoom-in duration-700 text-center py-10">
             <CircleCheck className="w-16 h-16 text-black mx-auto mb-8 stroke-[1]" />
@@ -54,16 +54,16 @@ export function NewsletterSection() {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-16 lg:gap-24">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-12 lg:gap-24">
             {/* Typography Block */}
             <div className="flex-1 text-center lg:text-left">
-              <span className="text-[10px] uppercase tracking-[0.4em] text-neutral-500 font-bold mb-8 block">
+              <span className="text-[10px] uppercase tracking-[0.4em] text-neutral-500 font-bold mb-6 sm:mb-8 block">
                 Newsletter
               </span>
-              <h2 className="font-display text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight leading-[0.95] text-black">
+              <h2 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight leading-[0.95] text-black">
                 Get 10% off <br className="hidden lg:block" /> your first order
               </h2>
-              <p className="text-neutral-600 text-base md:text-lg mt-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-sans">
+              <p className="text-neutral-600 text-base md:text-lg mt-6 sm:mt-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-sans">
                 Exclusive access to new arrivals, private sales, and seasonal editorials. No noise.
               </p>
             </div>
@@ -72,7 +72,7 @@ export function NewsletterSection() {
             <div className="w-full lg:w-[450px] shrink-0">
               <form
                 onSubmit={handleSubmit}
-                className="flex flex-col lg:flex-row items-stretch lg:items-end gap-6 lg:gap-0 group"
+                className="flex flex-col items-stretch gap-4 sm:gap-6"
               >
                 <div className="relative flex-1">
                   <Input
@@ -82,9 +82,9 @@ export function NewsletterSection() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={cn(
-                      "h-16 lg:h-14 rounded-[var(--radius)] border-0 border-b border-neutral-200 bg-transparent px-0",
-                      "text-lg lg:text-base focus-visible:ring-0 focus-visible:border-black transition-all duration-500",
-                      "placeholder:text-neutral-300 placeholder:uppercase placeholder:tracking-widest placeholder:text-[10px]"
+                      'h-14 rounded-[var(--radius)] border-0 border-b border-neutral-200 bg-transparent px-0',
+                      'text-base focus-visible:ring-0 focus-visible:border-black transition-all duration-500',
+                      'placeholder:text-neutral-300 placeholder:uppercase placeholder:tracking-widest placeholder:text-[10px]',
                     )}
                   />
                 </div>
@@ -92,20 +92,20 @@ export function NewsletterSection() {
                   type="submit"
                   disabled={isLoading}
                   className={cn(
-                    "h-16 lg:h-14 px-12 rounded-[var(--radius)] uppercase tracking-[0.2em] text-[11px] font-bold",
-                    "bg-black text-white hover:bg-neutral-900 transition-all duration-500",
-                    "active:scale-95 shadow-2xl lg:shadow-none disabled:opacity-70"
+                    'h-14 px-12 rounded-[var(--radius)] uppercase tracking-[0.2em] text-[11px] font-bold',
+                    'bg-black text-white hover:bg-neutral-900 transition-all duration-500',
+                    'active:scale-95 shadow-2xl lg:shadow-none disabled:opacity-70',
                   )}
                 >
                   {isLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
-                    "Subscribe"
+                    'Subscribe'
                   )}
                 </Button>
               </form>
 
-              <p className="mt-6 text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-medium text-center lg:text-left">
+              <p className="mt-5 sm:mt-6 text-[10px] uppercase tracking-[0.3em] text-neutral-500 font-medium text-center lg:text-left">
                 Unsubscribe anytime.
               </p>
             </div>

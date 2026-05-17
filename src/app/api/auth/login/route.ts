@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimiters, checkRateLimit, getClientIp } from '@/lib/utils/rateLimit'
+import { isAccountLocked, recordFailedLogin, clearFailedLogins } from '@/lib/utils/accountLock'
 import bcrypt from 'bcryptjs'
 import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
@@ -7,6 +9,9 @@ import { signAccessToken, signRefreshToken } from '@/lib/auth/jwt'
 
 export async function POST(req: NextRequest) {
   try {
+    const clientIp = getClientIp(req)
+    const rateLimitErr = await checkRateLimit(rateLimiters.auth, clientIp)
+    if (rateLimitErr) return rateLimitErr
     const body = await req.json()
     const parsed = loginSchema.safeParse(body)
 
@@ -18,6 +23,13 @@ export async function POST(req: NextRequest) {
     }
 
     const { email, password } = parsed.data
+
+    if (await isAccountLocked(email)) {
+      return NextResponse.json(
+        { success: false, error: 'Account temporarily locked. Try again in 15 minutes.' },
+        { status: 429 }
+      )
+    }
 
     const user = await db.user.findUnique({ where: { email } })
     if (!user || !user.passwordHash) {
@@ -36,6 +48,7 @@ export async function POST(req: NextRequest) {
 
     const passwordMatch = await bcrypt.compare(password, user.passwordHash)
     if (!passwordMatch) {
+      await recordFailedLogin(email)
       return NextResponse.json(
         { success: false, error: 'Invalid credentials' },
         { status: 401 }
@@ -43,6 +56,7 @@ export async function POST(req: NextRequest) {
     }
 
     const tokenPayload = { userId: user.id, email: user.email, role: user.role }
+    await clearFailedLogins(email)
     const accessToken = signAccessToken(tokenPayload)
     const refreshToken = signRefreshToken(tokenPayload)
 

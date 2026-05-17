@@ -76,8 +76,7 @@ export function AccountSidebar({ isCollapsed, onToggle }: AccountSidebarProps) {
     dispatch(clearCart())
     dispatch(clearWishlist())
     await persistor.purge()
-    router.refresh()
-    router.push('/login')
+    window.location.href = '/login'
   }
 
   // Mock loyalty tier for now - in a real app this would come from a loyalty slice or user profile

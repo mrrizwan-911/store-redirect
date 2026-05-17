@@ -548,6 +548,7 @@ model SiteSettings {
   // Announcement Bar
   announcementText  String   @default("Free delivery on orders over PKR 3,000 | New arrivals every Friday")
   showAnnouncement  Boolean  @default(true)
+  announcementBars  Json     @default("[{\"id\":\"default-1\",\"text\":\"Free delivery on orders over PKR 3,000 | New arrivals every Friday\",\"target\":\"both\",\"isActive\":true}]")
 
   // Footer Content
   footerLogo        String?
@@ -569,4 +570,59 @@ model SiteSettings {
   paymentMethods     String[] @default(["JAZZCASH", "EASYPAISA", "VISA", "MASTERCARD"])
 
   updatedAt         DateTime @updatedAt
+}
+// ─────────────────────────────────────────────────────────────────────────────
+// APPEND ONLY — paste this block at the very end of:
+//   prisma/schema.prisma
+// after the closing } of SiteSettings.
+//
+// Then run:
+//   npx prisma migrate dev --name add-user-behaviour-analytics
+//   npx prisma generate
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Behaviour analytics — used for future personalisation & recommendations.
+// userId  = logged-in user (real cuid from User table)
+// sessionId = anonymous visitors tracked via 'anon_session' cookie
+// Both are nullable — at least one will be set per record.
+
+model UserSearchHistory {
+  id          String   @id @default(cuid())
+  userId      String?
+  sessionId   String?
+  query       String
+  mode        String   // 'keyword' | 'ai_intent' | 'visual' | 'multimodal'
+  resultCount Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([createdAt])
+}
+
+model UserProductView {
+  id        String   @id @default(cuid())
+  userId    String?
+  sessionId String?
+  productId String
+  source    String?  // 'search' | 'chat' | 'category' | 'home'
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([productId])
+  @@index([createdAt])
+}
+
+model UserChatHistory {
+  id        String   @id @default(cuid())
+  userId    String?
+  sessionId String?
+  message   String   @db.Text
+  role      String   // 'user' | 'assistant'
+  sessionTs String   // minute-precision ISO string groups one conversation
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([createdAt])
 }

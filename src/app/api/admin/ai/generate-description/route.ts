@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       return userId
     }
 
-    const { name, category, tags } = await req.json()
+    const { name, category, tags, shortDescription } = await req.json()
 
     if (!name) {
       return NextResponse.json({ success: false, error: 'Product name is required' }, { status: 400 })
@@ -21,16 +21,31 @@ export async function POST(req: Request) {
     // Using OpenAI GPT-4o as requested
     const openai = aiConfig.getOpenAI()
 
-    const prompt = `Write a compelling 2-3 sentence product description for: ${name}
-Category: ${category || 'None'}
+    const prompt = `You are a world-class fashion e-commerce copywriter. Your descriptions are known for being rich, evocative, and persuasive — they make customers feel the product and picture themselves wearing it.
+
+Write a comprehensive, detailed product description for the following fashion item:
+
+Product Name: ${name}
+Category: ${category || 'Fashion / Apparel'}
 Tags: ${Array.isArray(tags) ? tags.join(', ') : (tags || 'None')}
-Keep it customer-facing, concise, and focused on benefits. No bullet points.`
+Short Description (for context): ${shortDescription || 'None'}
+
+Write a FULL product description of 150-200 words in flowing prose (no bullet points, no headers). The description must cover:
+
+1. **Opening hook** — A compelling opening sentence that captures the essence of the piece and draws the reader in
+2. **Design & style details** — Describe the silhouette, cut, fabric feel, colors, and any key design details (stitching, buttons, prints, embellishments, etc.)
+3. **Fit & comfort** — How it fits the body, the feel when worn, whether it's relaxed/fitted/structured
+4. **Versatility & occasion** — What occasions this is perfect for, how to style it, what to pair it with
+5. **Who it's for** — The lifestyle and personality of the ideal customer
+6. **Closing value statement** — Why this piece deserves a place in their wardrobe
+
+Write in second person ("you", "your") to be personal and engaging. Be specific and vivid. Avoid generic phrases like "perfect addition to your wardrobe" or "high quality". Make it feel premium, real, and desirable.`
 
     const response = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [{ role: 'user', content: prompt }],
       stream: true,
-      max_tokens: 300,
+      max_tokens: 600,
     })
 
     const encoder = new TextEncoder()

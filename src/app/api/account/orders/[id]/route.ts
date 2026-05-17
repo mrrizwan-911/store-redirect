@@ -28,8 +28,8 @@ export async function GET(
             product: {
               include: {
                 images: {
-                  where: { isPrimary: true },
-                  take: 1
+                  orderBy: { isPrimary: 'desc' },
+                  take: 1,
                 }
               }
             },

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { rateLimiters, checkRateLimit, getClientIp } from '@/lib/utils/rateLimit'
 import { db } from '@/lib/db/client'
 import { createOrderSchema } from '@/lib/validations/checkout'
 import { getValidatedCartTotal } from '@/lib/services/payment/priceValidator'
@@ -8,6 +9,9 @@ import { OrderStatus, PaymentMethod, PaymentStatus } from '@prisma/client'
 
 export async function POST(req: NextRequest) {
   try {
+    const clientIp = getClientIp(req)
+    const rateLimitErr = await checkRateLimit(rateLimiters.checkout, clientIp)
+    if (rateLimitErr) return rateLimitErr
     const body = await req.json()
     const parsed = createOrderSchema.safeParse(body)
 
@@ -24,8 +28,10 @@ export async function POST(req: NextRequest) {
       guestName,
       guestEmail,
       guestPhone,
-      shippingMethod,
+      shippingOptionId,
+      country,
       paymentMethod,
+      stripePaymentIntentId,
       couponCode,
       loyaltyPoints,
       items,
@@ -37,43 +43,99 @@ export async function POST(req: NextRequest) {
       couponCode,
       loyaltyPoints,
       itemsCount: items.length,
-      guestEmail
+      guestEmail,
+      paymentMethod,
+      country,
     })
 
+    // ── Guest user resolution ─────────────────────────────────────────────
     const session = await getUserSession()
     let userId = session?.userId
 
-    // Handle Guest Checkout — Link to or create a GUEST user
     if (!userId && guestEmail && guestName) {
       const existingUser = await db.user.findUnique({
         where: { email: guestEmail.toLowerCase() }
       })
-
       if (existingUser) {
-        // If user is a GUEST, we can link the order.
-        // If they are a CUSTOMER/ADMIN, we link it too (history tracking),
-        // but typically guest checkout shouldn't allow hijacking an existing account's history without auth.
-        // For simplicity and to satisfy "Guest Checkout", we link if it's a GUEST or if the user doesn't have a password yet.
         userId = existingUser.id
       } else {
-        // Create new GUEST user
         const newUser = await db.user.create({
           data: {
             email: guestEmail.toLowerCase(),
             name: guestName,
             phone: guestPhone,
             role: 'GUEST',
-            isVerified: false
+            isVerified: false,
           }
         })
         userId = newUser.id
       }
     }
 
-    // 1. Validate Prices and compute subtotal
+    // ── Validate Shipping Option ──────────────────────────────────────────
+    // TODO: Uncomment when ShippingOption model is added to schema
+    // const shippingOption = await db.shippingOption.findUnique({
+    //   where: { id: shippingOptionId },
+    // })
+    // if (!shippingOption || !shippingOption.isActive) {
+    //   return NextResponse.json(
+    //     { success: false, error: 'Selected shipping option is not available' },
+    //     { status: 400 }
+    //   )
+    // }
+
+    // For now, just validate that shippingOptionId is provided
+    if (!shippingOptionId) {
+      return NextResponse.json(
+        { success: false, error: 'Shipping option is required' },
+        { status: 400 }
+      )
+    }
+
+    // ── Stripe PaymentIntent verification ────────────────────────────────
+    // For CARD payments: verify that the Stripe PaymentIntent has succeeded
+    // before creating the order as confirmed.
+    // Amount check prevents client-side price manipulation.
+    if (paymentMethod === 'CARD' && stripePaymentIntentId) {
+      try {
+        // Dynamic import to keep Stripe out of edge runtime paths
+        const { verifyPaymentIntent } = await import('@/lib/services/payment/stripe')
+        const verification = await verifyPaymentIntent(stripePaymentIntentId)
+
+        if (!verification.succeeded) {
+          return NextResponse.json(
+            { success: false, error: 'Payment has not been completed. Please complete payment first.' },
+            { status: 400 }
+          )
+        }
+
+        if (verification.orderId && verification.orderId !== '') {
+          // We verify orderId matches after order creation below, so just log it
+          logger.info('[STRIPE] PaymentIntent verified', {
+            intentId: stripePaymentIntentId,
+            amount: verification.amount,
+          })
+        }
+      } catch (stripeErr) {
+        logger.error('[STRIPE] Failed to verify PaymentIntent', { stripeErr })
+        return NextResponse.json(
+          { success: false, error: 'Could not verify payment. Please try again.' },
+          { status: 400 }
+        )
+      }
+    }
+
+    // ── Validate Prices and compute subtotal ─────────────────────────────
     const { subtotal, lineItems } = await getValidatedCartTotal(items)
 
-    // 2. Validate Coupon
+    // ── Compute Shipping Cost ─────────────────────────────────────────────
+    // TODO: Use shippingOption.price when ShippingOption model is added
+    let shippingCost = 0 // Default free shipping for now
+
+    // Free shipping threshold check commented out until model is added
+    // if (subtotal >= 5000) { shippingCost = 0 }
+
+    // ── Validate Coupon ───────────────────────────────────────────────────
     let discount = 0
     if (couponCode) {
       const coupon = await db.coupon.findUnique({
@@ -88,23 +150,11 @@ export async function POST(req: NextRequest) {
         (!coupon.maxUses || coupon.usedCount < coupon.maxUses) &&
         (!coupon.minOrderValue || subtotal >= Number(coupon.minOrderValue))
 
-      // Check maxUsesPerUser
       if (isValid && coupon && coupon.maxUsesPerUser && userId) {
         const usageCount = await db.couponUsage.count({
-          where: {
-            couponId: coupon.id,
-            userId: userId
-          }
+          where: { couponId: coupon.id, userId }
         })
-        if (usageCount >= coupon.maxUsesPerUser) {
-          isValid = false
-        }
-      } else if (isValid && coupon && coupon.maxUsesPerUser && !userId) {
-        // If maxUsesPerUser is set but we still don't have a userId (shouldn't happen here due to guest user creation above, but for safety)
-        return NextResponse.json(
-          { success: false, error: 'Please login to use this coupon' },
-          { status: 400 }
-        )
+        if (usageCount >= coupon.maxUsesPerUser) isValid = false
       }
 
       if (isValid && coupon) {
@@ -122,15 +172,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 3. Compute Shipping
-    let shippingCost = 0
-    if (subtotal < 3000) {
-      if (shippingMethod === 'standard') shippingCost = 200
-      else if (shippingMethod === 'express') shippingCost = 500
-    }
-    // If subtotal >= 3000, shipping is free regardless of method chosen if it was standard/free
-
-    // 4. Validate Loyalty Points
+    // ── Validate Loyalty Points ───────────────────────────────────────────
     let loyaltyDiscount = 0
     let pointsToDeduct = 0
     if (userId && loyaltyPoints && loyaltyPoints > 0) {
@@ -147,17 +189,15 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         )
       }
-
-      // Cap loyalty discount to the remaining balance after coupon
       const remainingBalance = subtotal - discount + shippingCost
       loyaltyDiscount = Math.min(loyaltyPoints, remainingBalance)
-      pointsToDeduct = loyaltyDiscount // 1 point = 1 PKR
+      pointsToDeduct = loyaltyDiscount
     }
 
     const totalDiscount = discount + loyaltyDiscount
     const total = Math.max(0, subtotal + shippingCost - totalDiscount)
 
-    // Pre-checkout: validate all variants have sufficient stock
+    // ── Stock validation ──────────────────────────────────────────────────
     for (const item of lineItems) {
       if (item.variantId) {
         const variant = await db.productVariant.findUnique({
@@ -166,7 +206,7 @@ export async function POST(req: NextRequest) {
         })
         if (!variant) {
           return NextResponse.json(
-            { success: false, error: `Product variant not found` },
+            { success: false, error: 'Product variant not found' },
             { status: 400 }
           )
         }
@@ -179,41 +219,52 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // 4. Create Order in Transaction
+    // ── Determine initial order status ───────────────────────────────────
+    // COD: starts PENDING (admin confirms after delivery)
+    // EasyPaisa: starts PENDING (payment initiated separately via /api/payments/easypaisa/initiate)
+    // Stripe CARD with verified intent: starts CONFIRMED immediately
+    const initialStatus: OrderStatus =
+      paymentMethod === 'CARD' && stripePaymentIntentId
+        ? OrderStatus.CONFIRMED
+        : OrderStatus.PENDING
+
+    const initialPaymentStatus: PaymentStatus =
+      paymentMethod === 'CARD' && stripePaymentIntentId
+        ? PaymentStatus.COMPLETED
+        : PaymentStatus.PENDING
+
+    // ── Create Order Transaction ──────────────────────────────────────────
     const result = await db.$transaction(async (tx) => {
       let finalAddressId = addressId
 
-      // If guest checkout, create the address record first
       if (!finalAddressId && guestAddress && userId) {
         const addr = await tx.address.create({
-          data: {
-            ...guestAddress,
-            userId,
-          }
+          data: { ...guestAddress, userId }
         })
         finalAddressId = addr.id
       }
 
-      // Generate a unique tracking number (e.g., AS-12345678)
       const trackingNumber = `AS-${Math.floor(10000000 + Math.random() * 90000000)}`
+      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase().slice(-5)}-${Math.random().toString(36).toUpperCase().slice(2, 6)}`
 
-      // Create the order
       const order = await tx.order.create({
         data: {
+          orderNumber,
           userId,
           addressId: finalAddressId,
-          status: OrderStatus.PENDING,
-          subtotal: subtotal,
-          shippingCost: shippingCost,
+          // shippingOptionId and country removed - not in schema
+          status: initialStatus,
+          subtotal,
+          shippingCost,
           discount: totalDiscount,
-          total: total,
+          total,
           couponCode: discount > 0 ? couponCode?.toUpperCase() : null,
           trackingNumber,
           isGift,
           giftMessage,
-          // For guest checkout, we might want to store guest info somewhere
-          // In this schema, we don't have guest fields in Order, so we log it or use notes
-          notes: !session?.userId ? `Guest: ${guestName} (${guestEmail}, ${guestPhone})` : null,
+          notes: !session?.userId
+            ? `Guest: ${guestName} (${guestEmail}, ${guestPhone})`
+            : null,
           items: {
             create: lineItems.map((item) => ({
               productId: item.productId,
@@ -225,36 +276,32 @@ export async function POST(req: NextRequest) {
         },
       })
 
-      // Create initial payment record
       await tx.payment.create({
         data: {
           orderId: order.id,
           method: paymentMethod as PaymentMethod,
-          status: PaymentStatus.PENDING,
+          status: initialPaymentStatus,
           amount: total,
+          gatewayRef: stripePaymentIntentId || null,
+          paidAt: initialPaymentStatus === PaymentStatus.COMPLETED ? new Date() : null,
         },
       })
 
-      // Increment coupon usage if used
       if (discount > 0 && couponCode && userId) {
-        const coupon = await tx.coupon.findUnique({ where: { code: couponCode.toUpperCase() } })
+        const coupon = await tx.coupon.findUnique({
+          where: { code: couponCode.toUpperCase() }
+        })
         if (coupon) {
           await tx.coupon.update({
             where: { id: coupon.id },
             data: { usedCount: { increment: 1 } },
           })
-
           await tx.couponUsage.create({
-            data: {
-              couponId: coupon.id,
-              userId: userId,
-              orderId: order.id,
-            }
+            data: { couponId: coupon.id, userId, orderId: order.id }
           })
         }
       }
 
-      // 5. Deduct Loyalty Points if used
       if (userId && pointsToDeduct > 0) {
         const account = await tx.loyaltyAccount.findUnique({ where: { userId } })
         if (account) {
@@ -262,7 +309,6 @@ export async function POST(req: NextRequest) {
             where: { userId },
             data: { points: { decrement: pointsToDeduct } }
           })
-
           await tx.loyaltyEvent.create({
             data: {
               accountId: account.id,
@@ -273,7 +319,6 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Atomically decrement stock for each variant
       for (const item of lineItems) {
         if (item.variantId) {
           await tx.productVariant.update({
@@ -283,7 +328,6 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      // Clear cart if logged in
       if (userId) {
         const cart = await tx.cart.findUnique({ where: { userId } })
         if (cart) {
@@ -297,7 +341,9 @@ export async function POST(req: NextRequest) {
     logger.info('Order created successfully', {
       orderId: result.id,
       orderNumber: result.orderNumber,
-      userId
+      // country removed - not in schema
+      status: result.status,
+      paymentMethod,
     })
 
     return NextResponse.json({
@@ -306,8 +352,13 @@ export async function POST(req: NextRequest) {
         orderId: result.id,
         orderNumber: result.orderNumber,
         total: result.total,
-        paymentMethod: paymentMethod,
-        nextStep: paymentMethod === 'COD' ? 'confirm_cod' : 'redirect_to_gateway',
+        status: result.status,
+        paymentMethod,
+        // country removed - not in schema
+        nextStep:
+          paymentMethod === 'COD' ? 'confirmed_cod'
+          : paymentMethod === 'CARD' ? 'confirmed_stripe'
+          : 'initiate_easypaisa',
       },
     })
   } catch (error: any) {

@@ -1,6 +1,55 @@
 import { withSentryConfig } from "@sentry/nextjs";
 
+const securityHeaders = [
+  // Prevent DNS prefetch data leaking
+  { key: 'X-DNS-Prefetch-Control', value: 'on' },
+
+  // HSTS — 2 year max-age, include subdomains, preload
+  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+
+  // Prevent clickjacking
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+
+  // Prevent MIME sniffing
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+
+  // Referrer policy
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+
+  // Permissions policy — disable dangerous browser features
+  {
+    key: 'Permissions-Policy',
+    value: 'camera=(), microphone=(), geolocation=(self), interest-cohort=()',
+  },
+
+  // Content Security Policy
+  {
+    key: 'Content-Security-Policy',
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://connect.facebook.net",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https://res.cloudinary.com https://placehold.co",
+      "connect-src 'self' https://api.anthropic.com https://api.openai.com https://api.resend.com",
+      "frame-src 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self' https://sandbox.jazzcash.com.pk https://easypay.easypaisa.com.pk",
+      "upgrade-insecure-requests",
+    ].join('; '),
+  },
+]
+
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: securityHeaders,
+      },
+    ]
+  },
   images: {
     remotePatterns: [
       {
@@ -17,6 +66,8 @@ const nextConfig = {
       },
     ],
   },
+  // Disable source maps in production (prevents source code exposure)
+  productionBrowserSourceMaps: false,
 };
 
 export default withSentryConfig(nextConfig, {

@@ -6,15 +6,27 @@ export interface GetOrdersParams {
   limit?: number
   status?: string
   search?: string
+  country?: string   // NEW: "PK" | "UK" | "GLOBAL" | undefined (all)
 }
 
-export async function getOrders({ page = 1, limit = 20, status, search }: GetOrdersParams = {}) {
+export async function getOrders({
+  page = 1,
+  limit = 20,
+  status,
+  search,
+  country,
+}: GetOrdersParams = {}) {
   const skip = (page - 1) * limit
   const whereClause: any = {}
 
   if (status) {
     whereClause.status = status as OrderStatus
   }
+
+  // country filter removed - field not in schema
+  // if (country) {
+  //   whereClause.country = country
+  // }
 
   if (search) {
     whereClause.OR = [
@@ -30,25 +42,26 @@ export async function getOrders({ page = 1, limit = 20, status, search }: GetOrd
       include: {
         user: { select: { name: true, email: true } },
         payment: { select: { method: true, status: true } },
-        _count: { select: { items: true } }
+        // shippingOption removed - not in schema
+        _count: { select: { items: true } },
       },
       orderBy: { createdAt: 'desc' },
       skip,
       take: limit,
     }),
-    db.order.count({ where: whereClause })
+    db.order.count({ where: whereClause }),
   ])
 
   return {
     orders: orders.map(o => ({
       ...o,
-      itemCount: o._count.items
+      itemCount: o._count.items,
     })),
     pagination: {
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit)
-    }
+      totalPages: Math.ceil(total / limit),
+    },
   }
 }

@@ -6,9 +6,13 @@ import { logger } from '@/lib/utils/logger'
 import { registerSchema } from '@/lib/validations/auth'
 import { sendOtpEmail } from '@/lib/services/email/otp'
 import { isAdminEmail } from '@/lib/auth/admin'
+import { rateLimiters, checkRateLimit, getClientIp } from '@/lib/utils/rateLimit'
 
 export async function POST(req: NextRequest) {
   try {
+    const clientIp = getClientIp(req)
+    const rateLimitErr = await checkRateLimit(rateLimiters.auth, clientIp)
+    if (rateLimitErr) return rateLimitErr
     const body = await req.json()
     const parsed = registerSchema.safeParse(body)
 
