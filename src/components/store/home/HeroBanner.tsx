@@ -24,7 +24,7 @@ export function HeroBanner() {
   }, [])
 
   return (
-    <section className="relative h-[calc(100vh-70px)] min-h-[500px] w-full overflow-hidden bg-black">
+    <section className="relative h-[calc(100vh-70px)] md:h-[calc(100vh-var(--header-height,0px)-var(--announcement-height,0px))] min-h-[500px] w-full overflow-hidden bg-black">
       {/* Slider Background */}
       <AnimatePresence initial={false}>
         <motion.div

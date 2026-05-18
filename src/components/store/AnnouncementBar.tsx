@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { SITE_COUNTRY } from '@/lib/constants/site'
 
 const ROTATION_INTERVAL_MS = 4000
@@ -10,6 +10,7 @@ export function AnnouncementBar() {
   const [loading, setLoading]       = useState(true)
   const [messageIndex, setMessageIndex] = useState(0)
   const [allMessages, setAllMessages]   = useState<string[]>([])
+  const barRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     async function fetchSettings() {
@@ -88,6 +89,16 @@ export function AnnouncementBar() {
     return () => clearInterval(interval)
   }, [allMessages])
 
+  // Measure height and set CSS variable
+  useEffect(() => {
+    if (barRef.current && allMessages.length > 0) {
+      const height = barRef.current.offsetHeight
+      document.documentElement.style.setProperty('--announcement-height', `${height}px`)
+    } else {
+      document.documentElement.style.setProperty('--announcement-height', '0px')
+    }
+  }, [allMessages, messageIndex])
+
   if (loading || !settings) return null
 
   // If globally disabled or filter resolved to no active announcements, hide completely
@@ -97,7 +108,7 @@ export function AnnouncementBar() {
   if (!currentMessage) return null
 
   return (
-    <div className="bg-black text-white text-center py-2 px-4 text-[10px] md:text-xs tracking-[0.15em] font-sans font-medium uppercase overflow-hidden min-h-[32px] flex items-center justify-center transition-all duration-300">
+    <div ref={barRef} className="bg-black text-white text-center py-2 px-4 text-[10px] md:text-xs tracking-[0.15em] font-sans font-medium uppercase overflow-hidden min-h-[32px] flex items-center justify-center transition-all duration-300">
       <span
         key={`${messageIndex}-${currentMessage}`}
         className="inline-block animate-in fade-in slide-in-from-bottom-2 duration-700"

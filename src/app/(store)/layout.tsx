@@ -39,7 +39,7 @@ export default async function StoreLayout({
       <div className="flex flex-col min-h-screen relative">
         <AnnouncementBar />
         <Navbar serverCategories={serverCategories as any} />
-        <main className="flex-1">
+        <main className="flex-1 pb-16 md:pb-0">
           {children}
         </main>
         <ComparisonBar />
