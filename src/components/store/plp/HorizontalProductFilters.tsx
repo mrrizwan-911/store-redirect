@@ -198,14 +198,14 @@ export function HorizontalProductFilters({
           ? 'cursor-default border-black bg-black text-white'
           : active
           ? 'border-black bg-black text-white shadow-[0_2px_12px_rgba(0,0,0,0.18)]'
-          : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-400 hover:text-black'
+          : 'border-border bg-card text-neutral-600 hover:border-neutral-400 hover:text-black'
       )}
     >
       {badge && (
         <span
           className={cn(
             'flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-black',
-            active ? 'bg-white text-black' : 'bg-black text-white'
+            active ? 'bg-card text-black' : 'bg-black text-white'
           )}
         >
           {badge}
@@ -242,7 +242,7 @@ export function HorizontalProductFilters({
           exit={{ opacity: 0, y: 8, scale: 0.98 }}
           transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
           className={cn(
-            'absolute top-full left-0 z-[70] mt-2 overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-[0_8px_40px_rgba(0,0,0,0.14)]',
+            'absolute top-full left-0 z-[70] mt-2 overflow-hidden rounded-2xl border border-border bg-card shadow-[0_8px_40px_rgba(0,0,0,0.14)]',
             className
           )}
         >
@@ -261,11 +261,11 @@ export function HorizontalProductFilters({
     label: string
     onRemove: () => void
   }) => (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-black">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-black">
       {label}
       <button
         onClick={onRemove}
-        className="ml-0.5 rounded-full p-0.5 hover:bg-neutral-200 transition-colors"
+        className="ml-0.5 rounded-full p-0.5 hover:bg-border transition-colors"
       >
         <X className="h-2.5 w-2.5" />
       </button>
@@ -299,7 +299,7 @@ export function HorizontalProductFilters({
                         'flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-[11px] font-bold uppercase tracking-widest transition-colors',
                         currentFilters.category === cat.slug
                           ? 'bg-black text-white'
-                          : 'text-neutral-600 hover:bg-neutral-50 hover:text-black'
+                          : 'text-neutral-600 hover:bg-surface hover:text-black'
                       )}
                     >
                       {cat.name}
@@ -341,7 +341,7 @@ export function HorizontalProductFilters({
                         'flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-[11px] font-bold uppercase tracking-widest transition-colors',
                         currentFilters.subCategory === sub.slug
                           ? 'bg-black text-white'
-                          : 'text-neutral-600 hover:bg-neutral-50 hover:text-black'
+                          : 'text-neutral-600 hover:bg-surface hover:text-black'
                       )}
                     >
                       {sub.name}
@@ -358,7 +358,7 @@ export function HorizontalProductFilters({
 
         {/* ── Divider ── */}
         {(parentCategories.length > 0 || lockedParentCategory) && (
-          <div className="mx-1 h-5 w-px bg-neutral-200" />
+          <div className="mx-1 h-5 w-px bg-border" />
         )}
 
         {/* ── Price pill ── */}
@@ -389,7 +389,7 @@ export function HorizontalProductFilters({
                     type="number"
                     value={value}
                     onChange={(e) => set(Number(e.target.value))}
-                    className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm font-mono font-bold text-black outline-none transition-colors focus:border-black"
+                    className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm font-mono font-bold text-black outline-none transition-colors focus:border-black"
                   />
                 </div>
               ))}
@@ -429,7 +429,7 @@ export function HorizontalProductFilters({
                   'flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 text-[11px] font-bold uppercase tracking-widest transition-colors',
                   currentFilters.minRating === null
                     ? 'bg-black text-white'
-                    : 'text-neutral-600 hover:bg-neutral-50 hover:text-black'
+                    : 'text-neutral-600 hover:bg-surface hover:text-black'
                 )}
               >
                 All ratings
@@ -445,7 +445,7 @@ export function HorizontalProductFilters({
                     'flex w-full items-center justify-between gap-3 rounded-xl px-4 py-3 transition-colors',
                     currentFilters.minRating === r
                       ? 'bg-black text-white'
-                      : 'text-neutral-600 hover:bg-neutral-50 hover:text-black'
+                      : 'text-neutral-600 hover:bg-surface hover:text-black'
                   )}
                 >
                   <span className="flex items-center gap-1.5">
@@ -476,7 +476,7 @@ export function HorizontalProductFilters({
         {/* ── Clear all ── */}
         {hasActiveFilters && (
           <>
-            <div className="mx-1 h-5 w-px bg-neutral-200" />
+            <div className="mx-1 h-5 w-px bg-border" />
             <button
               onClick={clearAll}
               className="flex items-center gap-1.5 rounded-full px-3 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 transition-colors hover:text-black"
@@ -538,7 +538,7 @@ export function HorizontalProductFilters({
       <div className="flex items-center justify-between">
         <button
           onClick={() => setMobileOpen(true)}
-          className="flex items-center gap-2.5 rounded-full border border-neutral-200 bg-white px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-black shadow-sm transition-all active:scale-95"
+          className="flex items-center gap-2.5 rounded-full border border-border bg-card px-4 py-2.5 text-[10px] font-bold uppercase tracking-[0.18em] text-black shadow-sm transition-all active:scale-95"
         >
           <SlidersHorizontal className="h-3.5 w-3.5" />
           Filters
@@ -614,11 +614,11 @@ export function HorizontalProductFilters({
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-[90] max-h-[85dvh] overflow-y-auto rounded-t-3xl bg-white shadow-2xl"
+              className="fixed bottom-0 left-0 right-0 z-[90] max-h-[85dvh] overflow-y-auto rounded-t-3xl bg-card shadow-2xl"
             >
               {/* Handle */}
               <div className="flex justify-center pt-3 pb-2">
-                <div className="h-1 w-10 rounded-full bg-neutral-200" />
+                <div className="h-1 w-10 rounded-full bg-border" />
               </div>
 
               {/* Header */}
@@ -637,7 +637,7 @@ export function HorizontalProductFilters({
                   )}
                   <button
                     onClick={() => setMobileOpen(false)}
-                    className="rounded-full p-2 hover:bg-neutral-100 transition-colors"
+                    className="rounded-full p-2 hover:bg-surface transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -658,7 +658,7 @@ export function HorizontalProductFilters({
                             'rounded-full border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-all',
                             currentFilters.category === cat.slug
                               ? 'border-black bg-black text-white'
-                              : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-400'
+                              : 'border-border bg-card text-neutral-600 hover:border-neutral-400'
                           )}
                         >
                           {cat.name}
@@ -690,7 +690,7 @@ export function HorizontalProductFilters({
                               'rounded-full border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-all',
                               currentFilters.subCategory === sub.slug
                                 ? 'border-black bg-black text-white'
-                                : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-400'
+                                : 'border-border bg-card text-neutral-600 hover:border-neutral-400'
                             )}
                           >
                             {sub.name}
@@ -716,7 +716,7 @@ export function HorizontalProductFilters({
                           type="number"
                           value={value}
                           onChange={(e) => set(Number(e.target.value))}
-                          className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm font-mono font-bold text-black outline-none focus:border-black"
+                          className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm font-mono font-bold text-black outline-none focus:border-black"
                         />
                       </div>
                     ))}
@@ -745,7 +745,7 @@ export function HorizontalProductFilters({
                         'rounded-full border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-all',
                         currentFilters.minRating === null
                           ? 'border-black bg-black text-white'
-                          : 'border-neutral-200 text-neutral-600'
+                          : 'border-border text-neutral-600'
                       )}
                     >
                       All
@@ -758,7 +758,7 @@ export function HorizontalProductFilters({
                           'flex items-center gap-1.5 rounded-full border px-4 py-2 text-[10px] font-bold uppercase tracking-wider transition-all',
                           currentFilters.minRating === r
                             ? 'border-black bg-black text-white'
-                            : 'border-neutral-200 text-neutral-600'
+                            : 'border-border text-neutral-600'
                         )}
                       >
                         {r}

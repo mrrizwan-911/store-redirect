@@ -20,7 +20,7 @@ export function CartDrawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && dispatch(closeCart())}>
-      <SheetContent className="w-full sm:max-w-md p-0 bg-white flex flex-col">
+      <SheetContent className="w-full sm:max-w-md p-0 bg-card flex flex-col">
         <SheetHeader className="px-6 py-6 border-b border-border">
           <div className="flex items-center justify-between">
             <SheetTitle className="font-display text-xl uppercase tracking-widest flex items-center gap-2">
@@ -32,7 +32,7 @@ export function CartDrawer() {
 
         {items.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-            <div className="w-20 h-20 rounded-full bg-neutral-50 flex items-center justify-center mb-6">
+            <div className="w-20 h-20 rounded-full bg-surface flex items-center justify-center mb-6">
               <ShoppingBag className="w-8 h-8 text-neutral-300" />
             </div>
             <h3 className="font-display text-lg mb-2">Your cart is empty</h3>
@@ -53,7 +53,7 @@ export function CartDrawer() {
               <div className="py-6 flex flex-col gap-6">
                 {items.map((item) => (
                   <div key={`${item.productId}-${item.variantId || 'default'}`} className="flex gap-4">
-                    <div className="relative w-24 h-32 flex-shrink-0 bg-neutral-100 border border-border">
+                    <div className="relative w-24 h-32 flex-shrink-0 bg-surface border border-border">
                       <Image
                         src={item.imageUrl}
                         alt={item.name}
@@ -80,14 +80,14 @@ export function CartDrawer() {
                         <div className="flex items-center border border-border">
                           <button
                             onClick={() => dispatch(updateQuantity({ ...item, quantity: Math.max(1, item.quantity - 1) }))}
-                            className="p-1.5 hover:bg-neutral-50 transition-colors"
+                            className="p-1.5 hover:bg-surface transition-colors"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
                           <span className="w-8 text-center text-xs font-medium">{item.quantity}</span>
                           <button
                             onClick={() => dispatch(updateQuantity({ ...item, quantity: item.quantity + 1 }))}
-                            className="p-1.5 hover:bg-neutral-50 transition-colors"
+                            className="p-1.5 hover:bg-surface transition-colors"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -100,7 +100,7 @@ export function CartDrawer() {
               </div>
             </ScrollArea>
 
-            <div className="p-6 bg-neutral-50 border-t border-border">
+            <div className="p-6 bg-surface border-t border-border">
               <div className="flex flex-col gap-4 mb-6">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-neutral-500 uppercase tracking-widest">Subtotal</span>

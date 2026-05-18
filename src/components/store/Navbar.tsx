@@ -124,8 +124,8 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
       <header
         ref={headerRef}
         className={cn(
-          'z-50 w-full transition-all duration-500 md:sticky md:top-0 md:bg-white md:border-b-2 md:border-[#EEEEEE]',
-          pathname === '/' ? 'relative h-16 -mb-16 md:mb-0 bg-transparent md:bg-white border-none md:border-b-2' : 'hidden md:block',
+          'z-50 w-full transition-all duration-500 md:sticky md:top-0 md:bg-background md:border-b-2 md:border-border',
+          pathname === '/' ? 'relative h-16 -mb-16 md:mb-0 bg-transparent md:bg-background border-none md:border-b-2' : 'hidden md:block',
           isScrolled ? 'md:py-1' : 'md:py-3',
         )}
       >
@@ -166,7 +166,7 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
                   <div key={cat.label} className="relative group h-full flex items-center">
                     <Link href={cat.href} className={navLinkStyles}>{cat.label}</Link>
                     {getSubcategories(cat.slug).length > 0 && (
-                      <div className="absolute top-full left-0 hidden group-hover:block w-48 bg-white border border-neutral-200 shadow-xl py-4 px-6 rounded-[var(--radius)]">
+                      <div className="absolute top-full left-0 hidden group-hover:block w-48 bg-background border border-border shadow-xl py-4 px-6 rounded-[var(--radius)]">
                         <div className="flex flex-col gap-3">
                           {getSubcategories(cat.slug).map(sub => (
                             <Link key={sub.id} href={`/categories/${cat.slug}/${sub.slug}`} className="text-[11px] uppercase tracking-wider text-neutral-500 hover:text-black transition-colors">
@@ -250,13 +250,13 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
         <SheetContent
           side="left"
           showCloseButton={false}
-          style={{ backgroundColor: 'white' }}
-          className="w-full sm:w-[400px] p-0 !bg-white border-r border-neutral-200 shadow-2xl overflow-hidden"
+          style={{ backgroundColor: 'var(--background)' }}
+          className="w-full sm:w-[400px] p-0 !bg-background border-r border-border shadow-2xl overflow-hidden"
         >
-          <div className="flex flex-col h-full !bg-white !text-black overflow-hidden" style={{ backgroundColor: 'white', color: 'black' }}>
+          <div className="flex flex-col h-full !bg-background !text-black overflow-hidden" style={{ backgroundColor: 'var(--background)', color: 'black' }}>
 
             {/* Sidebar header with logo image */}
-            <div className="flex items-center justify-between px-8 py-10 border-b border-neutral-100 shrink-0">
+            <div className="flex items-center justify-between px-8 py-10 border-b border-border shrink-0">
               <Link href="/" onClick={() => setIsSidebarOpen(false)} className="flex items-center gap-3 group">
                 {/* Logo image — 44px height in sidebar (Increased 25%) */}
                 <div className="relative h-11 w-11 flex-shrink-0">
@@ -314,7 +314,7 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
                 <Link href="/lookbook"  onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}><Sparkles  className="w-5 h-5 stroke-[1.2]" />Lookbook</Link>
                 <Link href="/wishlist"  onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}><Heart     className="w-5 h-5 stroke-[1.2]" />Wishlist</Link>
 
-                <div className="h-px bg-neutral-100 my-2" />
+                <div className="h-px bg-border my-2" />
 
                 <Link href="/story"      onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}><Info  className="w-5 h-5 stroke-[1.2]" />Our Story</Link>
                 <Link href="/newsletter" onClick={() => setIsSidebarOpen(false)} className={sidebarLinkStyles}><Mail  className="w-5 h-5 stroke-[1.2]" />Newsletter</Link>
@@ -323,7 +323,7 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
             </nav>
 
             {/* Sidebar footer */}
-            <div className="shrink-0 px-10 py-6 border-t border-neutral-100 bg-white space-y-4">
+            <div className="shrink-0 px-10 py-6 border-t border-border bg-background space-y-4">
               <div className="flex flex-col space-y-0.5">
                 <button onClick={() => { setIsSidebarOpen(false); dispatch(toggleCart()) }} className={sidebarLinkStyles}>
                   <ShoppingBag className="w-5 h-5 stroke-[1.2]" />Cart ({cartCount})
@@ -341,7 +341,7 @@ export function Navbar({ serverCategories = [] }: NavbarProps) {
       </Sheet>
 
       {/* Mobile Bottom Menu (Visible on all pages on mobile) */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border md:hidden">
         <div className="grid grid-cols-5 h-16 items-center">
           {/* Menu */}
           <button onClick={() => setIsSidebarOpen(true)} className="flex flex-col items-center justify-center text-gray-600 hover:text-black">
