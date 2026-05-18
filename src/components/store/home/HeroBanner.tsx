@@ -66,9 +66,9 @@ export function HeroBanner() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          className="max-w-4xl"
+          className="max-w-4xl mt-[3px] md:mt-0"
         >
-          <p className="mb-3 sm:mb-4 text-[10px] sm:text-xs font-medium uppercase tracking-[0.4em] text-white/70 font-sans">
+          <p className="mb-6 sm:mb-4 text-[10px] sm:text-xs font-medium uppercase tracking-[0.4em] text-white/70 font-sans">
             Modern Boutique Essentials
           </p>
 
