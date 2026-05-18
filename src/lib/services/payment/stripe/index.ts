@@ -14,11 +14,9 @@
 import Stripe from 'stripe'
 import { SITE_COUNTRY, SITE_CURRENCY, STRIPE_AMOUNT_MULTIPLIER } from '@/lib/constants/site'
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing STRIPE_SECRET_KEY environment variable')
-}
+const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+export const stripe = new Stripe(stripeKey, {
   apiVersion: '2026-04-22.dahlia',
   typescript: true,
 })
