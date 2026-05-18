@@ -38,7 +38,7 @@ export const viewport: Viewport = {
   viewportFit: 'cover',          // iPhone safe-area / Dynamic Island support
   // Warm cream matches the new eye-comfort background
   // Change back to '#0A0A0A' if you prefer the black browser chrome look
-  themeColor: '#FAF7F2',
+  themeColor: '#0A0A0A',
 }
 
 // ─── Metadata ─────────────────────────────────────────────────────────────────

@@ -3,7 +3,6 @@ import { Navbar } from '@/components/store/Navbar'
 import { ConditionalFooter } from '@/components/store/layout/ConditionalFooter'
 import { WishlistSyncProvider } from '@/components/store/WishlistSyncProvider'
 import { ComparisonBar } from '@/components/store/compare/ComparisonBar'
-import { PWASplashScreen } from '@/components/store/PWASplashScreen'
 import { db } from '@/lib/db/client'
 
 export default async function StoreLayout({
@@ -37,7 +36,6 @@ export default async function StoreLayout({
 
   return (
     <WishlistSyncProvider>
-      <PWASplashScreen />
       <div className="flex flex-col min-h-screen relative">
         <AnnouncementBar />
         <Navbar serverCategories={serverCategories as any} />
