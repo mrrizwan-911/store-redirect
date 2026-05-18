@@ -22,11 +22,12 @@ const stripePromise = loadStripe(
 interface CardFormProps {
   orderId: string
   total: number
+  token?: string
   onSuccess: (paymentIntentId: string) => void
   onError: (msg: string) => void
 }
 
-function CardForm({ orderId, total, onSuccess, onError }: CardFormProps) {
+function CardForm({ orderId, total, token, onSuccess, onError }: CardFormProps) {
   const stripe = useStripe()
   const elements = useElements()
   const [name, setName] = useState('')
@@ -40,7 +41,7 @@ function CardForm({ orderId, total, onSuccess, onError }: CardFormProps) {
     fetch('/api/payments/stripe/create-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId }),
+      body: JSON.stringify({ orderId, token }),
     })
       .then(r => r.json())
       .then(data => {
@@ -52,7 +53,7 @@ function CardForm({ orderId, total, onSuccess, onError }: CardFormProps) {
       })
       .catch(() => onError('Network error. Please refresh and try again.'))
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderId])
+  }, [orderId, token])
 
   const handleSubmit = async () => {
     if (!stripe || !elements || !clientSecret) return
@@ -173,11 +174,12 @@ function CardForm({ orderId, total, onSuccess, onError }: CardFormProps) {
 interface StripePaymentProps {
   orderId: string
   total: number
+  token?: string
   onSuccess: (paymentIntentId: string) => void
   onError: (msg: string) => void
 }
 
-export function StripePayment({ orderId, total, onSuccess, onError }: StripePaymentProps) {
+export function StripePayment({ orderId, total, token, onSuccess, onError }: StripePaymentProps) {
   return (
     <div className="space-y-4">
       {/* Header */}
@@ -199,6 +201,7 @@ export function StripePayment({ orderId, total, onSuccess, onError }: StripePaym
         <CardForm
           orderId={orderId}
           total={total}
+          token={token}
           onSuccess={onSuccess}
           onError={onError}
         />

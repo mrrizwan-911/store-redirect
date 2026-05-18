@@ -33,7 +33,7 @@ export async function sendEmail(
       return true
     }
 
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || 'Calnza <noreply@calnza.com>',
       to: params.to,
       subject: params.subject,
@@ -41,6 +41,10 @@ export async function sendEmail(
       text: params.text,
       attachments: params.attachments,
     })
+
+    if (error) {
+      throw new Error(error.message || 'Resend API error')
+    }
 
     await db.emailLog.create({
       data: { email: params.to, type: params.type, status: 'sent', userId: params.userId, retryCount },

@@ -10,11 +10,12 @@ interface Product {
   id: string;
   name: string;
   basePrice: number;
+  variants?: { id: string; title: string; stock: number }[];
 }
 
 interface ProductComboboxProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, product?: Product) => void;
 }
 
 export function ProductCombobox({ value, onChange }: ProductComboboxProps) {
@@ -92,7 +93,7 @@ export function ProductCombobox({ value, onChange }: ProductComboboxProps) {
                   key={product.id}
                   onClick={() => {
                     setSelectedProduct(product);
-                    onChange(product.id);
+                    onChange(product.id, product);
                     setOpen(false);
                   }}
                   className={cn(

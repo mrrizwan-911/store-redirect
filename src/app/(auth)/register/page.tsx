@@ -2,17 +2,20 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import { registerSchema } from '@/lib/validations/auth';
 import { ZodError } from 'zod';
-import { useAppSelector } from '@/store/hooks';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { logout } from '@/store/slices/authSlice';
 import AuthLayout from '@/components/store/auth/AuthLayout';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,12 +28,19 @@ export default function RegisterPage() {
 
   // Redirect if already authenticated
   React.useEffect(() => {
+    // If the server tells us to clear auth, do it and remove the query param
+    if (searchParams.get('clear_auth')) {
+      dispatch(logout());
+      router.replace('/register');
+      return;
+    }
+
     if (isAuthenticated && user) {
       router.refresh();
       const redirectPath = user.role === 'ADMIN' ? '/d8f2a1/admin/analytics' : '/account';
       router.push(redirectPath);
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, searchParams, dispatch]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

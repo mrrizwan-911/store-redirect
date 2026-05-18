@@ -83,10 +83,60 @@ export async function POST(
 
     // Create Order + Payment in a transaction
     const order = await db.$transaction(async (tx) => {
+      let userId = quotation.userId
+
+      // If no user linked, find or create a guest user
+      if (!userId) {
+        const existingUser = await tx.user.findUnique({
+          where: { email: quotation.email.toLowerCase() }
+        })
+        if (existingUser) {
+          userId = existingUser.id
+        } else {
+          const newUser = await tx.user.create({
+            data: {
+              email: quotation.email.toLowerCase(),
+              name: quotation.name,
+              phone: quotation.phone,
+              role: 'GUEST',
+              isVerified: false,
+            }
+          })
+          userId = newUser.id
+        }
+      }
+
+      // Create address if quotation has address info
+      let addressId: string | null = null
+      if (quotation.addressLine1) {
+        const nameParts = quotation.name.trim().split(/\s+/)
+        const firstName = nameParts[0] || ''
+        const lastName = nameParts.slice(1).join(' ') || ''
+
+        const addr = await tx.address.create({
+          data: {
+            userId: userId!,
+            label: 'Quotation Shipping',
+            firstName,
+            lastName,
+            email: quotation.email,
+            phone: quotation.phone || '',
+            country: quotation.country || 'Pakistan',
+            line1: quotation.addressLine1,
+            line2: quotation.addressLine2,
+            city: quotation.city || '',
+            province: quotation.province || '',
+            postalCode: quotation.postalCode || '',
+          }
+        })
+        addressId = addr.id
+      }
+
       const newOrder = await tx.order.create({
         data: {
           orderNumber,
-          userId: quotation.userId || null,
+          userId,
+          addressId,
           status: OrderStatus.PENDING,
           subtotal,
           shippingCost: 0,

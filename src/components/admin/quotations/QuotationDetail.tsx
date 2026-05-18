@@ -41,7 +41,9 @@ import { QuotationGuide } from "./QuotationGuide";
 
 export interface QuotationItemWithPrice {
   productId: string;
+  variantId?: string;
   productName: string;
+  variantName?: string;
   quantity: number;
   notes?: string;
   unitPrice?: number;
@@ -143,7 +145,13 @@ export function QuotationDetail({ quotation }: QuotationDetailProps) {
           action: "regenerate",
           name: quotation.name,
           company: quotation.company,
-          items: items.map((i) => `${i.quantity}x ${i.productName}`),
+          addressLine1: quotation.addressLine1,
+          addressLine2: quotation.addressLine2,
+          city: quotation.city,
+          province: quotation.province,
+          postalCode: quotation.postalCode,
+          country: quotation.country,
+          items: items.map((i) => `${i.quantity}x ${i.productName}${i.variantName ? ` - ${i.variantName}` : ""}`),
         }),
       });
       const data = await res.json();
@@ -356,7 +364,10 @@ export function QuotationDetail({ quotation }: QuotationDetailProps) {
                     <div key={idx} className="p-4 space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="text-[12px] font-bold text-black">{item.productName}</p>
+                          <p className="text-[12px] font-bold text-black">
+                            {item.productName}
+                            {item.variantName && <span className="text-neutral-500 font-normal ml-1">({item.variantName})</span>}
+                          </p>
                           <p className="text-[10px] text-neutral-400 mt-0.5">
                             Qty: {item.quantity}{item.notes && ` · ${item.notes}`}
                           </p>
@@ -487,14 +498,14 @@ export function QuotationDetail({ quotation }: QuotationDetailProps) {
                   { label: "Customer info reviewed",       done: true },
                   { label: "Prices set for all items",     done: items.every((i) => (i.unitPrice ?? 0) > 0) },
                   { label: "Cover letter draft ready",     done: aiDraft.trim().length > 20 },
-                  { label: "Quotation not yet sent",       done: liveStatus === "PENDING" },
+                  { label: "Quotation is Pending",         done: liveStatus === "PENDING" },
                 ].map((c, i) => (
                   <div key={i} className="flex items-center gap-3">
                     {c.done
                       ? <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0"/>
                       : <XCircle className="w-4 h-4 text-amber-400 shrink-0"/>}
                     <span className={cn("text-[12px] font-bold", c.done ? "text-black" : "text-amber-700")}>
-                      {c.label}
+                      {c.label} {c.label === "Quotation is Pending" && liveStatus !== "PENDING" && `(Current: ${liveStatus})`}
                     </span>
                   </div>
                 ))}

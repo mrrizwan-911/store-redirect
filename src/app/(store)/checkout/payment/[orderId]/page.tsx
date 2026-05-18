@@ -217,6 +217,7 @@ export default function B2BPaymentPage() {
               <StripePayment
                 orderId={order.id}
                 total={order.total}
+                token={token || undefined}
                 onSuccess={handlePaymentSuccess}
                 onError={(msg) => toast.error(msg)}
               />

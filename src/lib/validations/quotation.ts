@@ -5,6 +5,7 @@ import { QuotationStatus } from "@prisma/client";
 
 export const quotationItemSchema = z.object({
   productId: z.string().min(1, "Product ID is required"),
+  variantId: z.string().optional(),
   quantity: z.number().int().min(10, "Minimum quantity for quotation is 10 units"),
   notes: z.string().optional(),
 });
@@ -14,6 +15,12 @@ export const quotationSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().optional(),
   company: z.string().optional(),
+  addressLine1: z.string().min(1, "Address line 1 is required"),
+  addressLine2: z.string().optional(),
+  city: z.string().min(1, "City is required"),
+  province: z.string().min(1, "Province is required"),
+  postalCode: z.string().min(1, "Postal code is required"),
+  country: z.string().min(1, "Country is required"),
   items: z.array(quotationItemSchema).min(1, "At least one item is required"),
 });
 
@@ -31,12 +38,14 @@ export const quotationUpdateSchema = z.object({
 
 export const quotationItemWithPriceSchema = z.object({
   productId: z.string().min(1),
+  variantId: z.string().optional(),
   quantity: z.number().int().min(1),
   notes: z.string().optional(),
   // Admin-set fields (optional — absent until admin prices the quotation)
   unitPrice: z.number().min(0).optional(),
   discountAmount: z.number().min(0).optional(), // fixed PKR discount per unit
   productName: z.string().optional(),           // enriched at read time
+  variantName: z.string().optional(),           // enriched at read time
 });
 
 export const quotationPricingUpdateSchema = z.object({

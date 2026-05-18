@@ -2,18 +2,19 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import { loginSchema } from '@/lib/validations/auth';
 import { ZodError } from 'zod';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setUser, setToken } from '@/store/slices/authSlice';
+import { setUser, setToken, logout } from '@/store/slices/authSlice';
 import AuthLayout from '@/components/store/auth/AuthLayout';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -26,6 +27,13 @@ export default function LoginPage() {
 
   // Redirect if already authenticated
   React.useEffect(() => {
+    // If the server tells us to clear auth, do it and remove the query param
+    if (searchParams.get('clear_auth')) {
+      dispatch(logout());
+      router.replace('/login');
+      return;
+    }
+
     if (isAuthenticated && user) {
       router.refresh(); // Clear Next.js client-side cache
       if (user.role === 'ADMIN') {
@@ -34,7 +42,7 @@ export default function LoginPage() {
         router.push('/account');
       }
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, searchParams, dispatch]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

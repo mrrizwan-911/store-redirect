@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import {
   ArrowLeft, User, Mail, Phone, MapPin, CreditCard,
-  Package, Clock, Calendar, Hash, Truck, Globe,
+  Package, Clock, Calendar, Hash, Truck, Globe, Printer
 } from 'lucide-react'
 import { db } from '@/lib/db/client'
 import { OrderStatusUpdater } from '@/components/admin/orders/OrderStatusUpdater'
@@ -109,6 +109,16 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
               Placed on {new Date(order.createdAt).toLocaleDateString()}
             </p>
           </div>
+          
+          <a 
+            href={`/api/admin/orders/${order.id}/invoice`} 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50 hover:text-black text-[10px] uppercase tracking-widest font-bold px-4 py-2 rounded-md transition-colors shadow-sm"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            Download Invoice
+          </a>
         </div>
       </div>
 

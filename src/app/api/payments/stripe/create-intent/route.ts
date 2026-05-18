@@ -3,15 +3,11 @@ import { db } from '@/lib/db/client'
 import { getUserSession } from '@/lib/auth/session'
 import { createPaymentIntent } from '@/lib/services/payment/stripe'
 import { logger } from '@/lib/utils/logger'
+import { verifyPaymentToken } from '@/lib/utils/paymentToken'
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getUserSession()
-    if (!session) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { orderId } = await req.json()
+    const { orderId, token } = await req.json()
     if (!orderId) {
       return NextResponse.json({ success: false, error: 'orderId is required' }, { status: 400 })
     }
@@ -26,8 +22,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 })
     }
 
-    if (order.userId !== session.userId) {
-      return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 })
+    // Token Auth check first
+    let isAuthorized = false
+    if (token) {
+      const tokenVerification = verifyPaymentToken(orderId, token)
+      if (tokenVerification.valid) {
+        isAuthorized = true
+      }
+    }
+
+    // Session Auth fallback
+    if (!isAuthorized) {
+      const session = await getUserSession()
+      if (!session) {
+        return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+      }
+      if (order.userId !== session.userId) {
+        return NextResponse.json({ success: false, error: 'Access denied' }, { status: 403 })
+      }
     }
 
     if (order.status !== 'PENDING') {

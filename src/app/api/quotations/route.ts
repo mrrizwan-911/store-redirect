@@ -22,15 +22,24 @@ export async function POST(req: NextRequest) {
     const productIds = validatedData.items.map((i: any) => i.productId);
     const products = await db.product.findMany({
       where: { id: { in: productIds } },
-      select: { id: true, name: true, basePrice: true },
+      select: {
+        id: true,
+        name: true,
+        basePrice: true,
+        variants: {
+          select: { id: true, title: true }
+        }
+      },
     });
 
     // Enrich items with names for the initial AI draft
     const enrichedItems = validatedData.items.map((item: any) => {
       const p = products.find((prod) => prod.id === item.productId);
+      const v = item.variantId ? p?.variants.find((varnt) => varnt.id === item.variantId) : null;
       return {
         ...item,
         productName: p?.name || "Unknown Product",
+        variantName: v?.title || undefined,
       };
     });
 
@@ -41,6 +50,12 @@ export async function POST(req: NextRequest) {
       email: validatedData.email,
       phone: validatedData.phone || null,
       company: validatedData.company || null,
+      addressLine1: validatedData.addressLine1,
+      addressLine2: validatedData.addressLine2 || null,
+      city: validatedData.city,
+      province: validatedData.province,
+      postalCode: validatedData.postalCode,
+      country: validatedData.country,
       items: JSON.parse(JSON.stringify(validatedData.items)), // Ensure items is a plain serializable object
       status: QuotationStatus.PENDING,
       expiresAt,
@@ -53,20 +68,18 @@ export async function POST(req: NextRequest) {
     try {
       const quotation = await db.quotation.create({ data });
 
-      // Generate initial AI Draft immediately as per DAY-08 Spec
-      try {
-        const draftInput = { ...quotation, items: enrichedItems };
-        const aiDraft = await generateQuotationDraft(draftInput);
-
-        await db.quotation.update({
-          where: { id: quotation.id },
-          data: { aiDraft }
+      // Generate initial AI Draft asynchronously so it doesn't block the UI
+      const draftInput = { ...quotation, items: enrichedItems };
+      generateQuotationDraft(draftInput)
+        .then(async (aiDraft) => {
+          await db.quotation.update({
+            where: { id: quotation.id },
+            data: { aiDraft }
+          });
+        })
+        .catch((aiError) => {
+          logger.error("Failed to generate initial AI draft", aiError as Error);
         });
-
-        quotation.aiDraft = aiDraft;
-      } catch (aiError) {
-        logger.error("Failed to generate initial AI draft", aiError as Error);
-      }
 
       return NextResponse.json({ success: true, data: quotation }, { status: 201 });
     } catch (dbError: any) {

@@ -112,7 +112,9 @@ export async function proxy(req: NextRequest) {
   if (isAdminRoute) {
     if (!token) {
       logger.auth('Proxy: No token for admin route', { pathname })
-      return NextResponse.redirect(new URL('/login', req.url))
+      const loginUrl = new URL('/login', req.url)
+      loginUrl.searchParams.set('clear_auth', '1')
+      return NextResponse.redirect(loginUrl)
     }
     const payload = decodeJwt(token)
     if (!payload || payload.role !== 'ADMIN') {
@@ -139,6 +141,7 @@ export async function proxy(req: NextRequest) {
       logger.auth('Proxy: No token for protected user route', { pathname })
       const loginUrl = new URL('/login', req.url)
       loginUrl.searchParams.set('from', pathname)
+      loginUrl.searchParams.set('clear_auth', '1')
       return NextResponse.redirect(loginUrl)
     }
     const payload = decodeJwt(token)
@@ -152,6 +155,7 @@ export async function proxy(req: NextRequest) {
       logger.auth('Proxy: Invalid token for protected route', { pathname })
       const loginUrl = new URL('/login', req.url)
       loginUrl.searchParams.set('from', pathname)
+      loginUrl.searchParams.set('clear_auth', '1')
       return NextResponse.redirect(loginUrl)
     }
 

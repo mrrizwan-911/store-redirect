@@ -21,6 +21,7 @@ export const QuotationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submittedRef, setSubmittedRef] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState<Record<number, any>>({});
   const router = useRouter();
   const { isAuthenticated } = useAppSelector((s) => s.auth);
 
@@ -38,6 +39,12 @@ export const QuotationForm = () => {
       email: "",
       phone: "",
       company: "",
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      province: "",
+      postalCode: "",
+      country: "Pakistan", // Default to Pakistan as it's a local brand
       items: [{ productId: "", quantity: 10, notes: "" }],
     },
   });
@@ -173,6 +180,78 @@ export const QuotationForm = () => {
             </div>
           </div>
 
+          {/* Shipping Address */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-display">Shipping Address</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="addressLine1">Address Line 1 *</Label>
+                <Input
+                  id="addressLine1"
+                  placeholder="Street address, P.O. box, company name, c/o"
+                  className="rounded-none border-gray-200 focus:border-black ring-0 focus-visible:ring-0 transition-all font-body"
+                  {...register("addressLine1")}
+                />
+                {errors.addressLine1 && <p className="text-sm text-red-500">{errors.addressLine1.message}</p>}
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="addressLine2">Address Line 2</Label>
+                <Input
+                  id="addressLine2"
+                  placeholder="Apartment, suite, unit, building, floor, etc."
+                  className="rounded-none border-gray-200 focus:border-black ring-0 focus-visible:ring-0 transition-all font-body"
+                  {...register("addressLine2")}
+                />
+                {errors.addressLine2 && <p className="text-sm text-red-500">{errors.addressLine2.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city">City *</Label>
+                <Input
+                  id="city"
+                  placeholder="Karachi"
+                  className="rounded-none border-gray-200 focus:border-black ring-0 focus-visible:ring-0 transition-all font-body"
+                  {...register("city")}
+                />
+                {errors.city && <p className="text-sm text-red-500">{errors.city.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="province">Province *</Label>
+                <Input
+                  id="province"
+                  placeholder="Sindh"
+                  className="rounded-none border-gray-200 focus:border-black ring-0 focus-visible:ring-0 transition-all font-body"
+                  {...register("province")}
+                />
+                {errors.province && <p className="text-sm text-red-500">{errors.province.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="postalCode">Postal Code *</Label>
+                <Input
+                  id="postalCode"
+                  placeholder="75500"
+                  className="rounded-none border-gray-200 focus:border-black ring-0 focus-visible:ring-0 transition-all font-body"
+                  {...register("postalCode")}
+                />
+                {errors.postalCode && <p className="text-sm text-red-500">{errors.postalCode.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="country">Country *</Label>
+                <Input
+                  id="country"
+                  placeholder="Pakistan"
+                  className="rounded-none border-gray-200 focus:border-black ring-0 focus-visible:ring-0 transition-all font-body"
+                  {...register("country")}
+                />
+                {errors.country && <p className="text-sm text-red-500">{errors.country.message}</p>}
+              </div>
+            </div>
+          </div>
+
           {/* Items */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -197,10 +276,32 @@ export const QuotationForm = () => {
                         <Label>Select Product *</Label>
                         <ProductCombobox
                           value={field.productId}
-                          onChange={(val) => setValue(`items.${index}.productId`, val)}
+                          onChange={(val, product) => {
+                            setValue(`items.${index}.productId`, val);
+                            setValue(`items.${index}.variantId`, ""); // reset variant
+                            setSelectedProducts(prev => ({ ...prev, [index]: product }));
+                          }}
                         />
                         {errors.items?.[index]?.productId && (
                           <p className="text-xs text-red-500">{errors.items[index]?.productId?.message}</p>
+                        )}
+                        
+                        {/* Variant Selector */}
+                        {selectedProducts[index]?.variants && selectedProducts[index].variants.length > 0 && (
+                          <div className="mt-2 space-y-2">
+                            <Label className="text-xs text-neutral-500">Select Variant</Label>
+                            <select
+                              className="flex h-10 w-full rounded-none border border-neutral-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-950 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              {...register(`items.${index}.variantId`)}
+                            >
+                              <option value="">Select a variant...</option>
+                              {selectedProducts[index].variants.map((v: any) => (
+                                <option key={v.id} value={v.id}>
+                                  {v.title} {v.stock > 0 ? `(${v.stock} in stock)` : "(Out of stock)"}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                         )}
                       </div>
 
