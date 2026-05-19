@@ -112,6 +112,10 @@ model Product {
   categoryId       String
   basePrice        Decimal          @db.Decimal(10, 2)
   salePrice        Decimal?         @db.Decimal(10, 2)
+  pricePK          Decimal          @default(0) @db.Decimal(10, 2)
+  priceUK          Decimal          @default(0) @db.Decimal(10, 2)
+  salePricePK      Decimal?         @db.Decimal(10, 2)
+  salePriceUK      Decimal?         @db.Decimal(10, 2)
   sku              String           @unique
   isActive         Boolean          @default(true)
   isFeatured       Boolean          @default(false)
@@ -141,6 +145,8 @@ model ProductVariant {
   stock      Int         @default(0)
   sku        String      @unique
   price      Decimal?    @db.Decimal(10, 2)
+  pricePK    Decimal?    @db.Decimal(10, 2)
+  priceUK    Decimal?    @db.Decimal(10, 2)
   cartItems  CartItem[]
   orderItems OrderItem[]
   product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -631,4 +637,12 @@ model UserChatHistory {
   @@index([userId])
   @@index([sessionId])
   @@index([createdAt])
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
