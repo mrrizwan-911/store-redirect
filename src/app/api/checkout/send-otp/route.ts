@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { sendOtpEmail } from '@/lib/services/email/otp'
+import { isDisposableEmail } from '@/lib/utils/emailValidation'
 import { z } from 'zod'
 
 const schema = z.object({
@@ -26,6 +27,13 @@ export async function POST(req: NextRequest) {
     }
 
     const { email, orderId } = parsed.data
+
+    if (await isDisposableEmail(email)) {
+      return NextResponse.json(
+        { success: false, error: 'Please use a real, permanent email address.' },
+        { status: 400 }
+      )
+    }
 
     // Verify order exists and belongs to this email
     const order = await db.order.findFirst({

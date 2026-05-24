@@ -7,6 +7,7 @@ import { registerSchema } from '@/lib/validations/auth'
 import { sendOtpEmail } from '@/lib/services/email/otp'
 import { isAdminEmail } from '@/lib/auth/admin'
 import { rateLimiters, checkRateLimit, getClientIp } from '@/lib/utils/rateLimit'
+import { isDisposableEmail } from '@/lib/utils/emailValidation'
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,6 +25,13 @@ export async function POST(req: NextRequest) {
     }
 
     const { name, full_name, fullName, email, password } = parsed.data
+
+    if (await isDisposableEmail(email)) {
+      return NextResponse.json(
+        { success: false, error: 'Please use a real, permanent email address.' },
+        { status: 400 }
+      )
+    }
 
     if (isAdminEmail(email)) {
       return NextResponse.json(
