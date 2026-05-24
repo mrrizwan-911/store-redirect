@@ -23,6 +23,8 @@ import { addToCompare, removeFromCompare } from '@/store/slices/compareSlice'
 import { toast } from 'sonner'
 import { formatPrice, currencySymbol } from '@/lib/utils/currency'
 import { generateWhatsAppOrderUrl } from '@/lib/utils/whatsapp'
+import { fbViewContent } from '@/lib/utils/metaPixel'
+import { sendGAEvent } from '@next/third-parties/google'
 
 interface Product {
   id: string
@@ -72,6 +74,30 @@ export default function ProductDetailClient({ product, categoryProducts, related
   useEffect(() => {
     setMounted(true)
     if (product.id) addViewedProduct(product.id)
+    
+    // Fire Meta Pixel ViewContent event
+    fbViewContent({
+      content_name: product.name,
+      content_ids: [product.id],
+      content_type: 'product',
+      value: Number(product.salePrice || product.basePrice),
+      currency: typeof window !== 'undefined' && window.location.hostname.includes('co.uk') ? 'GBP' : 'PKR'
+    })
+
+    // Fire Google Analytics view_item event
+    sendGAEvent('event', 'view_item', {
+      currency: typeof window !== 'undefined' && window.location.hostname.includes('co.uk') ? 'GBP' : 'PKR',
+      value: Number(product.salePrice || product.basePrice),
+      items: [
+        {
+          item_id: product.id,
+          item_name: product.name,
+          item_category: product.category.name,
+          price: Number(product.salePrice || product.basePrice),
+        }
+      ]
+    })
+
     // Fetch dynamic WhatsApp number from site settings
     fetch('/api/settings')
       .then(r => r.json())

@@ -11,6 +11,7 @@ import { ZodError } from 'zod';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { logout } from '@/store/slices/authSlice';
 import AuthLayout from '@/components/store/auth/AuthLayout';
+import { TurnstileWidget } from '@/components/ui/TurnstileWidget';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function RegisterPage() {
     email: '',
     password: '',
   });
+  const [turnstileToken, setTurnstileToken] = useState<string>('');
 
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
@@ -49,6 +51,10 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!turnstileToken) {
+      toast.error('Please complete the security check.');
+      return;
+    }
     setIsLoading(true);
 
     try {
@@ -58,7 +64,7 @@ export default function RegisterPage() {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, turnstileToken }),
       });
 
       const result = await response.json();
@@ -163,6 +169,8 @@ export default function RegisterPage() {
         </div>
 
         <div className="space-y-4 pt-4">
+          <TurnstileWidget onSuccess={setTurnstileToken} />
+
           <Button
             type="submit"
             disabled={isLoading}

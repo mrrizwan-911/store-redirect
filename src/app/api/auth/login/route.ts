@@ -6,6 +6,7 @@ import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { loginSchema } from '@/lib/validations/auth'
 import { signAccessToken, signRefreshToken } from '@/lib/auth/jwt'
+import { verifyTurnstile } from '@/lib/utils/verifyTurnstile'
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,7 +23,22 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { email, password } = parsed.data
+    const { email, password, turnstileToken } = parsed.data
+
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { success: false, error: 'Security verification failed.' },
+        { status: 403 }
+      )
+    }
+
+    const isValid = await verifyTurnstile(turnstileToken, clientIp)
+    if (!isValid) {
+      return NextResponse.json(
+        { success: false, error: 'Security verification failed.' },
+        { status: 403 }
+      )
+    }
 
     if (await isAccountLocked(email)) {
       return NextResponse.json(

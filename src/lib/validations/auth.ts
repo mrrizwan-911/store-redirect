@@ -11,6 +11,7 @@ export const registerSchema = z.object({
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
     .regex(/[0-9]/, 'Password must contain at least one number')
     .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
+  turnstileToken: z.string().optional(),
 }).refine(data => data.name || data.full_name || data.fullName, {
   message: "Name or full_name is required",
   path: ["name"]
@@ -19,6 +20,7 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
+  turnstileToken: z.string().optional(),
 })
 
 export const otpSchema = z.object({

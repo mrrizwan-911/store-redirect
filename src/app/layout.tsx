@@ -1,3 +1,4 @@
+import React, { Suspense } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { Playfair_Display, DM_Sans } from 'next/font/google'
 import './globals.css'
@@ -9,6 +10,8 @@ import { SWRegistrar } from '@/components/shared/SWRegistrar'
 import { ScrollProgress } from '@/components/store/shared/ScrollProgress'
 import { ExitIntentPopup } from '@/components/store/shared/ExitIntentPopup'
 import { SocialProofToast } from '@/components/store/shared/SocialProofToast'
+import { MetaPixel } from '@/components/store/shared/MetaPixel'
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const playfair = Playfair_Display({
@@ -179,6 +182,10 @@ export default function RootLayout({
         className="min-h-full flex flex-col font-body bg-background text-text-primary"
         suppressHydrationWarning
       >
+        {process.env.NEXT_PUBLIC_GA4_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA4_ID} />}
+        <Suspense fallback={null}>
+          <MetaPixel />
+        </Suspense>
         <ReduxProvider>
           {/* Scroll progress bar + back-to-top button */}
           <ScrollProgress />

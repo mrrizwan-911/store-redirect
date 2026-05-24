@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { CircleCheck, ArrowRight, MessageCircle } from 'lucide-react'
 import { formatPrice } from '@/lib/constants/site'
 import { generateWhatsAppOrderConfirmationUrl } from '@/lib/utils/whatsapp'
+import { fbPurchase } from '@/lib/utils/metaPixel'
+import { sendGAEvent } from '@next/third-parties/google'
 
 // Although this is a client component, we mark it dynamic to ensure
 // the parent layout doesn't try to pre-render it with dummy params
@@ -47,6 +49,29 @@ export default function OrderConfirmationPage() {
         const data = await res.json()
         if (!res.ok || !data.success) throw new Error(data.error || 'Order not found')
         setOrder(data.data)
+
+        // Fire Meta Pixel Purchase event
+        fbPurchase({
+          value: data.data.total,
+          currency: typeof window !== 'undefined' && window.location.hostname.includes('co.uk') ? 'GBP' : 'PKR',
+          content_ids: data.data.items.map((i: any) => i.id),
+          content_type: 'product',
+          num_items: data.data.items.reduce((acc: number, item: any) => acc + item.quantity, 0),
+        })
+
+        // Fire Google Analytics purchase event
+        sendGAEvent('event', 'purchase', {
+          transaction_id: data.data.orderNumber,
+          value: data.data.total,
+          currency: typeof window !== 'undefined' && window.location.hostname.includes('co.uk') ? 'GBP' : 'PKR',
+          shipping: data.data.shippingCost,
+          items: data.data.items.map((item: any) => ({
+            item_id: item.id,
+            item_name: item.product.name,
+            price: item.price,
+            quantity: item.quantity,
+          }))
+        })
       } catch (err: any) {
         setError(err.message)
       } finally {

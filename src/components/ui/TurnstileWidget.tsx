@@ -8,6 +8,7 @@ interface TurnstileWidgetProps {
   onError?: () => void
   theme?: 'light' | 'dark' | 'auto'
   size?: 'normal' | 'compact'
+  appearance?: 'always' | 'execute' | 'interaction-only'
 }
 
 declare global {
@@ -33,6 +34,7 @@ export function TurnstileWidget({
   onError,
   theme = 'light',
   size = 'normal',
+  appearance = 'always',
 }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const widgetIdRef  = useRef<string | null>(null)
@@ -50,11 +52,12 @@ export function TurnstileWidget({
       sitekey: process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY || '',
       theme,
       size,
+      appearance,
       callback: onSuccess,
       'expired-callback': onExpire,
       'error-callback': onError,
     })
-  }, [onSuccess, onExpire, onError, theme, size])
+  }, [onSuccess, onExpire, onError, theme, size, appearance])
 
   useEffect(() => {
     // If Turnstile is already loaded, render immediately

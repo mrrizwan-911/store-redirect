@@ -8,6 +8,7 @@ import { sendOtpEmail } from '@/lib/services/email/otp'
 import { isAdminEmail } from '@/lib/auth/admin'
 import { rateLimiters, checkRateLimit, getClientIp } from '@/lib/utils/rateLimit'
 import { isDisposableEmail } from '@/lib/utils/emailValidation'
+import { verifyTurnstile } from '@/lib/utils/verifyTurnstile'
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,7 +25,22 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { name, full_name, fullName, email, password } = parsed.data
+    const { name, full_name, fullName, email, password, turnstileToken } = parsed.data
+
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { success: false, error: 'Security verification failed.' },
+        { status: 403 }
+      )
+    }
+
+    const isValid = await verifyTurnstile(turnstileToken, clientIp)
+    if (!isValid) {
+      return NextResponse.json(
+        { success: false, error: 'Security verification failed.' },
+        { status: 403 }
+      )
+    }
 
     if (await isDisposableEmail(email)) {
       return NextResponse.json(

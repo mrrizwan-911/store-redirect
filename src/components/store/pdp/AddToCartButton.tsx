@@ -6,6 +6,8 @@ import { addItem, openCart } from '@/store/slices/cartSlice'
 import { Button } from '@/components/ui/button'
 import { ShoppingBag } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { fbAddToCart } from '@/lib/utils/metaPixel'
+import { sendGAEvent } from '@next/third-parties/google'
 
 interface AddToCartButtonProps {
   product: {
@@ -54,12 +56,37 @@ export default function AddToCartButton({
 
     // Simulate a small delay for better UX
     setTimeout(() => {
+      // Fire Meta Pixel event
+      const finalPrice = priceOverride ?? Number(selectedVariant.price || product.salePrice || product.basePrice)
+      fbAddToCart({
+        content_name: product.name,
+        content_ids: [product.id],
+        content_type: 'product',
+        value: finalPrice * quantity,
+        currency: typeof window !== 'undefined' && window.location.hostname.includes('co.uk') ? 'GBP' : 'PKR',
+        quantity: quantity,
+      })
+
+      // Fire Google Analytics add_to_cart event
+      sendGAEvent('event', 'add_to_cart', {
+        currency: typeof window !== 'undefined' && window.location.hostname.includes('co.uk') ? 'GBP' : 'PKR',
+        value: finalPrice * quantity,
+        items: [
+          {
+            item_id: product.id,
+            item_name: product.name,
+            price: finalPrice,
+            quantity: quantity,
+          }
+        ]
+      })
+
       dispatch(
         addItem({
           productId: product.id,
           variantId: selectedVariant.id,
           name: product.name,
-          price: priceOverride ?? Number(selectedVariant.price || product.salePrice || product.basePrice),
+          price: finalPrice,
           validatedPrice: priceOverride, // Store the validated price if available
           quantity: quantity,
           stock: availableStock,
