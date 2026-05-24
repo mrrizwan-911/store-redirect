@@ -2,6 +2,7 @@ import { db } from '@/lib/db/client'
 import { ProductListingClient } from '@/components/store/plp/ProductListingClient'
 import { Suspense } from 'react'
 import { enrichProductsWithFlashSales } from '@/lib/services/payment/priceValidator'
+import { SITE_COUNTRY } from '@/lib/constants/site'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,6 +21,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const sort = (resolvedSearchParams.sort as string) || 'createdAt_desc'
   const [sortField, sortDir] = sort.split('_') as [string, 'asc' | 'desc']
 
+  // Price field based on region
+  const priceField = SITE_COUNTRY === 'UK' ? 'priceUK' : 'pricePK'
+
   // Build where clause
   // If subCategory is set → filter by exact subcategory slug
   // Else if category is set → filter by parent OR its children
@@ -35,7 +39,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           ],
         }
       : {}),
-    basePrice: { gte: minPrice, lte: maxPrice },
+    [priceField]: { gte: minPrice, lte: maxPrice },
     variants: { some: { stock: { gt: 0 } } },
   }
 
@@ -68,13 +72,20 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         p.reviews.length > 0
           ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
           : null
+      // Pick price based on country
+      const price = Number(SITE_COUNTRY === 'UK' ? p.priceUK : p.pricePK)
+      const salePrice = SITE_COUNTRY === 'UK' ? p.salePriceUK : p.salePricePK
       return {
         ...p,
         avgRating,
         reviewCount: p.reviews.length,
         reviews: undefined,
-        basePrice: Number(p.basePrice),
-        salePrice: p.salePrice ? Number(p.salePrice) : null,
+        basePrice: price,
+        salePrice: salePrice ? Number(salePrice) : null,
+        pricePK: p.pricePK,
+        priceUK: p.priceUK,
+        salePricePK: p.salePricePK,
+        salePriceUK: p.salePriceUK,
       }
     })
   )

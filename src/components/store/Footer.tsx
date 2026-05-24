@@ -65,8 +65,14 @@ export function Footer() {
 
   const {
     footerTitle, footerDescription, footerLinks, socialLinks,
-    contactEmail, contactPhone, contactAddress, showPaymentMethods, paymentMethods,
+    contactEmail, contactPhone, contactAddress, whatsappNumber,
+    showPaymentMethods, paymentMethods,
   } = settings
+
+  // Build WhatsApp URL from the dedicated whatsappNumber field
+  const whatsappHref = whatsappNumber
+    ? `https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`
+    : null
 
   const APP_NAME    = process.env.NEXT_PUBLIC_APP_NAME    || 'Calnza'
   const LOGO_PATH   = process.env.NEXT_PUBLIC_LOGO_PATH   || '/bgless-logo.png'
@@ -117,8 +123,8 @@ export function Footer() {
                   <Globe className="w-4 h-4" />
                 </Link>
               )}
-              {socialLinks?.whatsapp && (
-                <Link href={socialLinks.whatsapp} target="_blank" className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-all duration-500">
+              {whatsappHref && (
+                <Link href={whatsappHref} target="_blank" className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-all duration-500">
                   <WhatsApp className="w-4 h-4" />
                 </Link>
               )}
@@ -169,7 +175,7 @@ export function Footer() {
                 <WhatsApp className="w-4 h-4 text-white/40 flex-shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <p className="text-[11px] text-white/30 uppercase tracking-widest font-bold">WhatsApp</p>
-                  <p className="text-[13px] text-white/60 font-light">{contactPhone}</p>
+                  <p className="text-[13px] text-white/60 font-light">{contactPhone || whatsappNumber || 'N/A'}</p>
                 </div>
               </li>
               <li className="flex gap-4 items-start">

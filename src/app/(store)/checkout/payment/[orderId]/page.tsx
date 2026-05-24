@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CircleCheck, ArrowRight, ShieldCheck, CreditCard, ChevronRight, ShoppingBag, Loader2 } from 'lucide-react'
 import { StripePayment } from '@/components/store/checkout/payments/StripePayment'
 import { toast } from 'sonner'
+import { formatPrice } from '@/lib/constants/site'
 
 export const dynamic = 'force-dynamic'
 
@@ -165,7 +166,7 @@ export default function B2BPaymentPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-neutral-400">Total Charged:</span>
-                <span className="font-bold text-black">PKR {order.total.toLocaleString()}</span>
+                <span className="font-bold text-black">{formatPrice(order.total)}</span>
               </div>
               {txRef && (
                 <div className="flex justify-between">
@@ -261,7 +262,7 @@ export default function B2BPaymentPage() {
                       <p className="text-[10px] text-neutral-500 mt-0.5">Qty: {item.quantity}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="font-bold text-black">PKR {item.price.toLocaleString()}</span>
+                      <span className="font-bold text-black">{formatPrice(item.price)}</span>
                     </div>
                   </div>
                 ))}
@@ -271,21 +272,21 @@ export default function B2BPaymentPage() {
               <div className="border-t border-neutral-100 pt-4 mt-4 space-y-2 text-xs">
                 <div className="flex justify-between text-neutral-500">
                   <span>Subtotal</span>
-                  <span>PKR {order.subtotal.toLocaleString()}</span>
+                  <span>{formatPrice(order.subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-neutral-500">
                   <span>Shipping Cost</span>
-                  <span>PKR {order.shippingCost.toLocaleString()}</span>
+                  <span>{formatPrice(order.shippingCost)}</span>
                 </div>
                 {order.discount > 0 && (
                   <div className="flex justify-between text-emerald-600 font-bold">
                     <span>Discount</span>
-                    <span>-PKR {order.discount.toLocaleString()}</span>
+                    <span>-{formatPrice(order.discount)}</span>
                   </div>
                 )}
                 <div className="border-t border-neutral-100 pt-3 flex justify-between font-extrabold text-sm text-black">
                   <span>Grand Total</span>
-                  <span>PKR {order.total.toLocaleString()}</span>
+                  <span>{formatPrice(order.total)}</span>
                 </div>
               </div>
             </div>

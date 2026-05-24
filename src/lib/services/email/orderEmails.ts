@@ -5,11 +5,12 @@ import { orderDeliveredTemplate } from './templates/orderDelivered'
 import { orderProcessingTemplate } from './templates/orderProcessing'
 import { orderCancelledTemplate } from './templates/orderCancelled'
 import { orderRefundedTemplate } from './templates/orderRefunded'
+import { getServerWhatsappNumber } from '@/lib/utils/serverSettings'
 
 export async function sendOrderConfirmationEmail(order: any, user: any) {
   if (!user?.email) return false
-
-  const { subject, html, text } = orderConfirmTemplate(user.name, order.orderNumber, order.items, order.total)
+  const whatsappNumber = await getServerWhatsappNumber()
+  const { subject, html, text } = orderConfirmTemplate(user.name, order.orderNumber, order.items, order.total, whatsappNumber)
 
   return sendEmail({
     to: user.email,
@@ -23,8 +24,8 @@ export async function sendOrderConfirmationEmail(order: any, user: any) {
 
 export async function sendOrderProcessingEmail(order: any, user: any) {
   if (!user?.email) return false
-
-  const { subject, html, text } = orderProcessingTemplate(user.name, order.orderNumber, order.items, order.total)
+  const whatsappNumber = await getServerWhatsappNumber()
+  const { subject, html, text } = orderProcessingTemplate(user.name, order.orderNumber, order.items, order.total, whatsappNumber)
 
   return sendEmail({
     to: user.email,
@@ -68,8 +69,8 @@ export async function sendOrderDeliveredEmail(order: any, user: any, pointsEarne
 
 export async function sendOrderCancelledEmail(order: any, user: any) {
   if (!user?.email) return false
-
-  const { subject, html, text } = orderCancelledTemplate(user.name, order.orderNumber, order.items, order.total)
+  const whatsappNumber = await getServerWhatsappNumber()
+  const { subject, html, text } = orderCancelledTemplate(user.name, order.orderNumber, order.items, order.total, whatsappNumber)
 
   return sendEmail({
     to: user.email,
@@ -83,8 +84,8 @@ export async function sendOrderCancelledEmail(order: any, user: any) {
 
 export async function sendOrderRefundedEmail(order: any, user: any) {
   if (!user?.email) return false
-
-  const { subject, html, text } = orderRefundedTemplate(user.name, order.orderNumber, order.items, order.total)
+  const whatsappNumber = await getServerWhatsappNumber()
+  const { subject, html, text } = orderRefundedTemplate(user.name, order.orderNumber, order.items, order.total, whatsappNumber)
 
   return sendEmail({
     to: user.email,

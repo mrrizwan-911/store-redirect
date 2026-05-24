@@ -148,6 +148,7 @@ export function OutfitBuilder({ initialData }: { initialData?: any }) {
   const [occasion, setOccasion] = useState(initialData?.occasion || '')
   const [gender, setGender] = useState(initialData?.gender || '')
   const [isPublished, setIsPublished] = useState(initialData?.isPublished ?? false)
+  const [country, setCountry] = useState(initialData?.country || 'ALL')
 
   const [search, setSearch] = useState('')
   const [searchResults, setSearchResults] = useState<any[]>([])
@@ -245,6 +246,7 @@ export function OutfitBuilder({ initialData }: { initialData?: any }) {
         occasion,
         gender,
         isPublished,
+        country,
         productIds: selectedProducts.map(p => p.id),
       }
 
@@ -339,6 +341,22 @@ export function OutfitBuilder({ initialData }: { initialData?: any }) {
             />
           </div>
         )}
+
+        {/* Target Region */}
+        <div>
+          <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-neutral-400 mb-1.5">
+            Target Region
+          </label>
+          <select
+            value={country}
+            onChange={e => setCountry(e.target.value)}
+            className="w-full border border-neutral-200 px-3 py-2.5 bg-white text-sm focus:outline-none focus:border-black transition-colors"
+          >
+            <option value="ALL">All Regions (Pakistan & UK)</option>
+            <option value="PK">🇵🇰 Pakistan Only</option>
+            <option value="UK">🇬🇧 United Kingdom Only</option>
+          </select>
+        </div>
 
         {/* Hero Image */}
         <div>

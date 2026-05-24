@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { closeCart, updateQuantity, removeItem } from '@/store/slices/cartSlice'
 import { addItem as addToWishlist } from '@/store/slices/wishlistSlice'
+import { currencySymbol, formatPrice } from '@/lib/utils/currency'
 import { X, Minus, Plus, Trash2, Heart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -99,9 +100,9 @@ export function CartDrawer() {
                       </p>
                     ) : null}
                     <div className="mt-2 flex items-center gap-2">
-                      <p className="font-bold text-[12px] tracking-tight">PKR {(item.validatedPrice ?? item.price).toLocaleString()}</p>
+                      <p className="font-bold text-[12px] tracking-tight">{formatPrice(item.validatedPrice ?? item.price)}</p>
                       {item.validatedPrice && item.validatedPrice < item.price && (
-                        <p className="text-[10px] text-neutral-400 line-through">PKR {item.price.toLocaleString()}</p>
+                        <p className="text-[10px] text-neutral-400 line-through">{formatPrice(item.price)}</p>
                       )}
                     </div>
                     <button
@@ -145,7 +146,7 @@ export function CartDrawer() {
           <div className="border-t border-[#E5E5E5] px-5 py-5 bg-[#FAFAFA]">
             <div className="flex justify-between items-center mb-6">
               <span className="text-neutral-500 font-medium text-[11px] uppercase tracking-[0.22em]">Subtotal</span>
-              <span className="font-serif text-lg font-bold tracking-tight">PKR {subtotal.toLocaleString()}</span>
+              <span className="font-serif text-lg font-bold tracking-tight">{formatPrice(subtotal)}</span>
             </div>
             <p className="text-[11px] text-neutral-500 mb-5">Shipping & taxes calculated at checkout.</p>
 

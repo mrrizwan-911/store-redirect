@@ -4,11 +4,16 @@ export interface GetCustomersParams {
   page?: number
   limit?: number
   search?: string
+  country?: string
 }
 
-export async function getCustomers({ page = 1, limit = 20, search }: GetCustomersParams = {}) {
+export async function getCustomers({ page = 1, limit = 20, search, country }: GetCustomersParams = {}) {
   const skip = (page - 1) * limit
   const whereClause: any = { role: 'CUSTOMER' }
+
+  if (country) {
+    whereClause.country = country
+  }
 
   if (search) {
     whereClause.OR = [

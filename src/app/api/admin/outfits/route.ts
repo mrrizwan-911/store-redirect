@@ -8,7 +8,18 @@ export async function GET(req: NextRequest) {
   if (authResult instanceof NextResponse) return authResult
 
   try {
+    const { searchParams } = new URL(req.url)
+    const country = searchParams.get('country') || ''
+
+    const whereClause: any = {}
+    if (country === 'PK') {
+      whereClause.country = { in: ['PK', 'ALL'] }
+    } else if (country === 'UK') {
+      whereClause.country = { in: ['UK', 'ALL'] }
+    }
+
     const outfits = await db.outfit.findMany({
+      where: whereClause,
       include: {
         items: {
           include: {

@@ -5,9 +5,10 @@ import { useTransition } from 'react'
 
 interface Props {
   currentCountry: string
+  resourceName?: string
 }
 
-export function CountryFilterToggle({ currentCountry }: Props) {
+export function CountryFilterToggle({ currentCountry, resourceName = 'Orders' }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -37,7 +38,7 @@ export function CountryFilterToggle({ currentCountry }: Props) {
             : 'bg-white text-neutral-400 hover:bg-neutral-50'
           }`}
       >
-        All Orders
+        All {resourceName}
       </button>
 
       {/* Pakistan */}

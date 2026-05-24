@@ -24,7 +24,9 @@ export default async function VariantsMatrixPage(context: { params: Promise<{ id
     title: v.title,
     sku: v.sku,
     stock: v.stock,
-    price: v.price ? Number(v.price) : null
+    price: v.price ? Number(v.price) : null,
+    pricePK: v.pricePK ? Number(v.pricePK) : null,
+    priceUK: v.priceUK ? Number(v.priceUK) : null
   }))
 
   return (

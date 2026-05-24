@@ -2,11 +2,31 @@ import { db } from '@/lib/db/client'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { FlashSaleActions } from '@/components/admin/promotions/FlashSaleActions'
+import { CountryFilterToggle } from '@/components/admin/orders/CountryFilterToggle'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminFlashSalesPage() {
+interface SearchParams {
+  country?: string
+}
+
+export default async function AdminFlashSalesPage({
+  searchParams,
+}: {
+  searchParams?: Promise<SearchParams>
+}) {
+  const params = (await searchParams) || {}
+  const country = params.country || ''
+
+  const whereClause: any = {}
+  if (country === 'PK') {
+    whereClause.country = { in: ['PK', 'ALL'] }
+  } else if (country === 'UK') {
+    whereClause.country = { in: ['UK', 'ALL'] }
+  }
+
   const sales = await db.flashSale.findMany({
+    where: whereClause,
     orderBy: { startTime: 'desc' },
   })
 
@@ -23,6 +43,8 @@ export default async function AdminFlashSalesPage() {
         </Link>
       </div>
 
+      <CountryFilterToggle currentCountry={country} resourceName="Flash Sales" />
+
       <div className="bg-white border border-neutral-100 rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
@@ -33,6 +55,7 @@ export default async function AdminFlashSalesPage() {
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Scope</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Start Time</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">End Time</th>
+                <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400">Region</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400 text-center">Status</th>
                 <th className="p-4 text-[10px] uppercase tracking-widest font-bold text-neutral-400 text-center">Actions</th>
               </tr>
@@ -51,6 +74,9 @@ export default async function AdminFlashSalesPage() {
                   </td>
                   <td className="p-4 text-neutral-500">{new Date(sale.startTime).toLocaleString()}</td>
                   <td className="p-4 text-neutral-500">{new Date(sale.endTime).toLocaleString()}</td>
+                  <td className="p-4 font-bold text-neutral-800 text-[10px] uppercase tracking-widest">
+                    {sale.country === 'PK' ? '🇵🇰 Pakistan' : sale.country === 'UK' ? '🇬🇧 UK' : '🌐 All'}
+                  </td>
                   <td className="p-4 text-center">
                     {(() => {
                       const now = new Date()

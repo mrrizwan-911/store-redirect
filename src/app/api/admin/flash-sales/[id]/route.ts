@@ -69,6 +69,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
         endTime,
         productIds: data.scope === 'ALL' ? [] : data.productIds,
         isActive: startTime <= now && endTime >= now,
+        country: data.country || 'ALL',
       },
     })
 

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { formatPrice } from '@/lib/utils/currency'
 import {
   ChevronLeft,
   Download,
@@ -358,13 +359,13 @@ export default function AccountQuotationDetailPage() {
                         </td>
                         <td className="py-4 px-5 text-[12px] font-bold text-black">{item.quantity}</td>
                         <td className="py-4 px-5 text-[12px] font-mono text-black">
-                          {item.unitPrice ? `PKR ${item.unitPrice.toLocaleString('en-PK')}` : '—'}
+                          {item.unitPrice ? formatPrice(item.unitPrice) : '—'}
                         </td>
                         <td className="py-4 px-5 text-[12px] font-mono text-neutral-500">
-                          {item.discountAmount ? `-PKR ${item.discountAmount.toLocaleString('en-PK')}` : '—'}
+                          {item.discountAmount ? formatPrice(-item.discountAmount) : '—'}
                         </td>
                         <td className="py-4 px-5 text-[12px] font-mono font-bold text-black">
-                          {item.unitPrice ? `PKR ${lineTotal.toLocaleString('en-PK')}` : '—'}
+                          {item.unitPrice ? formatPrice(lineTotal) : '—'}
                         </td>
                       </tr>
                     )
@@ -387,11 +388,11 @@ export default function AccountQuotationDetailPage() {
                     {item.notes && <p className="text-[10px] text-neutral-400">{item.notes}</p>}
                     {item.unitPrice ? (
                       <div className="flex flex-wrap gap-3 text-[10px] font-bold font-mono">
-                        <span className="text-neutral-500">Unit: PKR {item.unitPrice.toLocaleString('en-PK')}</span>
+                        <span className="text-neutral-500">Unit: {item.unitPrice.toLocaleString('en-PK')}</span>
                         {item.discountAmount ? (
-                          <span className="text-neutral-400">Disc: -PKR {item.discountAmount.toLocaleString('en-PK')}</span>
+                          <span className="text-neutral-400">Disc: -{item.discountAmount.toLocaleString('en-PK')}</span>
                         ) : null}
-                        <span className="text-black">Total: PKR {lineTotal.toLocaleString('en-PK')}</span>
+                        <span className="text-black">Total: {lineTotal.toLocaleString('en-PK')}</span>
                       </div>
                     ) : null}
                   </div>
@@ -435,17 +436,17 @@ export default function AccountQuotationDetailPage() {
               <div className="p-5 space-y-2">
                 <div className="flex justify-between text-[11px] font-bold text-neutral-500">
                   <span>Subtotal</span>
-                  <span className="font-mono">PKR {subtotal.toLocaleString('en-PK')}</span>
+                  <span className="font-mono">{formatPrice(subtotal)}</span>
                 </div>
                 {totalDiscount > 0 && (
                   <div className="flex justify-between text-[11px] font-bold text-neutral-400">
                     <span>Total Discount</span>
-                    <span className="font-mono">-PKR {totalDiscount.toLocaleString('en-PK')}</span>
+                    <span className="font-mono">-{formatPrice(totalDiscount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-[14px] font-black text-black border-t border-neutral-200 pt-2 mt-2">
                   <span>Grand Total</span>
-                  <span className="font-mono">PKR {grandTotal.toLocaleString('en-PK')}</span>
+                  <span className="font-mono">{formatPrice(grandTotal)}</span>
                 </div>
               </div>
             </div>

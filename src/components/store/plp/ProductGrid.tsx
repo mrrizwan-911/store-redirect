@@ -179,15 +179,15 @@ export function ProductGrid({
                     {product.salePrice ? (
                       <>
                         <span className="text-sm font-bold text-black font-sans">
-                          PKR {product.salePrice.toLocaleString()}
+                          {product.salePrice}  {/* Price already formatted */}
                         </span>
                         <span className="text-xs text-neutral-400 line-through font-sans">
-                          PKR {product.basePrice.toLocaleString()}
+                          {product.basePrice}  {/* Price already formatted */}
                         </span>
                       </>
                     ) : (
                       <span className="text-sm font-bold text-black font-sans">
-                        PKR {product.basePrice.toLocaleString()}
+                        {product.basePrice}  {/* Price already formatted */}
                       </span>
                     )}
                   </div>

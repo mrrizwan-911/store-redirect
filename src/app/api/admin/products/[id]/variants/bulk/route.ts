@@ -25,6 +25,8 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
             sku: v.sku,
             stock: v.stock,
             price: v.price === null || v.price === '' ? null : Number(v.price),
+            pricePK: v.pricePK === null || v.pricePK === '' ? null : Number(v.pricePK),
+            priceUK: v.priceUK === null || v.priceUK === '' ? null : Number(v.priceUK),
           },
         })
       )

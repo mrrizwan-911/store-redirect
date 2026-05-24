@@ -21,6 +21,8 @@ import {
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { addToCompare, removeFromCompare } from '@/store/slices/compareSlice'
 import { toast } from 'sonner'
+import { formatPrice, currencySymbol } from '@/lib/utils/currency'
+import { generateWhatsAppOrderUrl } from '@/lib/utils/whatsapp'
 
 interface Product {
   id: string
@@ -64,11 +66,21 @@ export default function ProductDetailClient({ product, categoryProducts, related
   const { addViewedProduct } = useRecentlyViewed()
   const [mounted, setMounted] = useState(false)
   const [copied, setCopied]   = useState(false)
+  const [whatsappPhone, setWhatsappPhone] = useState('')
   const isWishlisted          = mounted && isInWishlist
 
   useEffect(() => {
     setMounted(true)
     if (product.id) addViewedProduct(product.id)
+    // Fetch dynamic WhatsApp number from site settings
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.data?.whatsappNumber) {
+          setWhatsappPhone(d.data.whatsappNumber.replace(/[^0-9]/g, ''))
+        }
+      })
+      .catch(() => {})
   }, [product.id])
 
   const handleCompare = (e: React.MouseEvent) => {
@@ -133,16 +145,23 @@ export default function ProductDetailClient({ product, categoryProducts, related
   }
 
   const handleWhatsAppOrder = () => {
-    const selectedOptionsText = Object.entries(selectedOptions).map(([key, value]) => `${key}: ${value}`).join('\n')
-    const message = encodeURIComponent(
-      `*New Order Request from CALNZA*\n\n` +
-      `*Product:* ${product.name}\n` +
-      `*Link:* ${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/products/${product.slug}\n` +
-      (selectedOptionsText ? `*Details:*\n${selectedOptionsText}\n` : '') +
-      `*Quantity:* ${quantity}\n\nPlease let me know the availability and delivery process.`
-    )
-    const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER?.replace(/[^0-9]/g, '') || '923000000000'
-    window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank')
+    const opts = selectedOptions || {}
+    const color = opts['Color'] || opts['color'] || undefined
+    const size  = opts['Size']  || opts['size']  || undefined
+    const productUrl = `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/products/${product.slug}`
+    const url = generateWhatsAppOrderUrl({
+      productName: product.name,
+      sku: selectedVariant?.sku || product.sku,
+      color,
+      size,
+      quantity,
+      unitPrice: currentPrice,
+      total: currentPrice * quantity,
+      productUrl,
+      currencySymbol: currencySymbol(),
+      phoneOverride: whatsappPhone,
+    })
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   const handleWhatsAppShare = () => {
@@ -225,9 +244,9 @@ export default function ProductDetailClient({ product, categoryProducts, related
             </div>
 
             <div className="flex items-baseline gap-4">
-              <span className="text-xl font-light tracking-tight">PKR {currentPrice.toLocaleString()}</span>
+              <span className="text-xl font-light tracking-tight">{formatPrice(currentPrice)}</span>
               {originalPrice && (
-                <span className="text-base text-text-secondary line-through opacity-50">PKR {originalPrice.toLocaleString()}</span>
+                <span className="text-base text-text-secondary line-through opacity-50">{formatPrice(originalPrice)}</span>
               )}
             </div>
           </div>
@@ -371,7 +390,7 @@ export default function ProductDetailClient({ product, categoryProducts, related
           {/* Info Features */}
           <div className="grid grid-cols-2 gap-y-6 pt-10 border-t border-border">
             {[
-              { icon: Truck,        title: 'Free Delivery',     sub: 'On orders over PKR 3,000' },
+              { icon: Truck,        title: 'Free Delivery',     sub: 'On orders over {formatPrice(3000)}' },
               { icon: RefreshCcw,   title: 'Easy Returns',      sub: '7-day hassle free returns' },
               { icon: ShieldCheck,  title: 'Genuine Products',  sub: '100% authentic quality' },
               { icon: MessageCircle,title: 'Expert Support',    sub: '24/7 dedicated assistance' },
@@ -427,7 +446,7 @@ export default function ProductDetailClient({ product, categoryProducts, related
                 <p className="text-text-secondary leading-relaxed">
                   We currently offer delivery across all major cities in Pakistan. Orders are typically processed within 24–48 hours. Standard delivery takes 3–5 business days. Express delivery (available in selected cities) takes 1–2 business days.
                 </p>
-                <p className="text-text-secondary leading-relaxed">Free standard delivery is available on all orders exceeding PKR 3,000.</p>
+                <p className="text-text-secondary leading-relaxed">Free standard delivery is available on all orders exceeding {formatPrice(3000)}.</p>
               </div>
               <div className="space-y-4">
                 <h4 className="font-bold uppercase tracking-widest">Returns & Exchanges</h4>

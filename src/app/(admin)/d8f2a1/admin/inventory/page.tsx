@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { InventoryFilters } from '@/components/admin/inventory/InventoryFilters';
 import { InventoryTable } from '@/components/admin/inventory/InventoryTable';
 import { logger } from "@/lib/utils/logger";
+import { CountryFilterToggle } from "@/components/admin/orders/CountryFilterToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +13,7 @@ interface InventoryPageProps {
     search?: string;
     categoryId?: string;
     lowStock?: string;
+    country?: string;
   }>;
 }
 
@@ -27,26 +29,34 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
     redirect("/login");
   }
 
-  // Await searchParams as per Next.js 15+ patterns (indicated by package.json next: 16.x)
+  // Await searchParams as per Next.js 15+ patterns
   const params = await searchParams;
-  const { search, categoryId, lowStock } = params;
+  const { search, categoryId, lowStock, country } = params;
 
-  logger.info("Fetching inventory data", { search, categoryId, lowStock });
+  logger.info("Fetching inventory data", { search, categoryId, lowStock, country });
 
   try {
+    const andConditions: any[] = [
+      search ? {
+        OR: [
+          { sku: { contains: search, mode: "insensitive" } },
+          { product: { name: { contains: search, mode: "insensitive" } } }
+        ]
+      } : {},
+      categoryId ? { product: { categoryId } } : {},
+      lowStock === "true" ? { stock: { lte: 5 } } : {}
+    ];
+
+    if (country === 'PK') {
+      andConditions.push({ product: { pricePK: { gt: 0 } } });
+    } else if (country === 'UK') {
+      andConditions.push({ product: { priceUK: { gt: 0 } } });
+    }
+
     // 1. Fetch variants with filtering
     const variants = await db.productVariant.findMany({
       where: {
-        AND: [
-          search ? {
-            OR: [
-              { sku: { contains: search, mode: "insensitive" } },
-              { product: { name: { contains: search, mode: "insensitive" } } }
-            ]
-          } : {},
-          categoryId ? { product: { categoryId } } : {},
-          lowStock === "true" ? { stock: { lte: 5 } } : {}
-        ]
+        AND: andConditions
       },
       include: {
         product: {
@@ -97,6 +107,8 @@ export default async function InventoryPage({ searchParams }: InventoryPageProps
               MONITOR AND UPDATE STOCK LEVELS ACROSS YOUR PRODUCT CATALOG.
             </p>
           </div>
+
+          <CountryFilterToggle currentCountry={country || ""} resourceName="Inventory" />
 
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Filter section */}

@@ -9,6 +9,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { CouponInput } from './CouponInput'
 import { generateWhatsAppCartUrl } from '@/lib/utils/whatsapp'
+import { formatPrice, currencySymbol } from '@/lib/utils/currency'
 
 export function CartPage() {
   const dispatch = useAppDispatch()
@@ -16,9 +17,14 @@ export function CartPage() {
 
   const [discount, setDiscount] = useState<{ amount: number; code: string } | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [whatsappPhone, setWhatsappPhone] = useState('')
 
   useEffect(() => {
     setMounted(true)
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(d => { if (d.success && d.data?.whatsappNumber) setWhatsappPhone(d.data.whatsappNumber.replace(/[^0-9]/g, '')) })
+      .catch(() => {})
   }, [])
 
   const handleQuantityChange = (productId: string, variantId: string | undefined, currentQty: number, change: number) => {
@@ -47,13 +53,16 @@ export function CartPage() {
     const url = generateWhatsAppCartUrl(
       items.map(i => ({
         name: i.name,
-        variantTitle: i.variantTitle,
+        size: i.variantTitle?.includes('Size:') ? i.variantTitle.replace('Size:', '').trim() : undefined,
+        color: i.variantTitle?.includes('Color:') ? i.variantTitle.replace('Color:', '').trim() : undefined,
         quantity: i.quantity,
         price: i.validatedPrice ?? i.price,
       })),
-      total
+      total,
+      currencySymbol(),
+      whatsappPhone,
     )
-    window.open(url, '_blank')
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   // Prevent hydration mismatch by waiting for mount
@@ -171,10 +180,10 @@ export function CartPage() {
                 <div className="col-span-2 text-right text-[#737373] text-[13px] hidden md:block font-medium">
                   <div className="flex flex-col items-end">
                     <span className={item.validatedPrice && item.validatedPrice < item.price ? "text-black font-bold" : ""}>
-                      PKR {(item.validatedPrice ?? item.price).toLocaleString()}
+                      {formatPrice(item.validatedPrice ?? item.price)}
                     </span>
                     {item.validatedPrice && item.validatedPrice < item.price && (
-                      <span className="text-[10px] text-neutral-400 line-through">PKR {item.price.toLocaleString()}</span>
+                      <span className="text-[10px] text-neutral-400 line-through">{formatPrice(item.price)}</span>
                     )}
                   </div>
                 </div>
@@ -186,7 +195,7 @@ export function CartPage() {
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
-                  PKR {((item.validatedPrice ?? item.price) * item.quantity).toLocaleString()}
+                  {formatPrice((item.validatedPrice ?? item.price) * item.quantity)}
                 </div>
               </div>
             ))}
@@ -211,30 +220,30 @@ export function CartPage() {
           <div className="space-y-4 mb-8 text-[13px] border-t border-[#E5E5E5] pt-6 font-medium">
             <div className="flex justify-between">
               <span className="text-[#737373]">Subtotal</span>
-              <span>PKR {subtotal.toLocaleString()}</span>
+              <span>{formatPrice(subtotal)}</span>
             </div>
 
             {discount && (
               <div className="flex justify-between text-[#10B981]">
                 <span>Discount ({discount.code})</span>
-                <span>- PKR {discount.amount.toLocaleString()}</span>
+                <span>- {formatPrice(discount.amount)}</span>
               </div>
             )}
 
             <div className="flex justify-between">
               <span className="text-[#737373]">Shipping</span>
-              <span>PKR 0</span>
+              <span>{formatPrice(0)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#737373]">Taxes</span>
-              <span>PKR 0</span>
+              <span>{formatPrice(0)}</span>
             </div>
 
             <hr className="border-[#E5E5E5] my-4" />
 
             <div className="flex justify-between items-center">
               <span className="font-bold text-[15px]">Total</span>
-              <span className="font-serif text-2xl font-bold">PKR {total.toLocaleString()}</span>
+              <span className="font-serif text-2xl font-bold">{formatPrice(total)}</span>
             </div>
           </div>
 

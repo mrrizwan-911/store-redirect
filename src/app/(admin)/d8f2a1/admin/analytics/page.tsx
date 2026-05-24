@@ -5,10 +5,21 @@ import { RevenueChart } from '@/components/admin/dashboard/RevenueChart'
 import { OrderStatusChart } from '@/components/admin/dashboard/OrderStatusChart'
 import { PaymentMethodChart } from '@/components/admin/dashboard/PaymentMethodChart'
 import { ForecastAlerts } from '@/components/admin/dashboard/ForecastAlerts'
+import { CountryFilterToggle } from '@/components/admin/orders/CountryFilterToggle'
 
-export default async function AnalyticsPage() {
+interface PageProps {
+  searchParams: Promise<{
+    country?: string
+  }>
+}
+
+export default async function AnalyticsPage({ searchParams }: PageProps) {
   // 1. Validate Admin Session (Redirects to login if invalid)
   await validateAdmin()
+
+  const params = await searchParams
+  const country = params.country || ''
+  const region = country ? country.toLowerCase() : null
 
   // Default to last 30 days
   const endDate = new Date()
@@ -22,10 +33,10 @@ export default async function AnalyticsPage() {
 
   // 2. Fetch data directly from services (No internal HTTP calls)
   const [kpiData, revenueData, ordersData, productData, abandonedData] = await Promise.all([
-    getKpiSummary({ startDate, endDate, compareStart, compareEnd }),
-    getRevenueSeries({ startDate, endDate, granularity: 'day' }),
-    getOrdersAnalytics({ startDate, endDate }),
-    getProductAnalytics({ startDate, endDate }),
+    getKpiSummary({ startDate, endDate, compareStart, compareEnd, region }),
+    getRevenueSeries({ startDate, endDate, granularity: 'day', region }),
+    getOrdersAnalytics({ startDate, endDate, region }),
+    getProductAnalytics({ startDate, endDate, region }),
     getAbandonedCartStats()
   ])
 
@@ -39,6 +50,8 @@ export default async function AnalyticsPage() {
       <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Analytics Overview</h1>
       </div>
+
+      <CountryFilterToggle currentCountry={country} resourceName="Analytics" />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard

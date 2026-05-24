@@ -116,6 +116,7 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
               <th className="px-6 py-4 font-medium font-display">Uses</th>
               <th className="px-6 py-4 font-medium font-display">Max / User</th>
               <th className="px-6 py-4 font-medium font-display">Expires</th>
+              <th className="px-6 py-4 font-medium font-display">Region</th>
               <th className="px-6 py-4 font-medium font-display">Status</th>
               <th className="px-6 py-4 font-medium font-display text-right">Actions</th>
             </tr>
@@ -123,7 +124,7 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
           <tbody>
             {coupons.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-8 text-center text-[#737373] font-body">
+                <td colSpan={10} className="px-6 py-8 text-center text-[#737373] font-body">
                   No coupons yet. Create your first one.
                 </td>
               </tr>
@@ -140,6 +141,9 @@ export default function CouponsClient({ initialCoupons }: { initialCoupons: Coup
                   <td className="px-6 py-4 text-[#737373]">{coupon.maxUsesPerUser || '∞'}</td>
                   <td className="px-6 py-4 text-[#737373]">
                     {coupon.expiresAt ? format(new Date(coupon.expiresAt), 'MMM d, yyyy') : 'Never'}
+                  </td>
+                  <td className="px-6 py-4 font-semibold text-xs text-neutral-800">
+                    {(coupon as any).country === 'PK' ? '🇵🇰 Pakistan' : (coupon as any).country === 'UK' ? '🇬🇧 UK' : '🌐 All'}
                   </td>
                   <td className="px-6 py-4">
                     <Switch

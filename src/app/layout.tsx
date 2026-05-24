@@ -8,6 +8,7 @@ import { CartDrawer } from '@/components/store/cart/CartDrawer'
 import { SWRegistrar } from '@/components/shared/SWRegistrar'
 import { ScrollProgress } from '@/components/store/shared/ScrollProgress'
 import { ExitIntentPopup } from '@/components/store/shared/ExitIntentPopup'
+import { SocialProofToast } from '@/components/store/shared/SocialProofToast'
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
 const playfair = Playfair_Display({
@@ -22,13 +23,33 @@ const dmSans = DM_Sans({
   display: 'swap',
 })
 
-// ─── App config from env (never hardcoded) ───────────────────────────────────
-const rawAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calnza.com'
-const APP_URL = rawAppUrl.startsWith('http') ? rawAppUrl : `http://${rawAppUrl}`
-const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Calnza'
-const APP_DESCRIPTION =
-  process.env.NEXT_PUBLIC_APP_DESCRIPTION ||
-  'Modern boutique essentials — premium Pakistani fashion & accessories.'
+// ─── App config from env ────────────────────────────────────────────────────
+const rawAppUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://calnza.pk'
+const APP_URL   = rawAppUrl.startsWith('http') ? rawAppUrl : `https://${rawAppUrl}`
+const APP_NAME  = process.env.NEXT_PUBLIC_APP_NAME || 'Calnza'
+const SITE_COUNTRY = process.env.NEXT_PUBLIC_SITE_COUNTRY || 'PK'
+
+// Per-region descriptions and keywords
+const REGION_META: Record<string, { description: string; keywords: string[]; title: string }> = {
+  PK: {
+    title: 'Calnza — Luxury Pakistani Fashion Online',
+    description: 'Shop premium Pakistani apparel, embroidered suits, and luxury pret at Calnza.pk. Pay with EasyPaisa, COD, or card. Free delivery available.',
+    keywords: ['Pakistani fashion', 'Pakistani clothes online', 'embroidered suits', 'lawn suits', 'pret wear', 'luxury kurta', 'calnza', 'ladies clothes Pakistan'],
+  },
+  UK: {
+    title: 'Calnza — Pakistani Fashion in the UK',
+    description: 'Shop authentic Pakistani luxury fashion delivered to the UK. Embroidered suits, lawn collections and formal wear. Secure GBP checkout.',
+    keywords: ['Pakistani fashion UK', 'Asian clothes UK', 'embroidered suits UK', 'Pakistani dresses London', 'calnza uk', 'south asian fashion'],
+  },
+  GLOBAL: {
+    title: 'Calnza — Luxury South Asian Fashion',
+    description: 'Shop premium South Asian fashion worldwide. Embroidered suits, luxury pret, and formal wear delivered globally.',
+    keywords: ['South Asian fashion', 'Pakistani clothes international', 'embroidered suits', 'luxury pret', 'calnza'],
+  },
+}
+
+const META = REGION_META[SITE_COUNTRY] || REGION_META.PK
+const APP_DESCRIPTION = process.env.NEXT_PUBLIC_APP_DESCRIPTION || META.description
 
 // ─── Viewport ─────────────────────────────────────────────────────────────────
 export const viewport: Viewport = {
@@ -45,13 +66,23 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: APP_NAME,
-    template: `%s | ${APP_NAME}`,
+    default: META.title,
+    template: `%s | Calnza`,
   },
   description: APP_DESCRIPTION,
   applicationName: APP_NAME,
-  keywords: ['fashion', 'Pakistani apparel', 'boutique', 'clothes', 'accessories', 'calnza'],
+  keywords: META.keywords,
   authors: [{ name: APP_NAME, url: APP_URL }],
+
+  // ── Canonical + hreflang ──
+  alternates: {
+    canonical: APP_URL,
+    languages: {
+      'en-PK': 'https://calnza.pk',
+      'en-GB': 'https://calnza.co.uk',
+      'x-default': 'https://calnza.pk',
+    },
+  },
 
   // ── PWA / manifest ──
   manifest: '/manifest.json',
@@ -156,6 +187,8 @@ export default function RootLayout({
           {children}
           <CartDrawer />
           <FloatingWhatsApp />
+          {/* Social proof toast — bottom-left sequential notification widget */}
+          <SocialProofToast />
         </ReduxProvider>
         <Toaster />
         {/* Registers the service worker client-side after hydration */}

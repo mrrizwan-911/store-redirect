@@ -9,6 +9,7 @@ export const outfitSchema = z.object({
   gender: z.string().optional(),
   productIds: z.array(z.string()).min(2, "Must select at least 2 products").max(5, "Cannot select more than 5 products"),
   isPublished: z.boolean().default(false),
+  country: z.string().optional().default('ALL'),
 })
 
 export type OutfitInput = z.infer<typeof outfitSchema>

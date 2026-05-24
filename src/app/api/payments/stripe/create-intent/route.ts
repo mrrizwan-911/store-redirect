@@ -5,6 +5,20 @@ import { createPaymentIntent } from '@/lib/services/payment/stripe'
 import { logger } from '@/lib/utils/logger'
 import { verifyPaymentToken } from '@/lib/utils/paymentToken'
 
+// Map cookie country codes to Stripe currency codes
+const COUNTRY_CURRENCY: Record<string, string> = {
+  PK: 'pkr',
+  UK: 'gbp',
+  GLOBAL: 'usd',
+}
+
+// Multiplier: PKR (zero-decimal) = 1, GBP/USD = 100
+const COUNTRY_MULTIPLIER: Record<string, number> = {
+  PK: 1,
+  UK: 100,
+  GLOBAL: 100,
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { orderId, token } = await req.json()
@@ -49,10 +63,17 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // Detect visitor's preferred currency from cookie (fallback to domain env)
+    const countryCookie = req.cookies.get('calnza_country_pref')?.value
+    const cookieCurrency = countryCookie
+      ? COUNTRY_CURRENCY[countryCookie]
+      : undefined
+
     const { clientSecret, paymentIntentId } = await createPaymentIntent({
       orderId: order.id,
       amountInLocalCurrency: Number(order.total),
       customerEmail: order.user?.email ?? undefined,
+      currencyOverride: cookieCurrency,
     })
 
     // Store paymentIntentId on the payment record for later webhook matching

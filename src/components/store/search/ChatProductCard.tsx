@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
+import { formatPrice } from '@/lib/utils/currency'
 
 interface ChatProductCardProps {
   id: string
@@ -58,7 +59,7 @@ export function ChatProductCard({ id, slug, name, price, imageUrl }: ChatProduct
           {name}
         </p>
         <p className="text-xs font-bold text-black">
-          PKR {price.toLocaleString()}
+          {formatPrice(price)}
         </p>
       </div>
 

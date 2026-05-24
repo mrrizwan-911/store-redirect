@@ -7,6 +7,7 @@ import { useDispatch } from 'react-redux'
 import { addItem, openCart } from '@/store/slices/cartSlice'
 import { MessageCircle, Share2, Link as LinkIcon, ShoppingBag, Check, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { formatPrice } from '@/lib/constants/site'
 
 interface OutfitDetailProps {
   outfit: any
@@ -207,15 +208,15 @@ export function OutfitDetail({ outfit }: OutfitDetailProps) {
                           {hasDiscount ? (
                             <>
                               <span className="text-xs text-neutral-400 line-through tabular-nums">
-                                PKR {Number(product.basePrice).toLocaleString()}
+                                {formatPrice(product.price)}
                               </span>
                               <span className="text-xs font-semibold text-neutral-900 tabular-nums">
-                                PKR {price.toLocaleString()}
+                                {formatPrice(price)}
                               </span>
                             </>
                           ) : (
                             <span className="text-xs text-neutral-600 tabular-nums">
-                              PKR {price.toLocaleString()}
+                              {formatPrice(price)}
                             </span>
                           )}
                         </div>
@@ -251,7 +252,7 @@ export function OutfitDetail({ outfit }: OutfitDetailProps) {
                     Complete Look
                   </p>
                   <p className="text-2xl font-playfair font-bold text-neutral-900 tabular-nums">
-                    PKR {outfit.totalPrice.toLocaleString()}
+                    {formatPrice(outfit.totalPrice)}
                   </p>
                 </div>
                 <p className="text-[10px] text-neutral-400">

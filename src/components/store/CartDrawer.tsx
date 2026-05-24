@@ -8,6 +8,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { formatPrice } from '@/lib/utils/currency'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 
@@ -92,7 +93,7 @@ export function CartDrawer() {
                             <Plus className="w-3 h-3" />
                           </button>
                         </div>
-                        <p className="text-sm font-semibold">PKR {item.price.toLocaleString()}</p>
+                        <p className="text-sm font-semibold">{formatPrice(item.price)}</p>
                       </div>
                     </div>
                   </div>
@@ -104,7 +105,7 @@ export function CartDrawer() {
               <div className="flex flex-col gap-4 mb-6">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-neutral-500 uppercase tracking-widest">Subtotal</span>
-                  <span className="text-lg font-bold">PKR {subtotal.toLocaleString()}</span>
+                  <span className="text-lg font-bold">{formatPrice(subtotal)}</span>
                 </div>
                 <p className="text-[10px] text-neutral-400 uppercase tracking-widest leading-relaxed">
                   Shipping, taxes, and discounts calculated at checkout.

@@ -36,6 +36,7 @@ export function CouponFormDialog({
     maxUsesPerUser: '',
     expiresAt: '',
     isActive: true,
+    country: 'ALL',
   });
 
   useEffect(() => {
@@ -50,6 +51,7 @@ export function CouponFormDialog({
           maxUsesPerUser: editingCoupon.maxUsesPerUser?.toString() || '',
           expiresAt: editingCoupon.expiresAt ? new Date(editingCoupon.expiresAt).toISOString().split('T')[0] : '',
           isActive: editingCoupon.isActive,
+          country: (editingCoupon as any).country || 'ALL',
         });
       } else {
         setFormData({
@@ -61,6 +63,7 @@ export function CouponFormDialog({
           maxUsesPerUser: '',
           expiresAt: '',
           isActive: true,
+          country: 'ALL',
         });
       }
     }
@@ -84,6 +87,7 @@ export function CouponFormDialog({
         maxUsesPerUser: formData.maxUsesPerUser ? Number(formData.maxUsesPerUser) : null,
         expiresAt: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : null,
         isActive: formData.isActive,
+        country: formData.country,
       };
 
       const url = editingCoupon
@@ -206,6 +210,19 @@ export function CouponFormDialog({
               />
             </div>
           </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Target Region</Label>
+            <select
+              value={formData.country}
+              onChange={(e) => setFormData({...formData, country: e.target.value})}
+              className="w-full h-10 border border-[#E5E5E5] px-3 font-body bg-white rounded-none focus:outline-none focus:border-black"
+            >
+              <option value="ALL">All Regions (PK and UK)</option>
+              <option value="PK">🇵🇰 Pakistan Only</option>
+              <option value="UK">🇬🇧 United Kingdom Only</option>
+            </select>
           </div>
 
           <div className="space-y-2">

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
+import { formatPrice } from '@/lib/constants/site'
 
 interface EasypaisaPaymentProps {
   orderId: string
@@ -145,7 +146,7 @@ export function EasypaisaPayment({
             className="w-full bg-[#1B4332] text-white rounded-full h-12 text-[11px] uppercase tracking-[0.2em] font-bold
               hover:bg-[#145229] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Pay PKR {Number(total).toLocaleString()} Now
+            Pay {formatPrice(total)} Now
           </button>
         </>
       )}

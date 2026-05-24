@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { ProductCard } from '@/components/store/shared/ProductCard'
 import { useAppSelector } from '@/store/hooks'
 import { ProductSummary } from '@/components/store/plp/ProductGrid'
+import { SITE_COUNTRY, formatPrice } from '@/lib/constants/site'
 
 export default function PublicWishlistPage() {
   const productIds = useAppSelector((state) => state.wishlist.productIds)

@@ -64,6 +64,7 @@ export async function POST(req: Request) {
         endTime,
         productIds: data.scope === 'ALL' ? [] : data.productIds,
         isActive: startTime <= now && endTime >= now,
+        country: data.country || 'ALL',
       },
     })
 

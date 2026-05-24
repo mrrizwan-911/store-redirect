@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { CircleCheck, ArrowRight } from 'lucide-react'
+import { CircleCheck, ArrowRight, MessageCircle } from 'lucide-react'
+import { formatPrice } from '@/lib/constants/site'
+import { generateWhatsAppOrderConfirmationUrl } from '@/lib/utils/whatsapp'
 
 // Although this is a client component, we mark it dynamic to ensure
 // the parent layout doesn't try to pre-render it with dummy params
@@ -31,8 +33,14 @@ export default function OrderConfirmationPage() {
   const [order, setOrder] = useState<OrderSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [whatsappPhone, setWhatsappPhone] = useState('')
 
   useEffect(() => {
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(d => { if (d.success && d.data?.whatsappNumber) setWhatsappPhone(d.data.whatsappNumber.replace(/[^0-9]/g, '')) })
+      .catch(() => {})
+
     async function fetchOrder() {
       try {
         const res = await fetch(`/api/orders/confirmation/${orderId}`)
@@ -47,6 +55,18 @@ export default function OrderConfirmationPage() {
     }
     if (orderId) fetchOrder()
   }, [orderId])
+
+  function handleWhatsAppSupport() {
+    if (!order) return
+    const url = generateWhatsAppOrderConfirmationUrl({
+      orderNumber: order.orderNumber,
+      total: Number(order.total),
+      paymentMethod: 'N/A',
+      itemsCount: order.items.length,
+      phoneOverride: whatsappPhone,
+    })
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
 
   if (isLoading) {
     return (
@@ -93,22 +113,22 @@ export default function OrderConfirmationPage() {
                   <p className="font-medium">{item.product.name}</p>
                   <p className="text-neutral-400 text-xs">{item.variant.title} × {item.quantity}</p>
                 </div>
-                <p className="font-bold">PKR {(item.price * item.quantity).toLocaleString()}</p>
+                <p className="font-bold">{formatPrice(item.price * item.quantity)}</p>
               </div>
             ))}
           </div>
           <div className="border-t border-neutral-100 mt-4 pt-4 space-y-2 text-sm">
             <div className="flex justify-between text-neutral-500">
               <span>Subtotal</span>
-              <span>PKR {order.subtotal.toLocaleString()}</span>
+              <span>{formatPrice(order.subtotal)}</span>
             </div>
             <div className="flex justify-between text-neutral-500">
               <span>Shipping</span>
-              <span>PKR {order.shippingCost.toLocaleString()}</span>
+              <span>{formatPrice(order.shippingCost)}</span>
             </div>
             <div className="flex justify-between font-bold text-base">
               <span>Total</span>
-              <span>PKR {order.total.toLocaleString()}</span>
+              <span>{formatPrice(order.total)}</span>
             </div>
           </div>
         </div>
@@ -120,6 +140,13 @@ export default function OrderConfirmationPage() {
           >
             Continue Shopping
           </Link>
+          <button
+            onClick={handleWhatsAppSupport}
+            className="flex-1 text-center bg-[#25D366] text-white px-6 py-3 text-xs uppercase tracking-widest font-bold hover:bg-[#20bd5a] transition-colors flex items-center justify-center gap-2"
+          >
+            <MessageCircle className="w-4 h-4 fill-current" />
+            WhatsApp Support
+          </button>
           <Link
             href="/register"
             className="flex-1 text-center bg-black text-white px-6 py-3 text-xs uppercase tracking-widest font-bold hover:bg-neutral-900 transition-colors flex items-center justify-center gap-2"

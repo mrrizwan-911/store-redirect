@@ -16,6 +16,20 @@ import { SITE_COUNTRY, SITE_CURRENCY, STRIPE_AMOUNT_MULTIPLIER } from '@/lib/con
 
 const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
 
+/** Currency overrides from cookie-based country preferences */
+const COOKIE_CURRENCY: Record<string, string> = {
+  PK: 'pkr',
+  UK: 'gbp',
+  GLOBAL: 'usd',
+}
+
+/** Multiplier: zero-decimal vs cent-based currencies */
+const CURRENCY_MULTIPLIER: Record<string, number> = {
+  pkr: 1,
+  gbp: 100,
+  usd: 100,
+}
+
 export const stripe = new Stripe(stripeKey, {
   apiVersion: '2026-04-22.dahlia',
   typescript: true,
@@ -29,9 +43,11 @@ export async function createPaymentIntent(params: {
   orderId: string
   amountInLocalCurrency: number
   customerEmail?: string
+  currencyOverride?: string
 }): Promise<{ clientSecret: string; paymentIntentId: string }> {
-  const currency = SITE_CURRENCY[SITE_COUNTRY].toLowerCase()
-  const multiplier = STRIPE_AMOUNT_MULTIPLIER[SITE_COUNTRY]
+  // Use cookie-provided currency if available, otherwise fall back to domain env
+  const currency = (params.currencyOverride ?? COOKIE_CURRENCY[SITE_COUNTRY] ?? 'pkr').toLowerCase()
+  const multiplier = CURRENCY_MULTIPLIER[currency] ?? 1
 
   // Stripe requires integer amounts (smallest currency unit)
   const stripeAmount = Math.round(params.amountInLocalCurrency * multiplier)
@@ -42,6 +58,7 @@ export async function createPaymentIntent(params: {
     metadata: {
       orderId: params.orderId,
       siteCountry: SITE_COUNTRY,
+      stripeCurrency: currency,
     },
     receipt_email: params.customerEmail,
   })
@@ -66,7 +83,10 @@ export async function verifyPaymentIntent(paymentIntentId: string): Promise<{
   amount: number
 }> {
   const intent = await stripe.paymentIntents.retrieve(paymentIntentId)
-  const multiplier = STRIPE_AMOUNT_MULTIPLIER[SITE_COUNTRY]
+
+  // Read the currency from the PaymentIntent metadata (set by createPaymentIntent)
+  const storedCurrency = (intent.metadata?.stripeCurrency as string)?.toLowerCase() || 'pkr'
+  const multiplier = CURRENCY_MULTIPLIER[storedCurrency] ?? 1
 
   return {
     succeeded: intent.status === 'succeeded',

@@ -2,12 +2,32 @@ import { db } from '@/lib/db/client'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { ProductActions } from '@/components/admin/products/ProductActions'
+import { CountryFilterToggle } from '@/components/admin/orders/CountryFilterToggle'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminProductsPage() {
+interface SearchParams {
+  country?: string
+}
+
+export default async function AdminProductsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<SearchParams>
+}) {
+  const params = (await searchParams) || {}
+  const country = params.country || ''
+
+  const whereClause: any = {}
+  if (country === 'PK') {
+    whereClause.pricePK = { gt: 0 }
+  } else if (country === 'UK') {
+    whereClause.priceUK = { gt: 0 }
+  }
+
   const [products, activeFlashSales] = await Promise.all([
     db.product.findMany({
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
       include: {
         category: true,
@@ -35,6 +55,8 @@ export default async function AdminProductsPage() {
           Add Product
         </Link>
       </div>
+
+      <CountryFilterToggle currentCountry={country} resourceName="Products" />
 
       <div className="bg-white border border-neutral-100 rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
         <div className="overflow-x-auto">
@@ -78,14 +100,30 @@ export default async function AdminProductsPage() {
                     <td className="p-4 font-semibold text-neutral-900 text-xs">{product.name}</td>
                     <td className="p-4 text-neutral-500 text-xs">{product.sku}</td>
                     <td className="p-4 text-neutral-500 text-xs">{product.category.name}</td>
-                    <td className="p-4 text-xs">
-                      {flashPrice !== null ? (
+                    <td className="p-4 text-xs space-y-1">
+                      {(!country || country === 'PK') && (
                         <div className="flex flex-col">
-                          <span className="text-neutral-900 font-bold">PKR {flashPrice.toLocaleString()}</span>
-                          <span className="text-neutral-400 line-through text-[10px]">PKR {basePrice.toLocaleString()}</span>
+                          <span className="font-semibold text-neutral-800">
+                            🇵🇰 ₨ {product.salePricePK ? Number(product.salePricePK).toLocaleString() : Number(product.pricePK).toLocaleString()}
+                          </span>
+                          {product.salePricePK && (
+                            <span className="text-[10px] text-neutral-400 line-through">
+                              ₨ {Number(product.pricePK).toLocaleString()}
+                            </span>
+                          )}
                         </div>
-                      ) : (
-                        <span className="text-neutral-900 font-medium font-sans">PKR {basePrice.toLocaleString()}</span>
+                      )}
+                      {(!country || country === 'UK') && (
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-neutral-800">
+                            🇬🇧 £ {product.salePriceUK ? Number(product.salePriceUK).toLocaleString() : Number(product.priceUK).toLocaleString()}
+                          </span>
+                          {product.salePriceUK && (
+                            <span className="text-[10px] text-neutral-400 line-through">
+                              £ {Number(product.priceUK).toLocaleString()}
+                            </span>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="p-4 text-xs">

@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   LoaderCircle, Plus, Trash2, Save, Pencil, X, Check,
-  Truck, Globe, ChevronRight, ArrowLeft, Megaphone, Link, PhoneCall
+  Truck, Globe, ChevronRight, ArrowLeft, Megaphone, Link, PhoneCall,
+  UserPlus, Mail, Clock, ShieldCheck
 } from "lucide-react"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -505,15 +506,16 @@ function ShippingOptionsManager() {
 
 // ── Main Settings Page ────────────────────────────────────────────────────────
 export default function SettingsPage() {
+  const [activeCountry, setActiveCountry] = useState<'pk' | 'uk'>('pk')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [settings, setSettings] = useState<any>(null)
   const [currentSection, setCurrentSection] = useState<string | null>(null)
 
-  const fetchSettings = async () => {
+  const fetchSettings = async (countryCode = activeCountry) => {
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/settings')
+      const res = await fetch(`/api/admin/settings?country=${countryCode}`)
       const data = await res.json()
       if (data.success) {
         let payload = data.data || {}
@@ -541,7 +543,9 @@ export default function SettingsPage() {
     }
   }
 
-  useEffect(() => { fetchSettings() }, [])
+  useEffect(() => {
+    fetchSettings(activeCountry)
+  }, [activeCountry])
 
   const handleAddAnnouncement = () => {
     const currentBars = settings.announcementBars || []
@@ -596,7 +600,7 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true)
     try {
-      const res = await fetch('/api/admin/settings', {
+      const res = await fetch(`/api/admin/settings?country=${activeCountry}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),
@@ -658,6 +662,13 @@ export default function SettingsPage() {
       description: 'Configure standard or express carrier options, pricing tiers, and checkout options.',
       icon: Truck,
       color: 'text-blue-600 bg-blue-50 border-blue-100'
+    },
+    {
+      id: 'admin-invites',
+      title: 'Admin Invites',
+      description: 'Invite team members to access the admin dashboard. Each invite link expires in 48 hours.',
+      icon: UserPlus,
+      color: 'text-violet-600 bg-violet-50 border-violet-100'
     }
   ]
 
@@ -673,8 +684,8 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-5xl">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-neutral-200 pb-6">
-        <div>
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-neutral-200 pb-6">
+        <div className="space-y-3">
           <h1 className="text-3xl font-bold tracking-tight text-neutral-900 font-serif flex items-center gap-2">
             <span>Store Settings</span>
             {activeSectionObj && (
@@ -686,19 +697,42 @@ export default function SettingsPage() {
               </>
             )}
           </h1>
-          <p className="text-sm text-neutral-500 mt-1">
+          <p className="text-sm text-neutral-500">
             {activeSectionObj 
-              ? `Configure and fine-tune your global storefront ${activeSectionObj.title.toLowerCase()}.`
-              : 'Manage global storefront configurations, layout sections, and brand identity.'}
+              ? `Configure and fine-tune ${activeCountry === 'pk' ? '🇵🇰 Pakistan' : '🇬🇧 United Kingdom'} storefront ${activeSectionObj.title.toLowerCase()}.`
+              : 'Manage storefront configurations per country domain. Changes only apply to the selected country tab.'}
           </p>
+          {/* Country Tab Switcher */}
+          <div className="flex items-center border border-neutral-200 rounded-none p-0.5 w-fit bg-neutral-50">
+            <button
+              onClick={() => { setActiveCountry('pk'); setCurrentSection(null); }}
+              className={`flex items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                activeCountry === 'pk'
+                  ? 'bg-white text-black shadow-sm border border-neutral-200'
+                  : 'text-neutral-400 hover:text-neutral-700'
+              }`}
+            >
+              <span>🇵🇰</span> Pakistan (.pk)
+            </button>
+            <button
+              onClick={() => { setActiveCountry('uk'); setCurrentSection(null); }}
+              className={`flex items-center gap-2 px-4 py-2 text-[10px] font-bold uppercase tracking-widest transition-all ${
+                activeCountry === 'uk'
+                  ? 'bg-white text-black shadow-sm border border-neutral-200'
+                  : 'text-neutral-400 hover:text-neutral-700'
+              }`}
+            >
+              <span>🇬🇧</span> United Kingdom (.co.uk)
+            </button>
+          </div>
         </div>
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="rounded-none bg-black text-white hover:bg-neutral-800 text-[10px] font-bold uppercase tracking-[0.2em] px-8 py-6 h-auto self-start sm:self-auto shadow-none"
+          className="rounded-none bg-black text-white hover:bg-neutral-800 text-[10px] font-bold uppercase tracking-[0.2em] px-8 py-6 h-auto self-start shadow-none"
         >
           {saving ? <LoaderCircle className="w-4 h-4 animate-spin mr-2" /> : <Save className="w-4 h-4 mr-2" />}
-          Save All Changes
+          Save {activeCountry.toUpperCase()} Settings
         </Button>
       </div>
 
@@ -918,23 +952,43 @@ export default function SettingsPage() {
               <Card className="rounded-none border-neutral-200 bg-white shadow-none animate-in fade-in duration-300">
                 <CardHeader className="border-b border-neutral-100 pb-4">
                   <CardTitle className="text-[12px] font-bold uppercase tracking-[0.2em]">Contact Information</CardTitle>
+                  <p className="text-[10px] text-neutral-400 italic">
+                    {activeCountry === 'pk' ? '🇵🇰 Pakistan (.pk) settings' : '🇬🇧 United Kingdom (.co.uk) settings'}
+                  </p>
                 </CardHeader>
                 <CardContent className="pt-6 space-y-6">
-                  {[
-                    { id: 'contactEmail', label: 'Support Email', type: 'email', key: 'contactEmail' },
-                    { id: 'contactPhone', label: 'WhatsApp / Phone', type: 'tel', key: 'contactPhone' },
-                  ].map(field => (
-                    <div key={field.id} className="space-y-3">
-                      <Label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">{field.label}</Label>
-                      <Input type={field.type} value={settings[field.key]}
-                        onChange={e => setSettings({ ...settings, [field.key]: e.target.value })}
-                        className="rounded-none border-neutral-200 bg-white text-xs focus-visible:ring-black" />
-                    </div>
-                  ))}
                   <div className="space-y-3">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Studio Address</Label>
-                    <Textarea value={settings.contactAddress}
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Support Email</Label>
+                    <Input type="email" value={settings.contactEmail || ''}
+                      onChange={e => setSettings({ ...settings, contactEmail: e.target.value })}
+                      placeholder="concierge@calnza.pk"
+                      className="rounded-none border-neutral-200 bg-white text-xs focus-visible:ring-black" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">WhatsApp Number</Label>
+                    <p className="text-[10px] text-neutral-400 italic leading-relaxed">
+                      Used on all WhatsApp buttons: PDP &ldquo;Order via WhatsApp&rdquo;, Cart, Order history enquiries, transactional emails. Format: international digits only (e.g. <code className="bg-neutral-100 px-1">923001234567</code>)
+                    </p>
+                    <Input type="tel" value={settings.whatsappNumber || ''}
+                      onChange={e => setSettings({ ...settings, whatsappNumber: e.target.value })}
+                      placeholder="923001234567"
+                      className="rounded-none border-neutral-200 bg-white text-xs focus-visible:ring-black" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Contact Page Phone Display</Label>
+                    <p className="text-[10px] text-neutral-400 italic leading-relaxed">
+                      Displayed on the Contact page and footer only. Can include spaces, +, dashes (e.g. <code className="bg-neutral-100 px-1">+92 300 123 4567</code>)
+                    </p>
+                    <Input type="tel" value={settings.contactPhone || ''}
+                      onChange={e => setSettings({ ...settings, contactPhone: e.target.value })}
+                      placeholder="+92 300 123 4567"
+                      className="rounded-none border-neutral-200 bg-white text-xs focus-visible:ring-black" />
+                  </div>
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Studio / Office Address</Label>
+                    <Textarea value={settings.contactAddress || ''}
                       onChange={e => setSettings({ ...settings, contactAddress: e.target.value })}
+                      placeholder={activeCountry === 'uk' ? 'London, United Kingdom' : 'DHA Phase 6, Lahore, Pakistan'}
                       className="rounded-none border-neutral-200 bg-white text-xs focus-visible:ring-black min-h-[80px] resize-none" />
                   </div>
                 </CardContent>
@@ -946,21 +1000,24 @@ export default function SettingsPage() {
                 </CardHeader>
                 <CardContent className="pt-6 space-y-6">
                   {[
-                    { key: 'instagram', label: 'Instagram URL', placeholder: 'https://instagram.com/...' },
-                    { key: 'facebook', label: 'Facebook URL', placeholder: 'https://facebook.com/...' },
-                    { key: 'whatsapp', label: 'WhatsApp Link', placeholder: 'https://wa.me/...' },
+                    { key: 'instagram', label: 'Instagram URL', placeholder: 'https://instagram.com/calnza' },
+                    { key: 'facebook', label: 'Facebook URL', placeholder: 'https://facebook.com/calnza' },
                   ].map(s => (
                     <div key={s.key} className="space-y-3">
                       <Label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">{s.label}</Label>
-                      <Input value={settings.socialLinks[s.key]}
+                      <Input value={(settings.socialLinks || {})[s.key] || ''}
                         onChange={e => setSettings({
                           ...settings,
-                          socialLinks: { ...settings.socialLinks, [s.key]: e.target.value },
+                          socialLinks: { ...(settings.socialLinks || {}), [s.key]: e.target.value },
                         })}
                         placeholder={s.placeholder}
                         className="rounded-none border-neutral-200 bg-white text-xs focus-visible:ring-black" />
                     </div>
                   ))}
+                  <div className="p-3 bg-neutral-50 border border-neutral-200 text-[10px] text-neutral-500">
+                    <p className="font-bold uppercase tracking-widest mb-1">WhatsApp Social Link</p>
+                    <p className="italic">The WhatsApp social icon in the footer uses the <strong>WhatsApp Number</strong> field above. Set it in Contact Information.</p>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -982,8 +1039,170 @@ export default function SettingsPage() {
               </CardContent>
             </Card>
           )}
+
+          {currentSection === 'admin-invites' && (
+            <AdminInvitesPanel />
+          )}
         </div>
       )}
     </div>
   )
 }
+
+// ── Admin Invites Panel ───────────────────────────────────────────────────────
+function AdminInvitesPanel() {
+  const [email, setEmail] = useState('')
+  const [sending, setSending] = useState(false)
+  const [invites, setInvites] = useState<any[]>([])
+  const [loadingInvites, setLoadingInvites] = useState(true)
+
+  const fetchInvites = async () => {
+    setLoadingInvites(true)
+    try {
+      const res = await fetch('/api/admin/invites')
+      const data = await res.json()
+      if (data.invites) setInvites(data.invites)
+    } catch {
+      // silently fail
+    } finally {
+      setLoadingInvites(false)
+    }
+  }
+
+  useEffect(() => { fetchInvites() }, [])
+
+  const handleSendInvite = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email.trim()) return
+    setSending(true)
+    try {
+      const res = await fetch('/api/admin/invites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        toast.success(`Invite sent to ${email}`)
+        setEmail('')
+        fetchInvites()
+      } else {
+        toast.error(data.error || 'Failed to send invite')
+      }
+    } catch {
+      toast.error('Network error — try again')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const formatExpiry = (expiresAt: string) => {
+    const diff = new Date(expiresAt).getTime() - Date.now()
+    const hours = Math.floor(diff / 3600000)
+    const mins  = Math.floor((diff % 3600000) / 60000)
+    if (hours > 0) return `Expires in ${hours}h ${mins}m`
+    if (mins > 0)  return `Expires in ${mins}m`
+    return 'Expiring soon'
+  }
+
+  return (
+    <Card className="rounded-none border-neutral-200 bg-white shadow-none animate-in fade-in duration-300">
+      <CardHeader className="border-b border-neutral-100 pb-4">
+        <CardTitle className="text-[12px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+          <UserPlus className="w-4 h-4" /> Admin Invites
+        </CardTitle>
+        <CardDescription className="text-xs">
+          Send an invite link to a team member's email. They will receive a direct message box
+          with a link to set their password and activate their admin account. Invites expire in 48 hours.
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="pt-6 space-y-8">
+        {/* Send Invite Form */}
+        <form onSubmit={handleSendInvite} className="space-y-4">
+          <Label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 block">
+            Invite by Email
+          </Label>
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-300" />
+              <Input
+                type="email"
+                required
+                placeholder="team@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="rounded-none border-neutral-200 text-xs pl-10 h-11"
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={sending || !email.trim()}
+              className="rounded-none bg-black text-white hover:bg-neutral-800 text-[10px] font-bold uppercase tracking-[0.2em] px-6 h-11 shadow-none shrink-0"
+            >
+              {sending
+                ? <LoaderCircle className="w-3.5 h-3.5 animate-spin" />
+                : <><UserPlus className="w-3.5 h-3.5 mr-2" /> Send Invite</>
+              }
+            </Button>
+          </div>
+          <p className="text-[10px] text-neutral-400">
+            An email will be sent with a secure link. The invite expires in 48 hours.
+            If the person doesn't have an account, one will be created for them as an Admin.
+          </p>
+        </form>
+
+        {/* Pending Invites List */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-neutral-100 pb-2">
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.22em] text-neutral-500">
+              Pending Invites
+            </h3>
+            <button
+              onClick={fetchInvites}
+              className="text-[9px] text-neutral-400 hover:text-black uppercase tracking-widest font-bold transition-colors"
+            >
+              Refresh
+            </button>
+          </div>
+
+          {loadingInvites ? (
+            <div className="flex items-center justify-center py-8">
+              <LoaderCircle className="w-5 h-5 animate-spin text-neutral-300" />
+            </div>
+          ) : invites.length === 0 ? (
+            <div className="border border-dashed border-neutral-200 py-10 text-center">
+              <ShieldCheck className="w-8 h-8 text-neutral-200 mx-auto mb-2" />
+              <p className="text-[10px] uppercase tracking-widest text-neutral-300 font-bold">No pending invites</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {invites.map((inv: any) => (
+                <div key={inv.id} className="flex items-center justify-between p-4 border border-neutral-100 bg-neutral-50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center">
+                      <Mail className="w-3.5 h-3.5 text-violet-500" />
+                    </div>
+                    <div>
+                      <p className="text-[12px] font-medium text-neutral-900">{inv.email}</p>
+                      <p className="text-[10px] text-neutral-400">
+                        Invited by <span className="font-medium">{inv.invitedBy}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="flex items-center gap-1 text-[10px] text-amber-600 font-bold">
+                      <Clock className="w-3 h-3" />
+                      {formatExpiry(inv.expiresAt)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+

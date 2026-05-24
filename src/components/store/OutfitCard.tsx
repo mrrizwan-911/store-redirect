@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { formatPrice } from '@/lib/constants/site'
 
 interface OutfitCardProps {
   outfit: {
@@ -86,7 +87,7 @@ export function OutfitCard({ outfit, featured = false }: OutfitCardProps) {
           </div>
           <div className="flex-shrink-0 text-right">
             <p className="text-sm font-semibold text-neutral-900 tabular-nums">
-              PKR {outfit.totalPrice.toLocaleString()}
+              {formatPrice(outfit.totalPrice)}
             </p>
             <p className="text-[9px] uppercase tracking-widest text-neutral-300 mt-0.5">
               Complete look

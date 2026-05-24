@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import { db } from '@/lib/db/client'
 import { HeroBanner } from '@/components/store/home/HeroBanner'
 import { CategoryTiles } from '@/components/store/home/CategoryTiles'
@@ -7,8 +8,10 @@ import { LookbookTeaser } from '@/components/store/home/LookbookTeaser'
 import { NewsletterSection } from '@/components/store/home/NewsletterSection'
 import { RecentlyViewed } from '@/components/store/shared/RecentlyViewed'
 import { enrichProductsWithFlashSales } from '@/lib/services/payment/priceValidator'
+import { SITE_COUNTRY } from '@/lib/constants/site'
 
-export const dynamic = 'force-dynamic'
+// ISR: revalidate homepage every 60 seconds — cached at CDN edge
+export const revalidate = 60
 
 async function fetchProducts(where: object, orderBy: object, take: number) {
   return db.product.findMany({
@@ -30,6 +33,9 @@ export default async function Homepage() {
     fetchProducts({}, { createdAt: 'desc' }, 8),
   ])
 
+  // Determine which price field to use based on site country
+  const isUK = SITE_COUNTRY === 'UK'
+
   function mapProduct(p: Awaited<ReturnType<typeof fetchProducts>>[number]) {
     const totalStock = p.variants.reduce((sum, v) => sum + v.stock, 0)
     const avgRating = p.reviews.length
@@ -40,22 +46,27 @@ export default async function Homepage() {
     // Created within last 14 days = "New" badge
     const isNew = (Date.now() - new Date(p.createdAt).getTime()) < 14 * 24 * 60 * 60 * 1000
 
+    const currentPrice = isUK ? Number(p.priceUK || 0) : Number(p.pricePK || 0)
+    const currentSalePrice = isUK
+      ? (p.salePriceUK ? Number(p.salePriceUK) : undefined)
+      : (p.salePricePK ? Number(p.salePricePK) : undefined)
+
     return {
       id: p.id,
       name: p.name,
       slug: p.slug,
       imageUrl: primaryImage?.url ?? '/placeholder.png',
       secondaryImageUrl: secondaryImage?.url,
-      basePrice: Number(p.basePrice),
-      price: Number(p.basePrice),
-      salePrice: p.salePrice ? Number(p.salePrice) : undefined,
+      basePrice: currentPrice,
+      price: currentPrice,
+      salePrice: currentSalePrice,
       category: p.category.name,
       sku: p.sku,
       description: p.description,
       avgRating: avgRating ? Math.round(avgRating * 10) / 10 : undefined,
       reviewCount: p.reviews.length,
       isBadgeNew: isNew,
-      isBadgeSale: !!p.salePrice,
+      isBadgeSale: !!currentSalePrice,
       isLowStock: totalStock > 0 && totalStock <= 5,
       stockCount: totalStock,
     }

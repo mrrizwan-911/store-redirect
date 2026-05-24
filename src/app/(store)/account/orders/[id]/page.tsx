@@ -22,7 +22,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import Image from 'next/image'
 import { useAppSelector } from '@/store/hooks'
 import { cn } from '@/lib/utils'
-import { generateWhatsAppOrderConfirmationUrl } from '@/lib/utils/whatsapp'
+import { generateWhatsAppOrderInquiryUrl } from '@/lib/utils/whatsapp'
+import { formatPrice } from '@/lib/constants/site'
 
 interface OrderDetail {
   id: string
@@ -72,8 +73,15 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [downloadingInvoice, setDownloadingInvoice] = useState(false)
+  const [whatsappPhone, setWhatsappPhone] = useState('')
 
   useEffect(() => {
+    // Fetch dynamic WhatsApp number
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(d => { if (d.success && d.data?.whatsappNumber) setWhatsappPhone(d.data.whatsappNumber.replace(/[^0-9]/g, '')) })
+      .catch(() => {})
+
     async function fetchOrderDetail() {
       try {
         const res = await fetch(`/api/account/orders/${params.id}`)
@@ -119,11 +127,16 @@ export default function OrderDetailPage() {
 
   function handleWhatsApp() {
     if (!order) return
-    const url = generateWhatsAppOrderConfirmationUrl({
+    const url = generateWhatsAppOrderInquiryUrl({
       orderNumber: order.orderNumber,
+      status: order.status,
       total: Number(order.total),
-      paymentMethod: order.payment.method.replace(/_/g, ' '),
+      createdAt: order.createdAt,
       itemsCount: order.items.length,
+      trackingNumber: order.trackingNumber,
+      carrier: order.carrier,
+      paymentMethod: order.payment.method.replace(/_/g, ' '),
+      phoneOverride: whatsappPhone,
     })
     window.open(url, '_blank', 'noopener,noreferrer')
   }
@@ -282,7 +295,7 @@ export default function OrderDetailPage() {
                   </div>
                   <div className="flex justify-between items-end">
                     <p className="text-xs text-neutral-600 font-medium">Qty: {item.quantity}</p>
-                    <p className="text-sm font-bold font-mono text-black">PKR {Number(item.price).toLocaleString()}</p>
+                    <p className="text-sm font-bold font-mono text-black">{formatPrice(Number(item.price))}</p>
                   </div>
                   {order.status === 'DELIVERED' && (
                     <div className="mt-4">
@@ -338,21 +351,21 @@ export default function OrderDetailPage() {
             <div className="space-y-3 text-sm">
               <div className="flex justify-between text-neutral-600 font-medium">
                 <span>Subtotal</span>
-                <span className="font-mono text-black">PKR {Number(order.subtotal).toLocaleString()}</span>
+                <span className="font-mono text-black">{formatPrice(Number(order.subtotal))}</span>
               </div>
               <div className="flex justify-between text-neutral-600 font-medium">
                 <span>Shipping</span>
-                <span className="font-mono text-black">PKR {Number(order.shippingCost).toLocaleString()}</span>
+                <span className="font-mono text-black">{formatPrice(Number(order.shippingCost))}</span>
               </div>
               {Number(order.discount) > 0 && (
                 <div className="flex justify-between text-red-600 font-bold">
                   <span>Discount</span>
-                  <span className="font-mono">- PKR {Number(order.discount).toLocaleString()}</span>
+                  <span className="font-mono">-{formatPrice(Number(order.discount))}</span>
                 </div>
               )}
               <div className="pt-3 border-t border-neutral-200 flex justify-between font-bold text-lg text-black">
                 <span className="font-display">Total</span>
-                <span className="font-mono font-bold">PKR {Number(order.total).toLocaleString()}</span>
+                <span className="font-mono font-bold">{formatPrice(Number(order.total))}</span>
               </div>
             </div>
           </div>

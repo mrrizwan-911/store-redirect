@@ -1,6 +1,7 @@
 import { db } from '@/lib/db/client'
 import { SearchPageClient } from '@/components/store/search/SearchPageClient'
 import { Suspense } from 'react'
+import { SITE_COUNTRY } from '@/lib/constants/site'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,8 +26,11 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   const enriched = featured.map((p) => ({
     ...p,
-    basePrice: Number(p.basePrice),
-    salePrice: p.salePrice ? Number(p.salePrice) : null,
+    basePrice: SITE_COUNTRY === 'UK' ? Number(p.priceUK || 0) : Number(p.pricePK || 0),
+    price: SITE_COUNTRY === 'UK' ? Number(p.priceUK || 0) : Number(p.pricePK || 0),
+    salePrice: SITE_COUNTRY === 'UK'
+      ? (p.salePriceUK ? Number(p.salePriceUK) : null)
+      : (p.salePricePK ? Number(p.salePricePK) : null),
     variants: p.variants.map((v) => ({
       ...v,
       title: v.title,

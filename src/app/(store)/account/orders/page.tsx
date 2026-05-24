@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Package, Search, ChevronRight, ArrowRight, Clock } from 'lucide-react'
+import { Package, ArrowRight, MessageCircle } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useAppSelector } from '@/store/hooks'
+import { generateWhatsAppOrderInquiryUrl } from '@/lib/utils/whatsapp'
+import { formatPrice } from '@/lib/constants/site'
 
 interface Order {
   id: string
@@ -34,6 +36,7 @@ export default function OrdersHistoryPage() {
   const [orders, setOrders] = useState<Order[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [pagination, setPagination] = useState({ page: 1, pages: 1 })
+  const [whatsappPhone, setWhatsappPhone] = useState('')
   const { isAuthenticated } = useAppSelector((state) => state.auth)
 
   useEffect(() => {
@@ -42,6 +45,10 @@ export default function OrdersHistoryPage() {
       return
     }
     fetchOrders(1)
+    fetch('/api/settings')
+      .then(r => r.json())
+      .then(d => { if (d.success && d.data?.whatsappNumber) setWhatsappPhone(d.data.whatsappNumber.replace(/[^0-9]/g, '')) })
+      .catch(() => {})
   }, [isAuthenticated])
 
   async function fetchOrders(page: number) {
@@ -58,6 +65,18 @@ export default function OrdersHistoryPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  function handleInquiry(order: Order) {
+    const url = generateWhatsAppOrderInquiryUrl({
+      orderNumber: order.orderNumber,
+      status: order.status,
+      total: Number(order.total),
+      createdAt: order.createdAt,
+      itemsCount: order._count.items,
+      phoneOverride: whatsappPhone,
+    })
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   if (isLoading && orders.length === 0) {
@@ -111,15 +130,24 @@ export default function OrdersHistoryPage() {
                       <span className="text-xs text-neutral-600 font-medium">{order._count.items} Products</span>
                     </td>
                     <td className="py-6 align-middle">
-                      <span className="text-[13px] font-bold font-mono">PKR {Number(order.total).toLocaleString()}</span>
+                      <span className="text-[13px] font-bold font-mono">{formatPrice(order.total)}</span>
                     </td>
                     <td className="py-6 text-right align-middle">
-                      <Link
-                        href={`/account/orders/${order.id}`}
-                        className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-black hover:text-white transition-all text-neutral-400"
-                      >
-                        <ArrowRight className="w-4 h-4 stroke-[2]" />
-                      </Link>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => handleInquiry(order)}
+                          title="Enquire via WhatsApp"
+                          className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-[#25D366] hover:text-white transition-all text-neutral-400"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                        </button>
+                        <Link
+                          href={`/account/orders/${order.id}`}
+                          className="h-9 w-9 flex items-center justify-center rounded-full hover:bg-black hover:text-white transition-all text-neutral-400"
+                        >
+                          <ArrowRight className="w-4 h-4 stroke-[2]" />
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -130,10 +158,9 @@ export default function OrdersHistoryPage() {
           {/* Mobile View */}
           <div className="md:hidden space-y-4">
             {orders.map((order) => (
-              <Link
+              <div
                 key={order.id}
-                href={`/account/orders/${order.id}`}
-                className="block p-5 bg-white border border-neutral-200 active:bg-neutral-50 transition-colors rounded-[var(--radius)] shadow-sm"
+                className="block p-5 bg-white border border-neutral-200 transition-colors rounded-[var(--radius)] shadow-sm"
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="space-y-1 text-black">
@@ -152,9 +179,23 @@ export default function OrdersHistoryPage() {
                     <Package className="w-3 h-3 stroke-[2]" />
                     <span className="text-[10px] uppercase tracking-widest">{order._count.items} Items</span>
                   </div>
-                  <span className="text-sm font-bold font-mono text-black">PKR {Number(order.total).toLocaleString()}</span>
+                  <span className="text-sm font-bold font-mono text-black">{formatPrice(order.total)}</span>
                 </div>
-              </Link>
+                <div className="flex gap-2 mt-4 pt-4 border-t border-neutral-100">
+                  <button
+                    onClick={() => handleInquiry(order)}
+                    className="flex-1 h-9 rounded-[8px] border border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white transition-all text-[9px] uppercase tracking-widest font-bold flex items-center justify-center gap-1.5"
+                  >
+                    <MessageCircle className="w-3 h-3" /> Enquire
+                  </button>
+                  <Link
+                    href={`/account/orders/${order.id}`}
+                    className="flex-1 h-9 rounded-[8px] border border-neutral-200 text-black hover:bg-black hover:text-white transition-all text-[9px] uppercase tracking-widest font-bold flex items-center justify-center gap-1.5"
+                  >
+                    View Details <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
             ))}
           </div>
 

@@ -716,7 +716,7 @@ export function CheckoutClient() {
                         Math.floor((subtotal + shippingCost) / 100)
                       )
                     }, (_, i) => (i + 1) * 100).map(val => (
-                      <option key={val} value={val}>Use {val} pts (PKR {val} off)</option>
+                      <option key={val} value={val}>Use {val} pts ({formatPrice(val)} off)</option>
                     ))}
                   </select>
                 </div>

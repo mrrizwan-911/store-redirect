@@ -39,6 +39,7 @@ const productFilterSchema = z
     sort: z.string().optional(),
     search: z.string().optional(),
     q: z.string().optional(),
+    country: z.string().optional(),
     featured: z
       .string()
       .optional()
@@ -88,7 +89,11 @@ export async function GET(req: NextRequest) {
     search,
     q,
     featured,
+    country = 'PK',
   } = parsedParams.data
+
+  // Determine which region to filter by (default PK)
+  const regionFilter = { regions: { has: country } }
 
   const searchTerm = q || search
 
@@ -111,6 +116,7 @@ export async function GET(req: NextRequest) {
 
   const where: any = {
     isActive: true,
+    ...regionFilter,
     ...(featured && { isFeatured: true }),
     ...categoryFilter,
     basePrice: { gte: minPrice, lte: maxPrice },
@@ -149,6 +155,10 @@ export async function GET(req: NextRequest) {
       db.product.count({ where }),
     ])
 
+    // Return country-specific price fields for the storefront
+    const fieldPrice = country === 'UK' ? 'priceUK' as const : 'pricePK' as const
+    const fieldSalePrice = country === 'UK' ? 'salePriceUK' as const : 'salePricePK' as const
+
     const enrichedProducts = products.map((p) => {
       const avgRating =
         p.reviews.length > 0
@@ -156,6 +166,8 @@ export async function GET(req: NextRequest) {
           : null
       return {
         ...p,
+        price: Number(p[fieldPrice] || 0),
+        salePrice: p[fieldSalePrice] ? Number(p[fieldSalePrice]) : null,
         avgRating,
         reviewCount: p.reviews.length,
         reviews: undefined,

@@ -9,6 +9,7 @@ export const couponSchema = z.object({
   maxUsesPerUser: z.number().int().positive().optional().nullable(),
   expiresAt: z.string().datetime().optional().nullable(),
   isActive: z.boolean().default(true),
+  country: z.string().optional().default('ALL'),
 }).superRefine((data, ctx) => {
   if (data.type === 'PERCENTAGE' && data.discountValue > 100) {
     ctx.addIssue({

@@ -7,11 +7,12 @@ import { logger } from "@/lib/utils/logger";
 import { QuotationStatus } from "@prisma/client";
 import Link from "next/link";
 import { HelpCircle } from "lucide-react";
+import { CountryFilterToggle } from "@/components/admin/orders/CountryFilterToggle";
 
 export const dynamic = "force-dynamic";
 
 interface QuotationsPageProps {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; country?: string }>;
 }
 
 export default async function QuotationsPage({ searchParams }: QuotationsPageProps) {
@@ -27,15 +28,40 @@ export default async function QuotationsPage({ searchParams }: QuotationsPagePro
 
   const params = await searchParams;
   const status = params.status || "all";
+  const country = params.country || "";
 
   try {
+    const whereClause: any = {};
+    if (status !== "all") {
+      whereClause.status = status as QuotationStatus;
+    }
+    
+    if (country === "PK") {
+      whereClause.OR = [
+        { country: { equals: "PK", mode: "insensitive" } },
+        { country: { equals: "Pakistan", mode: "insensitive" } },
+        { country: null },
+        { country: "" }
+      ];
+    } else if (country === "UK") {
+      whereClause.OR = [
+        { country: { equals: "UK", mode: "insensitive" } },
+        { country: { equals: "United Kingdom", mode: "insensitive" } },
+        { country: { equals: "GB", mode: "insensitive" } }
+      ];
+    }
+
+    const countWhereClause = { ...whereClause };
+    delete countWhereClause.status;
+
     // Fetch filtered list + all counts in parallel
     const [quotations, allCounts] = await Promise.all([
       db.quotation.findMany({
-        where: status !== "all" ? { status: status as QuotationStatus } : {},
+        where: whereClause,
         orderBy: { createdAt: "desc" },
       }),
       db.quotation.groupBy({
+        where: countWhereClause,
         by: ["status"],
         _count: { id: true },
       }),
@@ -86,6 +112,8 @@ export default async function QuotationsPage({ searchParams }: QuotationsPagePro
               Guide
             </Link>
           </div>
+
+          <CountryFilterToggle currentCountry={country} resourceName="Quotations" />
 
           {/* ── Tabs ────────────────────────────────────────────────────── */}
           <QuotationTabs counts={counts as any} />

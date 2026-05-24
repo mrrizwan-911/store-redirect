@@ -23,10 +23,9 @@ export async function getOrders({
     whereClause.status = status as OrderStatus
   }
 
-  // country filter removed - field not in schema
-  // if (country) {
-  //   whereClause.country = country
-  // }
+  if (country) {
+    whereClause.country = country
+  }
 
   if (search) {
     whereClause.OR = [

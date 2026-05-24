@@ -7,6 +7,7 @@ import { Slider } from '@/components/ui/slider'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
+import { formatPrice } from '@/lib/constants/site'
 
 interface FilterState {
   category?: string
@@ -167,8 +168,8 @@ export function ProductFilters({ onFilterChange, currentFilters, categories = []
                 className="mb-6"
               />
               <div className="flex justify-between text-[10px] font-mono uppercase tracking-tighter text-neutral-500">
-                <span>PKR {currentFilters.minPrice.toLocaleString()}</span>
-                <span>PKR {currentFilters.maxPrice.toLocaleString()}</span>
+                <span>${formatPrice(currentFilters.minPrice)}</span>
+                <span>${formatPrice(currentFilters.maxPrice)}</span>
               </div>
             </motion.div>
           )}

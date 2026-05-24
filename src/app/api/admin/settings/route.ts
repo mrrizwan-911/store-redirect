@@ -21,6 +21,7 @@ const settingsSchema = z.object({
   contactEmail: z.string().email().optional(),
   contactPhone: z.string().optional(),
   contactAddress: z.string().optional(),
+  whatsappNumber: z.string().optional(),
   showPaymentMethods: z.boolean().optional(),
   paymentMethods: z.array(z.string()).optional()
 })
@@ -30,9 +31,45 @@ export async function GET(req: NextRequest) {
   if (authResponse instanceof NextResponse) return authResponse
 
   try {
-    const settings = await db.siteSettings.findUnique({
-      where: { id: 'global' }
+    const url = new URL(req.url)
+    const country = url.searchParams.get('country')?.toLowerCase() || 'pk'
+
+    let settings = await db.siteSettings.findUnique({
+      where: { id: country }
     })
+
+    if (!settings) {
+      const globalSettings = await db.siteSettings.findUnique({
+        where: { id: 'global' }
+      })
+
+      settings = await db.siteSettings.create({
+        data: {
+          id: country,
+          announcementText: globalSettings?.announcementText || "Free delivery on orders over PKR 3,000 | New arrivals every Friday",
+          showAnnouncement: globalSettings?.showAnnouncement !== undefined ? globalSettings.showAnnouncement : true,
+          announcementBars: globalSettings?.announcementBars || [
+            {
+              id: 'default-legacy',
+              text: 'Free delivery on orders over PKR 3,000 | New arrivals every Friday',
+              target: 'both',
+              isActive: true
+            }
+          ],
+          footerLogo: globalSettings?.footerLogo || null,
+          footerTitle: globalSettings?.footerTitle || "CALNZA",
+          footerDescription: globalSettings?.footerDescription || "Redefining luxury fashion for the modern era. Curated with surgical precision and ethical craftsmanship in Pakistan.",
+          footerLinks: globalSettings?.footerLinks || { about: [], categories: [], help: [] },
+          socialLinks: globalSettings?.socialLinks || { instagram: "", facebook: "", whatsapp: "" },
+          contactEmail: globalSettings?.contactEmail || "concierge@calnza.pk",
+          contactPhone: globalSettings?.contactPhone || "",
+          contactAddress: globalSettings?.contactAddress || "DHA Phase 6, Lahore, Pakistan",
+          whatsappNumber: globalSettings?.whatsappNumber || "",
+          showPaymentMethods: globalSettings?.showPaymentMethods !== undefined ? globalSettings.showPaymentMethods : true,
+          paymentMethods: globalSettings?.paymentMethods || ["COD", "EASYPAISA", "VISA", "MASTERCARD"]
+        }
+      })
+    }
 
     return NextResponse.json({ success: true, data: settings })
   } catch (error) {
@@ -49,19 +86,22 @@ export async function PATCH(req: NextRequest) {
   if (authResponse instanceof NextResponse) return authResponse
 
   try {
+    const url = new URL(req.url)
+    const country = url.searchParams.get('country')?.toLowerCase() || 'pk'
+
     const body = await req.json()
     const validated = settingsSchema.parse(body)
 
     const settings = await db.siteSettings.upsert({
-      where: { id: 'global' },
+      where: { id: country },
       update: validated,
       create: {
-        id: 'global',
+        id: country,
         ...validated
       }
     })
 
-    logger.info('Site settings updated', { adminId: (authResponse as any).userId })
+    logger.info('Site settings updated', { country, adminId: (authResponse as any).userId })
 
     return NextResponse.json({ success: true, data: settings })
   } catch (error) {

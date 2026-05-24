@@ -1,23 +1,28 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Plus, Edit, Trash2, CircleCheck, CircleX, LoaderCircle, LayoutGrid, Eye, EyeOff } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { CountryFilterToggle } from '@/components/admin/orders/CountryFilterToggle'
 
-export default function AdminOutfitsPage() {
+function OutfitsContent() {
   const [outfits, setOutfits] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'all' | 'published' | 'draft'>('all')
   const [deleting, setDeleting] = useState<string | null>(null)
 
+  const searchParams = useSearchParams()
+  const country = searchParams.get('country') || ''
+
   useEffect(() => {
     fetchOutfits()
-  }, [])
+  }, [country])
 
   const fetchOutfits = async () => {
     try {
-      const res = await fetch('/api/admin/outfits')
+      const res = await fetch(`/api/admin/outfits?country=${country}`)
       const json = await res.json()
       if (json.success) setOutfits(json.data)
     } catch (error) {
@@ -73,6 +78,8 @@ export default function AdminOutfitsPage() {
           Create New Look
         </Link>
       </div>
+
+      <CountryFilterToggle currentCountry={country} resourceName="Outfits" />
 
       {/* Stats */}
       {!loading && (
@@ -236,5 +243,17 @@ export default function AdminOutfitsPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function AdminOutfitsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-64">
+        <LoaderCircle className="w-6 h-6 animate-spin text-neutral-300" />
+      </div>
+    }>
+      <OutfitsContent />
+    </Suspense>
   )
 }

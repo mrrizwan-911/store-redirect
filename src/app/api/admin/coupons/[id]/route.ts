@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ success: false, error: parsed.error.issues[0].message }, { status: 400 });
     }
 
-    const { code, type, discountValue, minOrderValue, maxUses, maxUsesPerUser, expiresAt, isActive } = parsed.data;
+    const { code, type, discountValue, minOrderValue, maxUses, maxUsesPerUser, expiresAt, isActive, country } = parsed.data;
 
     // Check code uniqueness if changing code
     const existing = await db.coupon.findUnique({ where: { code } });
@@ -44,6 +44,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         maxUsesPerUser,
         expiresAt: expiresAt ? new Date(expiresAt) : null,
         isActive,
+        country: country || 'ALL',
       }
     });
 

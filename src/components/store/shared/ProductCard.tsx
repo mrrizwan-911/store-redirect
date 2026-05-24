@@ -34,6 +34,7 @@ interface ProductCardProps {
 }
 
 import { useFlashSaleTimer } from '@/hooks/useFlashSaleTimer'
+import { formatPrice } from '@/lib/utils/currency'
 
 export function ProductCard({
   id,
@@ -215,16 +216,16 @@ export function ProductCard({
           <div className="flex items-center gap-2 min-w-0">
             {hasActiveFlashSale ? (
               <>
-                <span className="text-sm font-bold text-black font-sans whitespace-nowrap">PKR {flashSalePrice.toLocaleString()}</span>
-                <span className="text-xs text-neutral-400 line-through font-sans whitespace-nowrap">PKR {price.toLocaleString()}</span>
+                <span className="text-sm font-bold text-black font-sans whitespace-nowrap">{formatPrice(flashSalePrice)}</span>
+                <span className="text-xs text-neutral-400 line-through font-sans whitespace-nowrap">{formatPrice(price)}</span>
               </>
             ) : salePrice ? (
               <>
-                <span className="text-sm font-bold text-black font-sans whitespace-nowrap">PKR {salePrice.toLocaleString()}</span>
-                <span className="text-xs text-neutral-400 line-through font-sans whitespace-nowrap">PKR {price.toLocaleString()}</span>
+                <span className="text-sm font-bold text-black font-sans whitespace-nowrap">{formatPrice(salePrice)}</span>
+                <span className="text-xs text-neutral-400 line-through font-sans whitespace-nowrap">{formatPrice(price)}</span>
               </>
             ) : (
-              <span className="text-sm font-bold text-black font-sans whitespace-nowrap">PKR {price.toLocaleString()}</span>
+              <span className="text-sm font-bold text-black font-sans whitespace-nowrap">{formatPrice(price)}</span>
             )}
           </div>
 

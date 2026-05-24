@@ -4,14 +4,16 @@ import { getUserSession } from '@/lib/auth/session';
 import LoyaltyStats from '@/components/admin/loyalty/LoyaltyStats';
 import LoyaltyFilters from '@/components/admin/loyalty/LoyaltyFilters';
 import { LoyaltyTable } from '@/components/admin/loyalty/LoyaltyTable';
+import { CountryFilterToggle } from '@/components/admin/orders/CountryFilterToggle';
 
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     search?: string;
     tier?: string;
-  };
+    country?: string;
+  }>;
 }
 
 export default async function AdminLoyaltyPage({ searchParams }: PageProps) {
@@ -22,20 +24,33 @@ export default async function AdminLoyaltyPage({ searchParams }: PageProps) {
     redirect('/login');
   }
 
-  const { search, tier } = params;
+  const { search, tier, country } = params;
   const currentTier = tier || 'all';
+  const currentCountry = country || '';
 
-  // 2. Fetch Aggregates
-  const totalMembers = await db.loyaltyAccount.count();
+  const countryFilter = currentCountry
+    ? { user: { country: currentCountry } }
+    : {};
+
+  // 2. Fetch Aggregates filtered by region
+  const totalMembers = await db.loyaltyAccount.count({
+    where: countryFilter,
+  });
 
   const issuedAgg = await db.loyaltyEvent.aggregate({
     _sum: { points: true },
-    where: { points: { gt: 0 } },
+    where: {
+      points: { gt: 0 },
+      account: countryFilter,
+    },
   });
 
   const redeemedAgg = await db.loyaltyEvent.aggregate({
     _sum: { points: true },
-    where: { points: { lt: 0 } },
+    where: {
+      points: { lt: 0 },
+      account: countryFilter,
+    },
   });
 
   const totalIssued = issuedAgg._sum.points || 0;
@@ -46,6 +61,7 @@ export default async function AdminLoyaltyPage({ searchParams }: PageProps) {
   const accounts = await db.loyaltyAccount.findMany({
     where: {
       AND: [
+        countryFilter,
         currentTier !== 'all' ? { tier: currentTier as any } : {},
         search ? {
           user: {
@@ -78,6 +94,9 @@ export default async function AdminLoyaltyPage({ searchParams }: PageProps) {
             Manage customer rewards, tiers, and point adjustments.
           </p>
         </div>
+
+        {/* Region Filter */}
+        <CountryFilterToggle currentCountry={currentCountry} resourceName="Loyalty Accounts" />
 
         {/* Stats Section */}
         <LoyaltyStats

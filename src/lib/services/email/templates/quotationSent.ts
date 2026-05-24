@@ -12,10 +12,10 @@ export function quotationSentTemplate(
   items: QuotationItem[],
   subtotal: number,
   expiryDate: string,
-  pdfUrl?: string
+  pdfUrl?: string,
+  whatsappNumber: string = ''
 ): { subject: string; html: string; text: string } {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://calnza.com'
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? ''
   const subject = `Your Calnza Quotation #${quotationNumber} Is Ready`
 
   const textItems = items.map(i => `  ${i.name}  ×${i.quantity}  @ PKR ${i.unitPrice.toLocaleString('en-PK')}  =  PKR ${i.totalPrice.toLocaleString('en-PK')}`).join('\n')

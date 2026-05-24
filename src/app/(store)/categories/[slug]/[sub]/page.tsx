@@ -3,6 +3,7 @@ import { ProductListingClient } from '@/components/store/plp/ProductListingClien
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { enrichProductsWithFlashSales } from '@/lib/services/payment/priceValidator'
+import { SITE_COUNTRY } from '@/lib/constants/site'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,6 +49,9 @@ export default async function SubcategoryPage({
   if (sortField === 'price') sortField = 'basePrice'
   if (sortField === 'date') sortField = 'createdAt'
 
+  // Price field based on region
+  const priceField = SITE_COUNTRY === 'UK' ? 'priceUK' : 'pricePK'
+
   // Products strictly in this sub-category
   const where: any = {
     isActive: true,
@@ -55,7 +59,7 @@ export default async function SubcategoryPage({
       slug: sub,
       parent: { slug: slug },
     },
-    basePrice: { gte: minPrice, lte: maxPrice },
+    [priceField]: { gte: minPrice, lte: maxPrice },
     variants: { some: { stock: { gt: 0 } } },
   }
 
@@ -84,13 +88,17 @@ export default async function SubcategoryPage({
         p.reviews.length > 0
           ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
           : null
+      const currentPrice = SITE_COUNTRY === 'UK' ? Number(p.priceUK) : Number(p.pricePK)
+      const currentSalePrice = SITE_COUNTRY === 'UK'
+        ? (p.salePriceUK ? Number(p.salePriceUK) : null)
+        : (p.salePricePK ? Number(p.salePricePK) : null)
       return {
         ...p,
         avgRating,
         reviewCount: p.reviews.length,
         reviews: undefined,
-        basePrice: Number(p.basePrice),
-        salePrice: p.salePrice ? Number(p.salePrice) : null,
+        basePrice: currentPrice,
+        salePrice: currentSalePrice,
       }
     })
   )

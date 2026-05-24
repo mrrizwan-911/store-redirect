@@ -1,15 +1,17 @@
 import Link from 'next/link'
 import { validateAdmin } from '@/lib/auth/serverAuth'
 import { getCustomers } from '@/lib/services/admin/customer'
+import { CountryFilterToggle } from '@/components/admin/orders/CountryFilterToggle'
 
-export default async function CustomersPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+export default async function CustomersPage({ searchParams }: { searchParams: Promise<{ page?: string; country?: string }> }) {
   // 1. Validate Admin
   await validateAdmin()
 
   // 2. Fetch data directly
   const params = await searchParams;
   const page = parseInt(params.page || '1', 10)
-  const data = await getCustomers({ page })
+  const country = params.country || ''
+  const data = await getCustomers({ page, country })
   const customers = data?.customers || []
 
   return (
@@ -17,6 +19,8 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
         <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Customers</h1>
       </div>
+
+      <CountryFilterToggle currentCountry={country} resourceName="Customers" />
 
       <div className="bg-white border border-neutral-100 rounded-xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
         <div className="overflow-x-auto">

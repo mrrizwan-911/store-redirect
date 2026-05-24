@@ -61,6 +61,10 @@ export function ProductForm({ initialData, categories: _categories }: ProductFor
       categoryId: '',
       basePrice: 0,
       salePrice: null,
+      pricePK: 0,
+      priceUK: 0,
+      salePricePK: null,
+      salePriceUK: null,
       sku: '',
       baseStock: 0,
       isActive: true,
@@ -68,6 +72,7 @@ export function ProductForm({ initialData, categories: _categories }: ProductFor
       tags: [],
       variantOptions: [],
       variants: [],
+      regions: ['PK', 'UK'],
     },
   })
 
@@ -121,7 +126,9 @@ export function ProductForm({ initialData, categories: _categories }: ProductFor
           optionValues: combo,
           sku: generateVariantSKU(productName || '', combo),
           stock: 0,
-          price: null
+          price: null,
+          pricePK: null,
+          priceUK: null
         })
       }
     }
@@ -402,7 +409,8 @@ export function ProductForm({ initialData, categories: _categories }: ProductFor
         throw new Error(result.error || 'Failed to save product')
       }
 
-      if (hasVariants) {
+      if (hasVariants && !isEditing) {
+        // Only go to variants-matrix on NEW product creation
         router.push(`/d8f2a1/admin/products/${result.data.id}/variants-matrix`)
       } else {
         router.push('/d8f2a1/admin/products')
@@ -599,58 +607,95 @@ export function ProductForm({ initialData, categories: _categories }: ProductFor
         {/* ─── Pricing & Inventory ─── */}
         <div className="bg-[#FAFAFA] border border-[#E5E5E5] p-4 sm:p-6 space-y-4">
           <h2 className="font-playfair text-xl text-[#000000]">Pricing {!hasVariants && '& Inventory'}</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <div>
-              <label className="block text-xs text-[#737373] mb-1 uppercase tracking-widest font-bold">
-                Base Price <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                {...register('basePrice', { valueAsNumber: true })}
-                className="w-full border border-[#E5E5E5] p-2 focus:ring-1 focus:ring-black outline-none text-sm"
-              />
-              {errors.basePrice?.message && <p className="text-xs text-[#EF4444] mt-1">{errors.basePrice.message as string}</p>}
-            </div>
-            <div>
-              <label className="block text-xs text-[#737373] mb-1 uppercase tracking-widest font-bold">Sale Price</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="Optional"
-                {...register('salePrice', { setValueAs: v => v === '' || isNaN(parseFloat(v)) ? null : parseFloat(v) })}
-                className="w-full border border-[#E5E5E5] p-2 focus:ring-1 focus:ring-black outline-none text-sm"
-              />
-            </div>
-
-            {!hasVariants && (
-              <>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4 border-b border-[#E5E5E5]">
+            {/* Pakistan Store Pricing */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-[#000000] border-b border-black pb-1">PAKISTAN STOREFRONT (₨ PKR)</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-[#737373] mb-1 uppercase tracking-widest font-bold">Base Stock</label>
+                  <label className="block text-xs text-[#737373] mb-1 uppercase tracking-widest font-semibold">Base Price ₨ <span className="text-red-500">*</span></label>
                   <input
                     type="number"
+                    step="0.01"
                     min="0"
-                    placeholder="0"
-                    {...register('baseStock', { valueAsNumber: true })}
+                    placeholder="₨ 0.00"
+                    {...register('pricePK', { valueAsNumber: true })}
                     className="w-full border border-[#E5E5E5] p-2 focus:ring-1 focus:ring-black outline-none text-sm"
                   />
-                  {errors.baseStock?.message && <p className="text-xs text-[#EF4444] mt-1">{errors.baseStock.message as string}</p>}
+                  {errors.pricePK?.message && <p className="text-xs text-[#EF4444] mt-1">{errors.pricePK.message as string}</p>}
                 </div>
                 <div>
-                  <label className="block text-xs text-[#737373] mb-1 uppercase tracking-widest font-bold">Base SKU</label>
+                  <label className="block text-xs text-[#737373] mb-1 uppercase tracking-widest font-semibold">Sale Price ₨</label>
                   <input
-                    {...register('sku')}
-                    placeholder="e.g., SHIRT-001"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Optional"
+                    {...register('salePricePK', { setValueAs: v => v === '' || isNaN(parseFloat(v)) ? null : parseFloat(v) })}
                     className="w-full border border-[#E5E5E5] p-2 focus:ring-1 focus:ring-black outline-none text-sm"
                   />
-                  {errors.sku?.message && <p className="text-xs text-[#EF4444] mt-1">{errors.sku.message as string}</p>}
+                  {errors.salePricePK?.message && <p className="text-xs text-[#EF4444] mt-1">{errors.salePricePK.message as string}</p>}
                 </div>
-              </>
-            )}
+              </div>
+            </div>
+
+            {/* UK & Global Store Pricing */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-[#000000] border-b border-black pb-1">UK & GLOBAL STOREFRONTS (£ GBP / $ USD)</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-[#737373] mb-1 uppercase tracking-widest font-semibold">Base Price £ <span className="text-red-500">*</span></label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="£ 0.00"
+                    {...register('priceUK', { valueAsNumber: true })}
+                    className="w-full border border-[#E5E5E5] p-2 focus:ring-1 focus:ring-black outline-none text-sm"
+                  />
+                  {errors.priceUK?.message && <p className="text-xs text-[#EF4444] mt-1">{errors.priceUK.message as string}</p>}
+                </div>
+                <div>
+                  <label className="block text-xs text-[#737373] mb-1 uppercase tracking-widest font-semibold">Sale Price £</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Optional"
+                    {...register('salePriceUK', { setValueAs: v => v === '' || isNaN(parseFloat(v)) ? null : parseFloat(v) })}
+                    className="w-full border border-[#E5E5E5] p-2 focus:ring-1 focus:ring-black outline-none text-sm"
+                  />
+                  {errors.salePriceUK?.message && <p className="text-xs text-[#EF4444] mt-1">{errors.salePriceUK.message as string}</p>}
+                </div>
+              </div>
+            </div>
           </div>
+
+          {!hasVariants && (
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-2">
+              <div>
+                <label className="block text-xs text-[#737373] mb-1 uppercase tracking-widest font-bold">Base Stock</label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  {...register('baseStock', { valueAsNumber: true })}
+                  className="w-full border border-[#E5E5E5] p-2 focus:ring-1 focus:ring-black outline-none text-sm"
+                />
+                {errors.baseStock?.message && <p className="text-xs text-[#EF4444] mt-1">{errors.baseStock.message as string}</p>}
+              </div>
+              <div>
+                <label className="block text-xs text-[#737373] mb-1 uppercase tracking-widest font-bold">Base SKU</label>
+                <input
+                  {...register('sku')}
+                  placeholder="e.g., SHIRT-001"
+                  className="w-full border border-[#E5E5E5] p-2 focus:ring-1 focus:ring-black outline-none text-sm"
+                />
+                {errors.sku?.message && <p className="text-xs text-[#EF4444] mt-1">{errors.sku.message as string}</p>}
+              </div>
+            </div>
+          )}
 
           {hasVariants && (
             <p className="text-xs text-neutral-500 italic">Variant SKU and stock are set in the Options section below.</p>
@@ -808,7 +853,7 @@ export function ProductForm({ initialData, categories: _categories }: ProductFor
                     </div>
 
                     {isSelected && variantIndex !== -1 && (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 ml-7">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 ml-7">
                         <div>
                           <label className="block text-xs text-[#737373] mb-1">SKU</label>
                           <input
@@ -826,11 +871,23 @@ export function ProductForm({ initialData, categories: _categories }: ProductFor
                           />
                         </div>
                         <div>
-                          <label className="block text-xs text-[#737373] mb-1">Price Override</label>
+                          <label className="block text-xs text-[#737373] mb-1">PK Price Override (₨)</label>
                           <input
                             type="number"
                             step="0.01"
-                            {...register(`variants.${variantIndex}.price`, {
+                            {...register(`variants.${variantIndex}.pricePK`, {
+                              setValueAs: (v) => (v === '' || isNaN(parseFloat(v)) ? null : parseFloat(v)),
+                            })}
+                            className="w-full border border-[#E5E5E5] p-2 text-xs focus:ring-1 focus:ring-black outline-none"
+                            placeholder="Optional"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-[#737373] mb-1">UK Price Override (£)</label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            {...register(`variants.${variantIndex}.priceUK`, {
                               setValueAs: (v) => (v === '' || isNaN(parseFloat(v)) ? null : parseFloat(v)),
                             })}
                             className="w-full border border-[#E5E5E5] p-2 text-xs focus:ring-1 focus:ring-black outline-none"
@@ -848,6 +905,53 @@ export function ProductForm({ initialData, categories: _categories }: ProductFor
             )}
           </div>
         )}
+
+        {/* ─── Regions ─── */}
+        <div className="bg-[#FAFAFA] border border-[#E5E5E5] p-4 sm:p-6">
+          <h2 className="font-playfair text-xl text-[#000000] mb-4">Regions</h2>
+          <p className="text-xs text-neutral-500 mb-3">Select which storefronts this product will appear on.</p>
+          <div className="flex flex-wrap gap-6">
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={watch('regions')?.includes('PK')}
+                onChange={(e) => {
+                  const current = watch('regions') || []
+                  if (e.target.checked) {
+                    if (!current.includes('PK')) setValue('regions', [...current, 'PK'])
+                  } else {
+                    setValue('regions', current.filter((r: string) => r !== 'PK'))
+                  }
+                }}
+                className="accent-black w-4 h-4"
+              />
+              <div>
+                <span className="text-[#000000] text-sm font-medium">Pakistan (PK)</span>
+                <p className="text-xs text-neutral-400">Visible on Pakistani storefront</p>
+              </div>
+            </label>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={watch('regions')?.includes('UK')}
+                onChange={(e) => {
+                  const current = watch('regions') || []
+                  if (e.target.checked) {
+                    if (!current.includes('UK')) setValue('regions', [...current, 'UK'])
+                  } else {
+                    setValue('regions', current.filter((r: string) => r !== 'UK'))
+                  }
+                }}
+                className="accent-black w-4 h-4"
+              />
+              <div>
+                <span className="text-[#000000] text-sm font-medium">UK & Global (UK)</span>
+                <p className="text-xs text-neutral-400">Visible on UK &amp; Global storefront</p>
+              </div>
+            </label>
+          </div>
+          {errors.regions?.message && <p className="text-sm text-[#EF4444] mt-2">{errors.regions.message as string}</p>}
+        </div>
 
         {/* ─── Status ─── */}
         <div className="bg-[#FAFAFA] border border-[#E5E5E5] p-4 sm:p-6">

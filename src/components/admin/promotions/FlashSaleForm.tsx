@@ -33,7 +33,11 @@ export function FlashSaleForm({ initialData, categorizedProducts }: FlashSaleFor
 
   const { register, handleSubmit, watch, setValue, getValues, formState: { errors } } = useForm({
     resolver: zodResolver(flashSaleSchema),
-    defaultValues: initialData || {
+    defaultValues: initialData ? {
+      ...initialData,
+      startTime: initialData.startTime ? new Date(initialData.startTime).toISOString().slice(0, 16) : '',
+      endTime: initialData.endTime ? new Date(initialData.endTime).toISOString().slice(0, 16) : '',
+    } : {
       name: '',
       scope: 'SINGLE',
       discountType: 'PERCENTAGE',
@@ -42,6 +46,7 @@ export function FlashSaleForm({ initialData, categorizedProducts }: FlashSaleFor
       startTime: '',
       endTime: '',
       productIds: [],
+      country: 'ALL',
     },
   })
 
@@ -283,6 +288,18 @@ export function FlashSaleForm({ initialData, categorizedProducts }: FlashSaleFor
                     className="w-full p-4 bg-neutral-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-black outline-none"
                   />
                   {errors.name && <p className="text-xs text-red-500 mt-2">{errors.name.message as string}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-[10px] uppercase tracking-widest font-bold text-neutral-400 mb-2">Target Region</label>
+                  <select
+                    {...register('country')}
+                    className="w-full p-4 bg-neutral-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-black outline-none appearance-none"
+                  >
+                    <option value="ALL">All Regions (Pakistan & UK)</option>
+                    <option value="PK">🇵🇰 Pakistan Only</option>
+                    <option value="UK">🇬🇧 United Kingdom Only</option>
+                  </select>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

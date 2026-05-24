@@ -11,6 +11,7 @@ import { Award, ShoppingBag, Star, Share2, History, TrendingUp, Info, Copy } fro
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { formatPrice } from '@/lib/constants/site'
 
 interface LoyaltyData {
   points: number
@@ -96,7 +97,7 @@ export function LoyaltyDashboard() {
           </CardHeader>
           <CardContent className="space-y-1">
             <div className="text-5xl font-display text-black">{data.points}</div>
-            <p className="text-xs text-neutral-500 font-medium">Equivalent to PKR {data.points} store credit</p>
+            <p className="text-xs text-neutral-500 font-medium">Equivalent to {formatPrice(data.points)} store credit</p>
           </CardContent>
           <div className="absolute top-0 right-0 w-32 h-32 bg-neutral-50 rounded-full -mr-16 -mt-16 -z-10" />
         </Card>
@@ -141,7 +142,7 @@ export function LoyaltyDashboard() {
               </Button>
             </div>
             <p className="text-[10px] text-neutral-400 uppercase tracking-widest font-bold">
-              100 Points = PKR 100 Discount
+              100 Points = {formatPrice(100)} Discount
             </p>
           </div>
         </Card>
@@ -152,7 +153,7 @@ export function LoyaltyDashboard() {
         <h2 className="font-display text-2xl border-b border-neutral-200 pb-4 text-black font-medium">Ways to Earn</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { icon: ShoppingBag, title: 'Purchase', detail: '1 Point per PKR 100 spent' },
+            { icon: ShoppingBag, title: 'Purchase', detail: '1 Point per {formatPrice(100)} spent' },
             { icon: Star, title: 'Reviews', detail: '+5 Points for verified reviews' },
             { icon: Share2, title: 'Referrals', detail: '+100 Points per referral' },
           ].map((item, i) => (
@@ -225,7 +226,7 @@ export function LoyaltyDashboard() {
           <Card className="rounded-[var(--radius)] border-neutral-200 shadow-none bg-neutral-900 text-white overflow-hidden">
             <CardContent className="p-6 space-y-4">
               <p className="text-xs text-neutral-400 leading-relaxed">
-                Invite friends and give them <span className="text-white font-bold">PKR 100 off</span> their first order. You'll earn <span className="text-white font-bold">100 points</span> back!
+                Invite friends and give them <span className="text-white font-bold">{formatPrice(100)} off</span> their first order. You'll earn <span className="text-white font-bold">100 points</span> back!
               </p>
 
               <div className="space-y-2 pt-2">

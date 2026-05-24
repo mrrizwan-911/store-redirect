@@ -7,6 +7,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { formatPrice } from '@/lib/constants/site'
 
 export default function ComparePage() {
   const router = useRouter()
@@ -107,7 +108,7 @@ export default function ComparePage() {
                 {items.map((item) => (
                   <td key={item.id} className="p-8 border-b border-neutral-100 text-sm leading-relaxed">
                     {feature.key === 'price' ? (
-                      <span className="font-bold">PKR {item.price.toLocaleString()}</span>
+                      <span className="font-bold">{formatPrice(item.price)}</span>
                     ) : (
                       <span className="text-neutral-600">{(item as any)[feature.key] || '—'}</span>
                     )}
@@ -155,7 +156,7 @@ export default function ComparePage() {
                 {items.map((item) => (
                   <div key={item.id} className="text-center">
                     {feature.key === 'price' ? (
-                      <p className="text-xs font-bold">PKR {item.price.toLocaleString()}</p>
+                      <p className="text-xs font-bold">{formatPrice(item.price)}</p>
                     ) : (
                       <p className="text-[11px] text-neutral-500 leading-normal">{(item as any)[feature.key] || '—'}</p>
                     )}

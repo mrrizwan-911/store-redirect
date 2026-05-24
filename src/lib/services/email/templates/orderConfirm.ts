@@ -8,10 +8,10 @@ export function orderConfirmTemplate(
   name: string,
   orderNumber: string,
   items: OrderItem[],
-  total: any
+  total: any,
+  whatsappNumber: string = ''
 ): { subject: string; html: string; text: string } {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://calnza.com'
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? ''
   const subject = `Order Confirmed #${orderNumber} — Thank you, ${name}`
 
   const textItems = items

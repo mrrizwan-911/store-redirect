@@ -5,6 +5,7 @@ import { ChevronDown, X, Check, SlidersHorizontal, Star } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Slider } from '@/components/ui/slider'
 import { cn } from '@/lib/utils'
+import { formatPrice, getCurrencySymbol } from '@/lib/constants/site'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -367,7 +368,7 @@ export function HorizontalProductFilters({
             panelKey="price"
             label={
               isPriceActive
-                ? `PKR ${currentFilters.minPrice.toLocaleString()} – ${currentFilters.maxPrice.toLocaleString()}`
+                ? `${formatPrice(currentFilters.minPrice)} – ${formatPrice(currentFilters.maxPrice)}`
                 : 'Price'
             }
             active={isPriceActive}
@@ -383,7 +384,7 @@ export function HorizontalProductFilters({
               ].map(({ label, value, set }) => (
                 <div key={label}>
                   <label className="mb-1.5 block text-[9px] font-bold uppercase tracking-widest text-neutral-400">
-                    {label} (PKR)
+                    {label} ({getCurrencySymbol()})
                   </label>
                   <input
                     type="number"
@@ -513,7 +514,7 @@ export function HorizontalProductFilters({
           )}
           {isPriceActive && (
             <ActiveChip
-              label={`PKR ${currentFilters.minPrice.toLocaleString()} – ${currentFilters.maxPrice.toLocaleString()}`}
+              label={`${formatPrice(currentFilters.minPrice)} – ${formatPrice(currentFilters.maxPrice)}`}
               onRemove={() =>
                 onFilterChange({ ...currentFilters, minPrice: 0, maxPrice: 50000 })
               }
@@ -575,7 +576,7 @@ export function HorizontalProductFilters({
               )}
               {isPriceActive && (
                 <ActiveChip
-                  label={`PKR ${currentFilters.minPrice.toLocaleString()}–${currentFilters.maxPrice.toLocaleString()}`}
+                  label={`${formatPrice(currentFilters.minPrice)}–${formatPrice(currentFilters.maxPrice)}`}
                   onRemove={() =>
                     onFilterChange({
                       ...currentFilters,
@@ -710,7 +711,7 @@ export function HorizontalProductFilters({
                     ].map(({ label, value, set }) => (
                       <div key={label}>
                         <label className="mb-1.5 block text-[9px] font-bold uppercase tracking-widest text-neutral-400">
-                          {label} (PKR)
+                          {label} ({getCurrencySymbol()})
                         </label>
                         <input
                           type="number"
@@ -731,8 +732,8 @@ export function HorizontalProductFilters({
                     className="mb-2"
                   />
                   <div className="flex justify-between text-[9px] font-mono text-neutral-400 mt-3">
-                    <span>PKR {localMin.toLocaleString()}</span>
-                    <span>PKR {localMax.toLocaleString()}</span>
+                    <span>${formatPrice(localMin)}</span>
+                    <span>${formatPrice(localMax)}</span>
                   </div>
                 </MobileSection>
 

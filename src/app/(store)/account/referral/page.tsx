@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Users, Copy, Share2, Award, Gift, Check, LoaderCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { formatPrice } from '@/lib/constants/site'
 import { Card, CardContent } from '@/components/ui/card'
 
 export default function ReferralPage() {
@@ -57,7 +58,7 @@ export default function ReferralPage() {
               Share the Luxury, <br className="hidden md:block" /> Earn Exclusive Rewards.
             </h2>
             <p className="text-neutral-300 text-sm font-light leading-relaxed">
-              Invite your friends to experience our premium collection. They get <span className="text-white font-bold">PKR 100 off</span> their first order, and you earn <span className="text-white font-bold">100 loyalty points</span> for every successful referral.
+              Invite your friends to experience our premium collection. They get <span className="text-white font-bold">{formatPrice(100)} off</span> their first order, and you earn <span className="text-white font-bold">100 loyalty points</span> for every successful referral.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
@@ -93,7 +94,7 @@ export default function ReferralPage() {
         {[
           { label: 'Total Referred', value: stats.totalReferred.toString(), icon: Users },
           { label: 'Points Earned', value: stats.pointsFromReferrals.toString(), icon: Award },
-          { label: 'Pending Credits', value: `PKR ${(stats.totalReferred * 100).toLocaleString()}`, icon: Gift },
+          { label: 'Pending Credits', value: formatPrice(stats.totalReferred * 100), icon: Gift },
         ].map((stat, i) => (
           <div key={i} className="p-8 border border-neutral-200 space-y-4 rounded-[var(--radius)] bg-white shadow-sm hover:border-black transition-all group">
             <div className="w-10 h-10 bg-neutral-50 flex items-center justify-center border border-neutral-100 text-neutral-500 rounded-[8px] group-hover:bg-black group-hover:text-white transition-all">

@@ -19,6 +19,7 @@ model User {
   referralCode  String?         @unique @default(cuid())
   marketingConsent Boolean @default(false)
   notes         String?
+  country       String          @default("PK")
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   addresses    Address[]
@@ -83,6 +84,19 @@ model OtpToken {
   @@index([userId])
 }
 
+model AdminInvite {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  token     String   @unique @default(cuid())
+  invitedBy String   // email of admin who sent the invite
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([email])
+}
+
 model Category {
   id          String     @id @default(cuid())
   name        String
@@ -116,6 +130,7 @@ model Product {
   priceUK          Decimal          @default(0) @db.Decimal(10, 2)
   salePricePK      Decimal?         @db.Decimal(10, 2)
   salePriceUK      Decimal?         @db.Decimal(10, 2)
+  regions          String[]         @default(["PK", "UK"])
   sku              String           @unique
   isActive         Boolean          @default(true)
   isFeatured       Boolean          @default(false)
@@ -226,6 +241,7 @@ model Order {
   notes          String?
   isGift         Boolean     @default(false)
   giftMessage    String?
+  country        String      @default("PK")
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   address        Address?    @relation(fields: [addressId], references: [id])
@@ -283,6 +299,7 @@ model FlashSale {
   endTime      DateTime
   isActive     Boolean         @default(false)
   productIds   String[]        // Empty if scope is ALL
+  country      String          @default("ALL")
   createdAt    DateTime        @default(now())
 
   @@index([startTime, endTime])
@@ -372,6 +389,7 @@ model Outfit {
   occasion    String?
   gender      String?
   isPublished Boolean      @default(false)
+  country     String       @default("ALL")
   createdAt   DateTime     @default(now())
   items       OutfitItem[]
 }
@@ -410,6 +428,7 @@ model Coupon {
   usedCount     Int       @default(0)
   expiresAt     DateTime?
   isActive      Boolean   @default(true)
+  country       String    @default("ALL")
   createdAt     DateTime  @default(now())
   usages        CouponUsage[]
 
@@ -574,8 +593,9 @@ model SiteSettings {
   // Social Media & Contact
   socialLinks       Json     @default("{\"instagram\": \"\", \"facebook\": \"\", \"whatsapp\": \"\"}")
   contactEmail      String   @default("concierge@calnza.pk")
-  contactPhone      String   @default("+92 300 1234567")
+  contactPhone      String   @default("")
   contactAddress    String   @default("DHA Phase 6, Lahore, Pakistan")
+  whatsappNumber    String   @default("")
 
   // Visibility & Config
   showPaymentMethods Boolean  @default(true)

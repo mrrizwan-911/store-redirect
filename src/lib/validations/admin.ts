@@ -21,6 +21,8 @@ export const productVariantSchema = z.object({
   stock: z.number().int().min(0),
   sku: z.string(),
   price: z.number().positive().optional().nullable(),
+  pricePK: z.number().positive().optional().nullable(),
+  priceUK: z.number().positive().optional().nullable(),
 })
 
 export const productSchema = z.object({
@@ -29,8 +31,12 @@ export const productSchema = z.object({
   description: z.string().min(20, 'Description must be at least 20 characters'),
   shortDescription: z.string().max(200).optional(),
   categoryId: z.string().min(1, 'Category required'),
-  basePrice: z.number().positive('Price must be positive'),
-  salePrice: z.number().positive().optional().nullable(),
+  basePrice: z.number().nonnegative('Price must be zero or positive').optional().default(0),
+  salePrice: z.number().nonnegative().optional().nullable(),
+  pricePK: z.number().nonnegative('Pakistan price must be zero or positive'),
+  priceUK: z.number().nonnegative('UK/Global price must be zero or positive'),
+  salePricePK: z.number().nonnegative().optional().nullable(),
+  salePriceUK: z.number().nonnegative().optional().nullable(),
   sku: z.string().min(2, 'SKU required'),
   baseStock: z.number().int().min(0).optional().default(0),
   isActive: z.boolean().default(true),
@@ -45,6 +51,7 @@ export const productSchema = z.object({
   })).optional().default([]),
   variantOptions: z.array(variantOptionSchema).optional().default([]),
   variants: z.array(productVariantSchema).default([]),
+  regions: z.array(z.string()).default(['PK', 'UK']),
 })
 
 export const flashSaleSchema = z.object({
@@ -56,6 +63,7 @@ export const flashSaleSchema = z.object({
   startTime: z.string().min(5, 'Invalid time'),  // ISO UTC string
   endTime: z.string().min(5, 'Invalid time'),
   productIds: z.array(z.string()).default([]),
+  country: z.string().optional().default('ALL'),
 }).superRefine((data, ctx) => {
   // 1. Validate Discount based on type
   if (data.discountType === 'PERCENTAGE') {

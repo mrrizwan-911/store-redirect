@@ -2,22 +2,38 @@ import { redirect } from 'next/navigation';
 import { db } from '@/lib/db/client';
 import { getUserSession } from '@/lib/auth/session';
 import CouponsClient from '@/components/admin/promotions/CouponsClient';
+import { CountryFilterToggle } from '@/components/admin/orders/CountryFilterToggle';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = {
-  title: 'Coupons | Admin',
-};
+interface SearchParams {
+  country?: string
+}
 
-export default async function AdminCouponsPage() {
+export default async function AdminCouponsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<SearchParams>
+}) {
   const session = await getUserSession();
 
   if (!session || session.role !== 'ADMIN') {
     redirect('/login');
   }
 
+  const params = (await searchParams) || {}
+  const country = params.country || ''
+
+  const whereClause: any = {}
+  if (country === 'PK') {
+    whereClause.country = { in: ['PK', 'ALL'] }
+  } else if (country === 'UK') {
+    whereClause.country = { in: ['UK', 'ALL'] }
+  }
+
   // Fetch initial coupons
   const couponsData = await db.coupon.findMany({
+    where: whereClause,
     orderBy: { createdAt: 'desc' },
   });
 
@@ -35,6 +51,7 @@ export default async function AdminCouponsPage() {
           Coupons Management
         </h1>
       </div>
+      <CountryFilterToggle currentCountry={country} resourceName="Coupons" />
       <CouponsClient initialCoupons={coupons as any} />
     </div>
   );
