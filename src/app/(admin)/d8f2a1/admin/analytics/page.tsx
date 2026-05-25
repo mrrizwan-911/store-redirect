@@ -56,15 +56,15 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           label="Today's Revenue"
-          value={`PKR ${(kpi as any).todayRevenue?.toLocaleString() || 0}`}
+          value={`${region === 'uk' ? '£' : 'PKR'} ${(kpi as any).todayRevenue?.toLocaleString() || 0}`}
         />
         <KpiCard
           label="This Month"
-          value={`PKR ${(kpi as any).monthRevenue?.toLocaleString() || 0}`}
+          value={`${region === 'uk' ? '£' : 'PKR'} ${(kpi as any).monthRevenue?.toLocaleString() || 0}`}
         />
         <KpiCard
           label="YTD Revenue"
-          value={`PKR ${(kpi as any).ytdRevenue?.toLocaleString() || 0}`}
+          value={`${region === 'uk' ? '£' : 'PKR'} ${(kpi as any).ytdRevenue?.toLocaleString() || 0}`}
         />
         <KpiCard
           label="Active Orders"
@@ -75,7 +75,13 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
       {/* Revenue Chart */}
       <div className="border border-neutral-200 p-4">
         <h2 className="text-lg font-semibold mb-4">Revenue Trend (Last 30 Days)</h2>
-        <RevenueChart data={(revenueData || []).map((d: any) => ({ date: d.date, revenue: d.total || 0 }))} />
+        <RevenueChart 
+          currency={region === 'uk' ? '£' : 'PKR'}
+          data={(revenueData || []).map((d: any) => ({
+            date: d.date,
+            revenue: region === 'uk' ? (d.uk || 0) : region === 'pk' ? (d.pk || 0) : (d.total || 0)
+          }))} 
+        />
       </div>
 
       {/* Order Status & Payment Methods */}
@@ -113,7 +119,7 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
           </div>
           <div className="mb-6">
             <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Potential Lost Revenue</p>
-            <p className="text-2xl font-playfair font-bold text-rose-600">PKR {abandonedData?.potentialRevenue?.toLocaleString() || 0}</p>
+            <p className="text-2xl font-playfair font-bold text-rose-600">{region === 'uk' ? '£' : 'PKR'} {abandonedData?.potentialRevenue?.toLocaleString() || 0}</p>
           </div>
           <div>
             <p className="text-xs text-neutral-500 uppercase tracking-wider mb-3">Top Abandoned Items</p>

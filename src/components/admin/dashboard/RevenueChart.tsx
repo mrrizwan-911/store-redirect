@@ -5,9 +5,10 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 interface RevenueChartProps {
   data: { date: string; revenue: number }[]
+  currency?: string
 }
 
-export function RevenueChart({ data }: RevenueChartProps) {
+export function RevenueChart({ data, currency = 'PKR' }: RevenueChartProps) {
   if (!data || data.length === 0) {
     return (
       <div className="w-full h-80 border border-black flex items-center justify-center bg-neutral-50 text-neutral-500 font-sans text-sm">
@@ -33,7 +34,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
               axisLine={false}
               tickLine={false}
               tick={{ fill: '#737373', fontSize: 12 }}
-              tickFormatter={(value) => `PKR ${value.toLocaleString()}`}
+              tickFormatter={(value) => `${currency} ${value.toLocaleString()}`}
             />
             <Tooltip
               contentStyle={{
@@ -44,7 +45,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                 fontSize: '12px'
               }}
               itemStyle={{ color: '#000' }}
-              formatter={(value: any) => [`PKR ${Number(value).toLocaleString()}`, 'Revenue']}
+              formatter={(value: any) => [`${currency} ${Number(value).toLocaleString()}`, 'Revenue']}
             />
             <Line
               type="monotone"
