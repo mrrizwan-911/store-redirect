@@ -176,6 +176,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${playfair.variable} ${dmSans.variable} h-full antialiased`}
+      style={{ scrollBehavior: 'smooth' }}
       suppressHydrationWarning
     >
       <body

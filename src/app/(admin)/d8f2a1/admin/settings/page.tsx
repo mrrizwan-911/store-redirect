@@ -45,7 +45,7 @@ const COUNTRY_OPTIONS = [
 ]
 
 // ── Shipping Manager Sub-component ────────────────────────────────────────────
-function ShippingOptionsManager() {
+function ShippingOptionsManager({ activeCountry }: { activeCountry: 'pk' | 'uk' }) {
   const [options, setOptions] = useState<ShippingOption[]>([])
   const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -82,6 +82,8 @@ function ShippingOptionsManager() {
         body: JSON.stringify({
           ...newOption,
           price: Number(newOption.price),
+          countries: [activeCountry.toUpperCase()],
+          sortOrder: 0,
           freeShippingThreshold: newOption.freeShippingThreshold
             ? Number(newOption.freeShippingThreshold)
             : null,
@@ -301,26 +303,6 @@ function ShippingOptionsManager() {
                   className="rounded-none border-neutral-200 text-xs" />
               </div>
 
-              {/* Sort Order */}
-              <div className="space-y-2">
-                <Label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Sort Order</Label>
-                <Input type="number" min={0}
-                  value={newOption.sortOrder}
-                  onChange={e => setNewOption({ ...newOption, sortOrder: Number(e.target.value) })}
-                  className="rounded-none border-neutral-200 text-xs" />
-              </div>
-
-              {/* Countries */}
-              <div className="space-y-2 md:col-span-2">
-                <Label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 flex items-center gap-2">
-                  <Globe className="w-3 h-3" /> Available On *
-                </Label>
-                <CountryPicker
-                  selected={newOption.countries}
-                  onChange={v => setNewOption({ ...newOption, countries: v })}
-                />
-              </div>
-
               {/* Active toggle */}
               <div className="space-y-2 md:col-span-2">
                 <div className="flex items-center gap-3">
@@ -406,26 +388,10 @@ function ShippingOptionsManager() {
                           placeholder="blank = disabled"
                           className="rounded-none border-neutral-200 text-xs" />
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400">Sort Order</Label>
-                        <Input type="number" min={0}
-                          value={editData.sortOrder ?? 0}
-                          onChange={e => setEditData({ ...editData, sortOrder: Number(e.target.value) })}
-                          className="rounded-none border-neutral-200 text-xs" />
-                      </div>
                       <div className="space-y-2 sm:col-span-2">
-                        <Label className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 flex items-center gap-2">
-                          <Globe className="w-3 h-3" /> Available On *
-                        </Label>
-                        <CountryPicker
-                          selected={editData.countries || []}
-                          onChange={v => setEditData({ ...editData, countries: v })}
-                        />
-                      </div>
-                      <div className="space-y-2 sm:col-span-2">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 mt-2">
                           <Switch
-                            checked={editData.isActive ?? true}
+                            checked={editData.isActive ?? opt.isActive}
                             onCheckedChange={v => setEditData({ ...editData, isActive: v })}
                             className="data-[state=checked]:bg-black"
                           />
@@ -1035,7 +1001,7 @@ export default function SettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
-                <ShippingOptionsManager />
+                <ShippingOptionsManager activeCountry={activeCountry} />
               </CardContent>
             </Card>
           )}

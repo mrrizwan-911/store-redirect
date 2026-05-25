@@ -77,7 +77,7 @@ export function CartDrawer() {
                 <div className="flex gap-4 items-start">
                   <div className="w-16 h-20 bg-[#FAFAFA] border border-[#E5E5E5] shrink-0 rounded-[var(--radius)] overflow-hidden relative">
                     <Image 
-                      src={item.imageUrl || 'https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?w=400&q=80'} 
+                      src={item.imageUrl || '/placeholder.png'} 
                       alt={item.name} 
                       fill
                       className="object-cover"

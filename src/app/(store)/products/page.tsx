@@ -82,10 +82,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         reviews: undefined,
         basePrice: price,
         salePrice: salePrice ? Number(salePrice) : null,
-        pricePK: p.pricePK,
-        priceUK: p.priceUK,
-        salePricePK: p.salePricePK,
-        salePriceUK: p.salePriceUK,
+        pricePK: p.pricePK ? Number(p.pricePK) : null,
+        priceUK: p.priceUK ? Number(p.priceUK) : null,
+        salePricePK: p.salePricePK ? Number(p.salePricePK) : null,
+        salePriceUK: p.salePriceUK ? Number(p.salePriceUK) : null,
       }
     })
   )

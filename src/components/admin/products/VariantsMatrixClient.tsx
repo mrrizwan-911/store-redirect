@@ -62,7 +62,6 @@ export function VariantsMatrixClient({ productId, variants: initialVariants }: V
               <th className="p-4 font-bold">Variant Title</th>
               <th className="p-4 font-bold">SKU</th>
               <th className="p-4 font-bold">Stock</th>
-              <th className="p-4 font-bold">Price Override</th>
               <th className="p-4 font-bold">PK Price Override (<span className="text-lg">₨</span>)</th>
               <th className="p-4 font-bold">UK Price Override (<span className="text-lg">£</span>)</th>
             </tr>
@@ -90,19 +89,10 @@ export function VariantsMatrixClient({ productId, variants: initialVariants }: V
                 <td className="p-4">
                   <input
                     type="number"
-                    value={v.price === null ? '' : v.price}
-                    onChange={(e) => handleUpdate(idx, 'price', e.target.value === '' ? null : parseFloat(e.target.value))}
-                    className="w-full border border-[#E5E5E5] p-2 text-sm focus:ring-1 focus:ring-black outline-none bg-white"
-                    placeholder="Base Price"
-                  />
-                </td>
-                <td className="p-4">
-                  <input
-                    type="number"
                     value={v.pricePK === null ? '' : v.pricePK}
                     onChange={(e) => handleUpdate(idx, 'pricePK', e.target.value === '' ? null : parseFloat(e.target.value))}
                     className="w-full border border-[#E5E5E5] p-2 text-sm focus:ring-1 focus:ring-black outline-none bg-white"
-                    placeholder="PK Price"
+                    placeholder="Inherit"
                   />
                 </td>
                 <td className="p-4">
@@ -111,7 +101,7 @@ export function VariantsMatrixClient({ productId, variants: initialVariants }: V
                     value={v.priceUK === null ? '' : v.priceUK}
                     onChange={(e) => handleUpdate(idx, 'priceUK', e.target.value === '' ? null : parseFloat(e.target.value))}
                     className="w-full border border-[#E5E5E5] p-2 text-sm focus:ring-1 focus:ring-black outline-none bg-white"
-                    placeholder="UK Price"
+                    placeholder="Inherit"
                   />
                 </td>
               </tr>

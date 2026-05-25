@@ -129,7 +129,7 @@ export function CartPage() {
                 <div className="col-span-6 flex gap-5 items-center">
                   <div className="w-20 h-28 bg-[#FAFAFA] border border-[#E5E5E5] shrink-0 rounded-md overflow-hidden relative">
                     <Image
-                      src={item.imageUrl || 'https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?w=400&q=80'}
+                      src={item.imageUrl || '/placeholder.png'}
                       alt={item.name}
                       fill
                       className="object-cover"

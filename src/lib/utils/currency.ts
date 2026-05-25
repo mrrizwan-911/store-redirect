@@ -15,22 +15,9 @@ export type Region = 'pk' | 'uk' | 'global' | string
 
 const COOKIE_NAME = 'calnza_country_pref'
 
-/** Get effective country from cookie or env var */
+/** Get effective country from env var to ensure consistency across server and client */
 function getCountryCode(): string {
-  // Client-side: check cookie
-  if (typeof document !== 'undefined') {
-    const cookies = document.cookie.split(';')
-    const countryCookie = cookies.find(c => c.trim().startsWith(`${COOKIE_NAME}=`))
-    if (countryCookie) {
-      const value = countryCookie.split('=')[1]?.trim()
-      if (value === 'PK' || value === 'UK' || value === 'GLOBAL') {
-        return value.toLowerCase()
-      }
-    }
-  }
-  // Server-side or no cookie: use env var
-  const env = process.env.NEXT_PUBLIC_SITE_COUNTRY || 'PK'
-  return env.toLowerCase()
+  return (process.env.NEXT_PUBLIC_SITE_COUNTRY || 'PK').toLowerCase()
 }
 
 /** Currency symbol only */
