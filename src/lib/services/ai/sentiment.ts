@@ -1,4 +1,5 @@
 import { aiConfig } from './config';
+import { logger } from '@/lib/utils/logger';
 
 export type Sentiment = 'POSITIVE' | 'NEUTRAL' | 'NEGATIVE';
 
@@ -37,7 +38,7 @@ export async function analyzeSentiment(text: string): Promise<Sentiment> {
       return validateSentiment(sentiment);
     }
   } catch (error) {
-    console.error('Sentiment analysis failed:', error);
+    logger.error('Sentiment analysis failed:', error);
     return 'NEUTRAL';
   }
 

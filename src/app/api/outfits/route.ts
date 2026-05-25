@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
+import { logger } from '@/lib/utils/logger'
 
 export async function GET(req: NextRequest) {
   try {
@@ -53,7 +54,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: { outfits: mappedOutfits } })
   } catch (error) {
-    console.error('Failed to fetch public outfits:', error)
+    logger.error('Failed to fetch public outfits:', error)
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 })
   }
 }

@@ -12,7 +12,7 @@ export function useRecentlyViewed() {
       try {
         setViewedIds(JSON.parse(stored));
       } catch (e) {
-        console.error('Failed to parse recently viewed', e);
+        logger.error('Failed to parse recently viewed', e);
       }
     }
   }, []);

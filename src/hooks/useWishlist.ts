@@ -1,5 +1,6 @@
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { toggleWishlist } from '@/store/slices/wishlistSlice'
+import { logger } from '@/lib/utils/logger'
 
 export function useWishlist(productId: string) {
   const dispatch = useAppDispatch()
@@ -35,7 +36,7 @@ export function useWishlist(productId: string) {
       } catch (error) {
         // If API fails — revert Redux
         dispatch(toggleWishlist(productId))
-        console.error('Wishlist sync error:', error)
+        logger.error('Wishlist sync error:', error)
       }
     }
   }

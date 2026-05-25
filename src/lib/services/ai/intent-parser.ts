@@ -1,4 +1,5 @@
 import { aiConfig } from './config';
+import { logger } from '@/lib/utils/logger';
 
 export interface SearchFilters {
   category?: string;
@@ -63,7 +64,7 @@ export async function parseSearchIntent(query: string): Promise<SearchFilters> {
     try {
       return JSON.parse(content);
     } catch (e) {
-      console.error('Failed to parse AI response:', content);
+      logger.error('Failed to parse AI response:', content);
       return {};
     }
   }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
-import { constructWebhookEvent } from '@/lib/services/payment/stripe'
+import { constructWebhookEvent, stripe } from '@/lib/services/payment/stripe'
 import { logger } from '@/lib/utils/logger'
 import { awardOrderPoints } from '@/lib/services/loyalty/award'
 import { sendOrderConfirmationEmail } from '@/lib/services/email/orderEmails'

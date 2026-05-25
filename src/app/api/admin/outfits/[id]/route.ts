@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json({ success: true, data: outfit })
   } catch (error) {
-    console.error('Failed to fetch outfit:', error)
+    logger.error('Failed to fetch outfit:', error)
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 })
   }
 }

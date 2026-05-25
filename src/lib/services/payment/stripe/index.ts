@@ -13,8 +13,13 @@
 
 import Stripe from 'stripe'
 import { SITE_COUNTRY, SITE_CURRENCY, STRIPE_AMOUNT_MULTIPLIER } from '@/lib/constants/site'
+import { logger } from '@/lib/utils/logger'
 
-const stripeKey = process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder';
+const stripeKey = process.env.STRIPE_SECRET_KEY
+
+if (!stripeKey) {
+  logger.warn('STRIPE_SECRET_KEY is not configured — Stripe payments will not work')
+}
 
 /** Currency overrides from cookie-based country preferences */
 const COOKIE_CURRENCY: Record<string, string> = {
@@ -30,7 +35,7 @@ const CURRENCY_MULTIPLIER: Record<string, number> = {
   usd: 100,
 }
 
-export const stripe = new Stripe(stripeKey, {
+export const stripe = new Stripe(stripeKey || 'sk_test_placeholder', {
   apiVersion: '2026-04-22.dahlia',
   typescript: true,
 })

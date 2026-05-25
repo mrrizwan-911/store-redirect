@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: outfits })
   } catch (error) {
-    console.error('Failed to fetch outfits:', error)
+    logger.error('Failed to fetch outfits:', error)
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 })
   }
 }
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: outfit }, { status: 201 })
   } catch (error) {
-    console.error('Failed to create outfit:', error)
+    logger.error('Failed to create outfit:', error)
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 })
   }
 }

@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { setWishlist } from '@/store/slices/wishlistSlice'
+import { logger } from '@/lib/utils/logger'
 
 export function useWishlistSync() {
   const dispatch = useAppDispatch()
@@ -51,7 +52,7 @@ export function useWishlistSync() {
 
         syncAttempted.current = true
       } catch (error) {
-        console.error('Wishlist sync error:', error)
+        logger.error('Wishlist sync error:', error)
       }
     }
 

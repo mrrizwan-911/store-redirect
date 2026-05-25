@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { verifyQuotationPdfToken } from '@/lib/utils/quotationToken'
 import { generateQuotationPDF, buildBrandConfig, loadLogoBase64 } from '@/lib/services/pdf/generator'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * GET /api/quotations/[id]/pdf?token=<signed-token>
@@ -76,7 +77,7 @@ export async function GET(
       },
     })
   } catch (error: any) {
-    console.error('[QUOTATION_PDF_DOWNLOAD]', error)
+    logger.error('[QUOTATION_PDF_DOWNLOAD]', error)
     return NextResponse.json({ error: 'Failed to generate PDF' }, { status: 500 })
   }
 }

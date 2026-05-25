@@ -79,9 +79,11 @@ export async function checkRateLimit(
  * Gets client IP from Next.js request, with fallback.
  */
 export function getClientIp(req: NextRequest): string {
-  return (
-    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    req.headers.get('x-real-ip') ??
-    'anonymous'
-  )
+  const forwarded = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+  if (forwarded) return forwarded
+  
+  const realIp = req.headers.get('x-real-ip')
+  if (realIp) return realIp
+  
+  return 'anonymous'
 }

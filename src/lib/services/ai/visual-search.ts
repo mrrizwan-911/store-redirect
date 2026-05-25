@@ -1,5 +1,6 @@
 import { aiConfig } from './config';
 import { SearchFilters } from './intent-parser';
+import { logger } from '@/lib/utils/logger';
 
 const SYSTEM_PROMPT = `
 You are an expert fashion analyst for Calnza, a premium clothing store in Pakistan.
@@ -80,7 +81,7 @@ export async function analyzeImage(imageSource: string): Promise<SearchFilters &
     try {
       return JSON.parse(content);
     } catch (e) {
-      console.error('Failed to parse AI response:', content);
+      logger.error('Failed to parse AI response:', content);
       return { description: 'Search results' };
     }
   }

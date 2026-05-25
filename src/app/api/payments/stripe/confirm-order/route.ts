@@ -3,7 +3,7 @@ import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { sendEmail } from '@/lib/services/email/sender'
 import { OrderStatus, PaymentStatus } from '@prisma/client'
-import { stripe } from '@/lib/services/payment/stripe'
+import { stripe, verifyPaymentIntent } from '@/lib/services/payment/stripe'
 import { SITE_COUNTRY, STRIPE_AMOUNT_MULTIPLIER } from '@/lib/constants/site'
 import { rateLimiters, checkRateLimit, getClientIp } from '@/lib/utils/rateLimit'
 

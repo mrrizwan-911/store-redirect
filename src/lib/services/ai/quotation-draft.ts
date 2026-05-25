@@ -1,4 +1,5 @@
 import { aiConfig } from './config';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Generates a professional cover letter for a B2B quotation using Claude.
@@ -45,7 +46,7 @@ export async function generateQuotationDraft(quotation: any) {
 
     throw new Error('Unexpected response format from OpenAI');
   } catch (error) {
-    console.error('[AI_DRAFT_ERROR]', error);
+    logger.error('[AI_DRAFT_ERROR]', error);
     // Fallback to simple template
     return `Dear ${quotation.name},\n\nThank you for reaching out to Calnza. We are pleased to provide you with the bulk order quotation for ${quotation.company || 'your inquiry'}.\n\nPlease find the details in the attached PDF. Our team is available to discuss any specific requirements or customizations you may need.\n\nBest regards,\nCalnza Team`;
   }

@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { verifyRefreshToken } from '@/lib/auth/jwt'
+import { logger } from '@/lib/utils/logger'
 
 export async function validateAdmin() {
   const cookieStore = await cookies()
@@ -17,7 +18,7 @@ export async function validateAdmin() {
     }
     return payload.userId
   } catch (error) {
-    console.error("Server Auth Admin Check Failed:", error)
+    logger.error("Server Auth Admin Check Failed:", error)
     redirect('/login')
   }
 }

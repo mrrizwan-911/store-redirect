@@ -1,5 +1,6 @@
 import { store } from '@/store';
 import { setToken, logout } from '@/store/slices/authSlice';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * fetchWithAuth is a custom fetch wrapper for client-side API calls.
@@ -53,7 +54,7 @@ export async function fetchWithAuth(url: string, options?: RequestInit): Promise
       }
     } catch (error) {
       // Network error during refresh or other unexpected failure
-      console.error('fetchWithAuth: Token refresh failed', error);
+      logger.error('fetchWithAuth: Token refresh failed', error);
       store.dispatch(logout());
 
       if (typeof window !== 'undefined') {

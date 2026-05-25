@@ -6,6 +6,7 @@
  *   const ok = await verifyTurnstile(token, request.headers.get('CF-Connecting-IP') ?? '')
  *   if (!ok) return NextResponse.json({ error: 'CAPTCHA failed' }, { status: 400 })
  */
+import { logger } from '@/lib/utils/logger'
 export async function verifyTurnstile(
   token: string,
   remoteIp?: string
@@ -15,10 +16,10 @@ export async function verifyTurnstile(
   if (!secret) {
     // In dev without key configured, skip verification
     if (process.env.NODE_ENV === 'development') {
-      console.warn('[Turnstile] TURNSTILE_SECRET_KEY not set — skipping in dev')
+      logger.warn('[Turnstile] TURNSTILE_SECRET_KEY not set — skipping in dev')
       return true
     }
-    console.error('[Turnstile] TURNSTILE_SECRET_KEY is not configured!')
+    logger.error('[Turnstile] TURNSTILE_SECRET_KEY is not configured!')
     return false
   }
 
@@ -47,12 +48,12 @@ export async function verifyTurnstile(
     const data: { success: boolean; 'error-codes'?: string[] } = await res.json()
 
     if (!data.success) {
-      console.warn('[Turnstile] Verification failed:', data['error-codes'])
+      logger.warn('[Turnstile] Verification failed:', data['error-codes'])
     }
 
     return data.success === true
   } catch (err) {
-    console.error('[Turnstile] Verification request failed:', err)
+    logger.error('[Turnstile] Verification request failed:', err)
     return false
   }
 }

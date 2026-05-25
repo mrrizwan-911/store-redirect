@@ -3,6 +3,7 @@ import { db } from '@/lib/db/client';
 import { getUserSession } from '@/lib/auth/session';
 import { generateOrderInvoicePDF } from '@/lib/services/pdf/generator';
 import { verifyAccessToken, verifyRefreshToken } from '@/lib/auth/jwt';
+import { logger } from '@/lib/utils/logger';
 
 export async function GET(
   req: NextRequest,
@@ -68,7 +69,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('[INVOICE_ERROR]', error);
+    logger.error('[INVOICE_ERROR]', error);
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { hash } from 'bcryptjs'
 import { z } from 'zod'
+import { logger } from '@/lib/utils/logger'
 
 const AcceptSchema = z.object({
   token: z.string().min(1),
