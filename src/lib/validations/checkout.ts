@@ -23,6 +23,7 @@ export const createOrderSchema = z.object({
   loyaltyPoints: z.number().int().min(0).max(2000).optional(),
   isGift: z.boolean().default(false),
   giftMessage: z.string().max(500).optional().nullable(),
+  turnstileToken: z.string().optional(),
   items: z.array(z.object({
     productId: z.string().min(1, 'Product ID is required'),
     variantId: z.string().optional().nullable(),

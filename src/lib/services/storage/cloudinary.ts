@@ -12,10 +12,20 @@ export async function uploadToCloudinary(
 ): Promise<{ url: string; publicId: string }> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
-      .upload_stream({ folder, resource_type: 'image' }, (error, result) => {
-        if (error || !result) return reject(error)
-        resolve({ url: result.secure_url, publicId: result.public_id })
-      })
+      .upload_stream(
+        { 
+          folder, 
+          resource_type: 'image',
+          transformation: [
+            { width: 1200, crop: 'limit' },
+            { quality: 'auto', fetch_format: 'auto' }
+          ]
+        }, 
+        (error, result) => {
+          if (error || !result) return reject(error)
+          resolve({ url: result.secure_url, publicId: result.public_id })
+        }
+      )
       .end(buffer)
   })
 }

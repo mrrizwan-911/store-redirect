@@ -182,7 +182,6 @@ export default function LoginPage() {
         <div className="space-y-4 pt-4">
           <TurnstileWidget 
             onSuccess={setTurnstileToken} 
-            appearance="interaction-only"
           />
 
           <Button

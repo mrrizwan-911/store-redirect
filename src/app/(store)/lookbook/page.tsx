@@ -55,7 +55,17 @@ export default async function LookbookPage({
         outfit.items.map(item => getValidatedPrice(item.product.id))
       )
       const totalPrice = itemPrices.reduce((sum, price) => sum + price, 0)
-      return { ...outfit, itemCount: outfit.items.length, totalPrice }
+      
+      const serializedItems = outfit.items.map(item => ({
+        ...item,
+        product: {
+          ...item.product,
+          basePrice: item.product.basePrice ? Number(item.product.basePrice) : null,
+          salePrice: item.product.salePrice ? Number(item.product.salePrice) : null,
+        }
+      }))
+      
+      return { ...outfit, items: serializedItems, itemCount: outfit.items.length, totalPrice }
     })
   )
 

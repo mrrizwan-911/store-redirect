@@ -5,6 +5,7 @@ import { createOrderSchema } from '@/lib/validations/checkout'
 import { getValidatedCartTotal } from '@/lib/services/payment/priceValidator'
 import { logger } from '@/lib/utils/logger'
 import { getUserSession } from '@/lib/auth/session'
+import { verifyTurnstile } from '@/lib/utils/verifyTurnstile'
 import { OrderStatus, PaymentMethod, PaymentStatus } from '@prisma/client'
 
 export async function POST(req: NextRequest) {
@@ -37,6 +38,7 @@ export async function POST(req: NextRequest) {
       items,
       isGift,
       giftMessage,
+      turnstileToken,
     } = parsed.data
 
     logger.info('Create order request received', {
@@ -47,6 +49,21 @@ export async function POST(req: NextRequest) {
       paymentMethod,
       country,
     })
+
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { success: false, error: 'Security verification failed.' },
+        { status: 403 }
+      )
+    }
+
+    const isValid = await verifyTurnstile(turnstileToken, clientIp)
+    if (!isValid) {
+      return NextResponse.json(
+        { success: false, error: 'Security verification failed.' },
+        { status: 403 }
+      )
+    }
 
     // ── Guest user resolution ─────────────────────────────────────────────
     const session = await getUserSession()

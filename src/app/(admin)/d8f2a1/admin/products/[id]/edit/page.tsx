@@ -23,9 +23,16 @@ export default async function EditProductPage(context: { params: Promise<{ id: s
     notFound()
   }
 
+  // Parse variant options properly
+  const parsedOptions = typeof product.variantOptions === 'string'
+    ? JSON.parse(product.variantOptions)
+    : (product.variantOptions || [])
+
   // Map to fit the form's expected input
   const initialData = {
     ...product,
+    variantOptions: parsedOptions,
+    baseStock: product.variants.length === 1 && parsedOptions.length === 0 ? product.variants[0].stock : 0,
     basePrice: Number(product.basePrice),
     salePrice: product.salePrice ? Number(product.salePrice) : null,
     pricePK: Number(product.pricePK),

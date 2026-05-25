@@ -11,6 +11,7 @@ import { AddressInput } from '@/lib/validations/address'
 import { SITE_COUNTRY, getEnabledPaymentMethods, formatPrice } from '@/lib/constants/site'
 import { ShippingStep } from './ShippingStep'
 import { PaymentStep } from './PaymentStep'
+import { TurnstileWidget } from '@/components/ui/TurnstileWidget'
 
 type CheckoutStep = 'address' | 'shipping' | 'payment' | 'confirm'
 
@@ -65,6 +66,9 @@ export function CheckoutClient() {
   const [stripePaymentIntentId, setStripePaymentIntentId] = useState<string | null>(null)
   const [paymentDone, setPaymentDone] = useState(false)
   const [confirmedOrder, setConfirmedOrder] = useState<any>(null)
+
+  // Turnstile security token
+  const [turnstileToken, setTurnstileToken] = useState<string>('')
 
   const getActiveAddress = () => {
     if (isAuthenticated && !isAddingNewAddress && selectedAddressId) {
@@ -180,6 +184,11 @@ export function CheckoutClient() {
       return
     }
 
+    if (!turnstileToken) {
+      toast.error('Security verification pending. Please wait.')
+      return
+    }
+
     const itemsExceedingStock = items.filter(item => item.quantity > item.stock)
     if (itemsExceedingStock.length > 0) {
       toast.error(`Items exceed stock: ${itemsExceedingStock.map(i => i.name).join(', ')}`)
@@ -206,6 +215,7 @@ export function CheckoutClient() {
         loyaltyPoints: redeemPoints > 0 ? redeemPoints : undefined,
         isGift,
         giftMessage: isGift ? giftMessage : undefined,
+        turnstileToken,
         items: items.map(item => ({
           productId: item.productId,
           variantId: item.variantId || null,
@@ -608,6 +618,10 @@ export function CheckoutClient() {
             {/* ── Navigation Buttons ──────────────────────────────────────── */}
             {currentStep !== 'confirm' && currentStep !== 'payment' && (
               <div className="mt-8 space-y-3 border-t border-neutral-200 pt-6">
+                <TurnstileWidget 
+                  onSuccess={setTurnstileToken} 
+                  appearance="interaction-only"
+                />
                 <button
                   onClick={handleNext}
                   disabled={isLoading}

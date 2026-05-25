@@ -100,6 +100,10 @@ export default async function CategoryPage({
         : (p.salePricePK ? Number(p.salePricePK) : null)
       return {
         ...p,
+        pricePK: p.pricePK ? Number(p.pricePK) : null,
+        priceUK: p.priceUK ? Number(p.priceUK) : null,
+        salePricePK: p.salePricePK ? Number(p.salePricePK) : null,
+        salePriceUK: p.salePriceUK ? Number(p.salePriceUK) : null,
         avgRating,
         reviewCount: p.reviews.length,
         reviews: undefined,

@@ -26,6 +26,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   const enriched = featured.map((p) => ({
     ...p,
+    pricePK: p.pricePK ? Number(p.pricePK) : null,
+    priceUK: p.priceUK ? Number(p.priceUK) : null,
+    salePricePK: p.salePricePK ? Number(p.salePricePK) : null,
+    salePriceUK: p.salePriceUK ? Number(p.salePriceUK) : null,
     basePrice: SITE_COUNTRY === 'UK' ? Number(p.priceUK || 0) : Number(p.pricePK || 0),
     price: SITE_COUNTRY === 'UK' ? Number(p.priceUK || 0) : Number(p.pricePK || 0),
     salePrice: SITE_COUNTRY === 'UK'

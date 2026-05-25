@@ -44,35 +44,44 @@ function countrySQL(region?: string | null): string {
 
 // ─── Existing: Abandoned Cart (kept exactly) ─────────────────────────────────
 
-export async function getAbandonedCartStats() {
+export async function getAbandonedCartStats(region?: string | null) {
   const now = new Date()
   const sixtyMinsAgo = new Date(now.getTime() - 60 * 60 * 1000)
+  const regionCond = countrySQL(region)
 
-  const count = await db.cart.count({
-    where: { lastActiveAt: { lt: sixtyMinsAgo }, items: { some: {} } },
-  })
-
-  const potentialRevenueRaw = await db.$queryRaw<{ total: number }[]>`
-    SELECT SUM(ci.quantity * COALESCE(p."salePrice", p."basePrice"))::float AS "total"
-    FROM "CartItem" ci
-    JOIN "Cart"    c ON ci."cartId"    = c.id
+  // Use raw sql for count to easily apply region logic
+  const statsRaw = await db.$queryRaw<{ count: number; potentialRevenue: number }[]>`
+    SELECT 
+      COUNT(DISTINCT c.id)::int AS count,
+      COALESCE(SUM(ci.quantity * COALESCE(p."salePrice", p."basePrice")), 0)::float AS "potentialRevenue"
+    FROM "Cart" c
+    JOIN "CartItem" ci ON ci."cartId" = c.id
     JOIN "Product" p ON ci."productId" = p.id
+    LEFT JOIN "User" u ON c."userId" = u.id
+    LEFT JOIN "Address" a ON u.id = a."userId" AND a."isDefault" = true
     WHERE c."lastActiveAt" < ${sixtyMinsAgo}
+      ${regionCond ? Prisma.raw(regionCond) : Prisma.empty}
   `
-  const potentialRevenue = potentialRevenueRaw[0]?.total || 0
 
   const topAbandoned = await db.$queryRaw<{ name: string; count: number }[]>`
     SELECT p.name, COUNT(*)::int AS "count"
     FROM "CartItem" ci
     JOIN "Cart"    c ON ci."cartId"    = c.id
     JOIN "Product" p ON ci."productId" = p.id
+    LEFT JOIN "User" u ON c."userId" = u.id
+    LEFT JOIN "Address" a ON u.id = a."userId" AND a."isDefault" = true
     WHERE c."lastActiveAt" < ${sixtyMinsAgo}
+      ${regionCond ? Prisma.raw(regionCond) : Prisma.empty}
     GROUP BY p.name
     ORDER BY "count" DESC
     LIMIT 5
   `
 
-  return { count, potentialRevenue, topAbandoned }
+  return { 
+    count: statsRaw[0]?.count || 0, 
+    potentialRevenue: statsRaw[0]?.potentialRevenue || 0, 
+    topAbandoned 
+  }
 }
 
 // ─── 1. KPI Summary ───────────────────────────────────────────────────────────
@@ -86,37 +95,48 @@ export async function getKpiSummary(options: {
 }) {
   const { startDate, endDate, compareStart, compareEnd, region } = options
   const cf = countryFilter(region)
+  const regionCond = countrySQL(region)
 
-  const [
-    curRevRaw, prevRevRaw,
-    curOrders, prevOrders,
-    curCustomers, prevCustomers,
-    activeOrders,
-    totalCarts, abandonedCarts,
-  ] = await Promise.all([
-    db.payment.aggregate({
-      where: { status: 'COMPLETED', paidAt: dateRange(startDate, endDate), order: { ...cf } },
-      _sum: { amount: true },
-    }),
-    db.payment.aggregate({
-      where: { status: 'COMPLETED', paidAt: dateRange(compareStart, compareEnd), order: { ...cf } },
-      _sum: { amount: true },
-    }),
-    db.order.count({ where: { createdAt: dateRange(startDate, endDate), ...cf } }),
-    db.order.count({ where: { createdAt: dateRange(compareStart, compareEnd), ...cf } }),
+  const kpiRaw = await db.$queryRaw<{
+    todayRevenue: number; monthRevenue: number; ytdRevenue: number;
+    curRevenue: number; prevRevenue: number;
+    curOrders: number; prevOrders: number;
+    activeOrders: number;
+  }[]>`
+    SELECT
+      SUM(CASE WHEN o."createdAt" >= CURRENT_DATE AND o.status NOT IN ('CANCELLED', 'REFUNDED') THEN o.total ELSE 0 END)::float AS "todayRevenue",
+      SUM(CASE WHEN o."createdAt" >= DATE_TRUNC('month', CURRENT_DATE) AND o.status NOT IN ('CANCELLED', 'REFUNDED') THEN o.total ELSE 0 END)::float AS "monthRevenue",
+      SUM(CASE WHEN o."createdAt" >= DATE_TRUNC('year', CURRENT_DATE) AND o.status NOT IN ('CANCELLED', 'REFUNDED') THEN o.total ELSE 0 END)::float AS "ytdRevenue",
+      SUM(CASE WHEN o."createdAt" >= ${startDate} AND o."createdAt" <= ${endDate} AND o.status NOT IN ('CANCELLED', 'REFUNDED') THEN o.total ELSE 0 END)::float AS "curRevenue",
+      SUM(CASE WHEN o."createdAt" >= ${compareStart} AND o."createdAt" <= ${compareEnd} AND o.status NOT IN ('CANCELLED', 'REFUNDED') THEN o.total ELSE 0 END)::float AS "prevRevenue",
+      SUM(CASE WHEN o."createdAt" >= ${startDate} AND o."createdAt" <= ${endDate} THEN 1 ELSE 0 END)::int AS "curOrders",
+      SUM(CASE WHEN o."createdAt" >= ${compareStart} AND o."createdAt" <= ${compareEnd} THEN 1 ELSE 0 END)::int AS "prevOrders",
+      SUM(CASE WHEN o.status IN ('PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED') THEN 1 ELSE 0 END)::int AS "activeOrders"
+    FROM "Order" o
+    LEFT JOIN "Address" a ON o."addressId" = a.id
+    WHERE 1=1
+    ${regionCond ? Prisma.raw(regionCond) : Prisma.empty}
+  `
+
+  const stats = kpiRaw[0] || {
+    todayRevenue: 0, monthRevenue: 0, ytdRevenue: 0,
+    curRevenue: 0, prevRevenue: 0, curOrders: 0, prevOrders: 0, activeOrders: 0
+  }
+
+  const [curCustomers, prevCustomers, totalCarts, abandonedCarts] = await Promise.all([
     db.user.count({ where: { role: 'CUSTOMER', createdAt: dateRange(startDate, endDate) } }),
     db.user.count({ where: { role: 'CUSTOMER', createdAt: dateRange(compareStart, compareEnd) } }),
-    db.order.count({
-      where: { status: { in: ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED'] }, ...cf },
-    }),
     db.cart.count({ where: { items: { some: {} } } }),
     db.cart.count({
       where: { lastActiveAt: { lt: new Date(Date.now() - 60 * 60 * 1000) }, items: { some: {} } },
     }),
   ])
 
-  const curRevenue  = Number(curRevRaw._sum.amount ?? 0)
-  const prevRevenue = Number(prevRevRaw._sum.amount ?? 0)
+  const curRevenue  = Number(stats.curRevenue ?? 0)
+  const prevRevenue = Number(stats.prevRevenue ?? 0)
+  const curOrders   = Number(stats.curOrders ?? 0)
+  const prevOrders  = Number(stats.prevOrders ?? 0)
+
   const curAov      = curOrders  > 0 ? curRevenue  / curOrders  : 0
   const prevAov     = prevOrders > 0 ? prevRevenue / prevOrders : 0
   const cartAbandonRate = totalCarts > 0
@@ -140,12 +160,15 @@ export async function getKpiSummary(options: {
 
   return {
     revenue:       { current: curRevenue,  previous: prevRevenue, changePct: changePct(curRevenue, prevRevenue) },
+    todayRevenue:  stats.todayRevenue || 0,
+    monthRevenue:  stats.monthRevenue || 0,
+    ytdRevenue:    stats.ytdRevenue || 0,
     orders:        { current: curOrders,   previous: prevOrders,  changePct: changePct(curOrders, prevOrders) },
     aov:           { current: curAov,      previous: prevAov,     changePct: changePct(curAov, prevAov) },
     newCustomers:  { current: curCustomers, previous: prevCustomers, changePct: changePct(curCustomers, prevCustomers) },
     repeatRate:    { current: repeatRate, previous: 0, changePct: 0 },
     cartAbandonRate: { current: cartAbandonRate, previous: 0, changePct: 0 },
-    activeOrders,
+    activeOrders:  stats.activeOrders || 0,
   }
 }
 
@@ -159,7 +182,7 @@ export async function getRevenueSeries(options: {
 }) {
   const { startDate, endDate, granularity } = options
   const trunc = granularity === 'month' ? 'month' : granularity === 'week' ? 'week' : 'day'
-  const truncSql = Prisma.raw(`DATE_TRUNC('${trunc}', p."paidAt")`)
+  const truncSql = Prisma.raw(`DATE_TRUNC('${trunc}', o."createdAt")`)
 
   // Always return all three series so the chart can show pk / uk / global lines.
   // "both" orders count toward BOTH pk and uk revenue.
@@ -168,17 +191,16 @@ export async function getRevenueSeries(options: {
   }[]>`
     SELECT
       ${truncSql}                                                               AS date,
-      SUM(CASE WHEN a.country IN ('pk','both') THEN p.amount ELSE 0 END)::float AS pk,
-      SUM(CASE WHEN a.country IN ('uk','both') THEN p.amount ELSE 0 END)::float AS uk,
+      SUM(CASE WHEN a.country IN ('pk','both') THEN o.total ELSE 0 END)::float AS pk,
+      SUM(CASE WHEN a.country IN ('uk','both') THEN o.total ELSE 0 END)::float AS uk,
       SUM(CASE WHEN a.country NOT IN ('pk','uk','both') OR a.country IS NULL
-               THEN p.amount ELSE 0 END)::float                                  AS global_rev,
-      SUM(p.amount)::float                                                        AS total
-    FROM "Payment" p
-    JOIN "Order" o ON p."orderId" = o.id
-    JOIN "Address" a ON o."addressId" = a.id
-    WHERE p.status   = 'COMPLETED'
-      AND p."paidAt" >= ${startDate}
-      AND p."paidAt" <= ${endDate}
+               THEN o.total ELSE 0 END)::float                                  AS global_rev,
+      SUM(o.total)::float                                                        AS total
+    FROM "Order" o
+    LEFT JOIN "Address" a ON o."addressId" = a.id
+    WHERE o.status NOT IN ('CANCELLED', 'REFUNDED')
+      AND o."createdAt" >= ${startDate}
+      AND o."createdAt" <= ${endDate}
     GROUP BY ${truncSql}
     ORDER BY date ASC
   `
@@ -206,11 +228,10 @@ export async function getOrdersByRegion(options: {
     SELECT
       COALESCE(a.country, 'pk')              AS country,
       COUNT(*)::int                          AS count,
-      COALESCE(SUM(p.amount), 0)::float      AS revenue,
-      COALESCE(AVG(p.amount), 0)::float      AS "avgOrderValue"
+      COALESCE(SUM(CASE WHEN o.status NOT IN ('CANCELLED', 'REFUNDED') THEN o.total ELSE 0 END), 0)::float      AS revenue,
+      COALESCE(AVG(CASE WHEN o.status NOT IN ('CANCELLED', 'REFUNDED') THEN o.total ELSE NULL END), 0)::float      AS "avgOrderValue"
     FROM "Order" o
     LEFT JOIN "Address" a ON o."addressId" = a.id
-    LEFT JOIN "Payment" p ON p."orderId" = o.id AND p.status = 'COMPLETED'
     WHERE o."createdAt" >= ${startDate}
       AND o."createdAt" <= ${endDate}
     GROUP BY COALESCE(a.country, 'pk')
@@ -524,44 +545,43 @@ export async function getFinancialSummary(options: {
 
   const [grossRaw, discountRaw, refundRaw, byMethodRaw, monthlyRaw] =
     await Promise.all([
-      db.payment.aggregate({
-        where: { status: 'COMPLETED', paidAt: dateRange(startDate, endDate), order: { ...cf } },
-        _sum: { amount: true },
+      db.order.aggregate({
+        where: { status: { notIn: ['CANCELLED', 'REFUNDED'] }, createdAt: dateRange(startDate, endDate), ...cf },
+        _sum: { total: true },
       }),
       db.order.aggregate({
         where: { createdAt: dateRange(startDate, endDate), ...cf },
         _sum: { discount: true },
       }),
-      db.payment.aggregate({
-        where: { status: 'REFUNDED', paidAt: dateRange(startDate, endDate), order: { ...cf } },
-        _sum: { amount: true },
+      db.order.aggregate({
+        where: { status: 'REFUNDED', createdAt: dateRange(startDate, endDate), ...cf },
+        _sum: { total: true },
       }),
       db.payment.groupBy({
         by: ['method'],
-        where: { status: 'COMPLETED', paidAt: dateRange(startDate, endDate), order: { ...cf } },
+        where: { order: { status: { notIn: ['CANCELLED', 'REFUNDED'] }, createdAt: dateRange(startDate, endDate), ...cf } },
         _sum: { amount: true },
         _count: true,
       }),
       db.$queryRaw<{ month: string; gross: number; discounts: number; refunds: number }[]>`
         SELECT
-          TO_CHAR(DATE_TRUNC('month', p."paidAt"), 'Mon YY') AS month,
-          COALESCE(SUM(CASE WHEN p.status='COMPLETED' THEN p.amount ELSE 0 END),0)::float AS gross,
+          TO_CHAR(DATE_TRUNC('month', o."createdAt"), 'Mon YY') AS month,
+          COALESCE(SUM(CASE WHEN o.status NOT IN ('CANCELLED', 'REFUNDED') THEN o.total ELSE 0 END),0)::float AS gross,
           COALESCE(SUM(o.discount),0)::float                                               AS discounts,
-          COALESCE(SUM(CASE WHEN p.status='REFUNDED'  THEN p.amount ELSE 0 END),0)::float AS refunds
-        FROM "Payment" p
-        JOIN "Order" o ON p."orderId" = o.id
-        JOIN "Address" a ON o."addressId" = a.id
-        WHERE p."paidAt" >= ${startDate}
-          AND p."paidAt" <= ${endDate}
+          COALESCE(SUM(CASE WHEN o.status = 'REFUNDED'  THEN o.total ELSE 0 END),0)::float AS refunds
+        FROM "Order" o
+        LEFT JOIN "Address" a ON o."addressId" = a.id
+        WHERE o."createdAt" >= ${startDate}
+          AND o."createdAt" <= ${endDate}
           ${regionCond ? Prisma.raw(regionCond) : Prisma.empty}
-        GROUP BY DATE_TRUNC('month', p."paidAt")
-        ORDER BY DATE_TRUNC('month', p."paidAt") DESC
+        GROUP BY DATE_TRUNC('month', o."createdAt")
+        ORDER BY DATE_TRUNC('month', o."createdAt") DESC
       `,
     ])
 
-  const gross     = Number(grossRaw._sum.amount    ?? 0)
+  const gross     = Number(grossRaw._sum.total    ?? 0)
   const discounts = Number(discountRaw._sum.discount ?? 0)
-  const refunds   = Number(refundRaw._sum.amount    ?? 0)
+  const refunds   = Number(refundRaw._sum.total    ?? 0)
 
   return {
     grossRevenue:     gross,

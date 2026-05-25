@@ -37,7 +37,7 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
     getRevenueSeries({ startDate, endDate, granularity: 'day', region }),
     getOrdersAnalytics({ startDate, endDate, region }),
     getProductAnalytics({ startDate, endDate, region }),
-    getAbandonedCartStats()
+    getAbandonedCartStats(region)
   ])
 
   // Extract KPI values
@@ -56,15 +56,15 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
           label="Today's Revenue"
-          value={`PKR ${kpi.revenue?.current?.toLocaleString() || 0}`}
+          value={`PKR ${(kpi as any).todayRevenue?.toLocaleString() || 0}`}
         />
         <KpiCard
           label="This Month"
-          value={`PKR ${kpi.revenue?.current?.toLocaleString() || 0}`}
+          value={`PKR ${(kpi as any).monthRevenue?.toLocaleString() || 0}`}
         />
         <KpiCard
           label="YTD Revenue"
-          value={`PKR ${kpi.revenue?.current?.toLocaleString() || 0}`}
+          value={`PKR ${(kpi as any).ytdRevenue?.toLocaleString() || 0}`}
         />
         <KpiCard
           label="Active Orders"
@@ -101,8 +101,37 @@ export default async function AnalyticsPage({ searchParams }: PageProps) {
         </div>
       </div>
 
-      {/* Abandoned Cart */}
-      <ForecastAlerts />
+      {/* Forecast & Abandoned Cart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ForecastAlerts />
+        
+        {/* Abandoned Cart Widget */}
+        <div className="bg-white p-6 rounded-xl border border-neutral-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-[10px] uppercase tracking-widest font-bold text-neutral-400">Abandoned Carts (Last Hour)</h3>
+            <span className="text-xl font-bold text-neutral-900">{abandonedData?.count || 0}</span>
+          </div>
+          <div className="mb-6">
+            <p className="text-xs text-neutral-500 uppercase tracking-wider mb-1">Potential Lost Revenue</p>
+            <p className="text-2xl font-playfair font-bold text-rose-600">PKR {abandonedData?.potentialRevenue?.toLocaleString() || 0}</p>
+          </div>
+          <div>
+            <p className="text-xs text-neutral-500 uppercase tracking-wider mb-3">Top Abandoned Items</p>
+            {abandonedData?.topAbandoned && abandonedData.topAbandoned.length > 0 ? (
+              <div className="space-y-2">
+                {abandonedData.topAbandoned.map((item: any, i: number) => (
+                  <div key={i} className="flex justify-between items-center text-sm border-b border-neutral-50 pb-2">
+                    <span className="truncate max-w-[200px] text-neutral-700">{item.name}</span>
+                    <span className="font-mono bg-neutral-100 px-2 py-0.5 rounded text-neutral-600 text-xs">{item.count} in carts</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-neutral-400 italic">No items abandoned recently</p>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
