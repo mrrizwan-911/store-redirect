@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { requireAdmin } from '@/lib/utils/adminAuth'
 import { outfitSchema } from '@/lib/validations/outfit'
+import { logger } from '@/lib/utils/logger'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const authResult = await requireAdmin(req)
@@ -71,7 +72,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     return NextResponse.json({ success: true, data: outfit })
   } catch (error) {
-    console.error('Failed to update outfit:', error)
+    logger.error('Failed to update outfit:', error)
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 })
   }
 }
@@ -85,7 +86,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     await db.outfit.delete({ where: { id: resolvedParams.id } })
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Failed to delete outfit:', error)
+    logger.error('Failed to delete outfit:', error)
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 })
   }
 }

@@ -44,6 +44,24 @@ export function getDisplayPrice(product: any, country: CountryCode) {
   }
 }
 
+/**
+ * Calculates discount amount given type (PERCENTAGE or FLAT), value, and base price.
+ * For PERCENTAGE: returns basePrice * value / 100
+ * For FLAT: returns min(value, basePrice)
+ */
+export function calculateDiscount({
+  type,
+  value,
+  basePrice,
+}: {
+  type: 'PERCENTAGE' | 'FLAT'
+  value: number
+  basePrice: number
+}): number {
+  if (type === 'PERCENTAGE') return Math.round((basePrice * value) / 100)
+  return Math.min(value, basePrice)
+}
+
 export function formatPrice(amount: number | null, country: CountryCode) {
   if (amount == null) return ''
 

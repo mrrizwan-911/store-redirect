@@ -12,6 +12,7 @@ import {
 import { awardOrderPoints } from '@/lib/services/loyalty/award'
 import { verifyAccessToken } from '@/lib/auth/jwt'
 import { getUserSession } from '@/lib/auth/session'
+import { logger } from '@/lib/utils/logger'
 
 export async function GET(req: NextRequest, context: { params: Promise<{ id: string }> }) {
   const authResult = await requireAdmin(req)
@@ -114,7 +115,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
 
     return NextResponse.json({ success: true, data: order })
   } catch (error: any) {
-    console.error('[PATCH_ORDER_ERROR]', error)
+    logger.error('[PATCH_ORDER_ERROR]', error)
     return NextResponse.json({ success: false, error: error.message || 'Failed to update order' }, { status: 400 })
   }
 }

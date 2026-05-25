@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { requireAdmin } from '@/lib/utils/adminAuth'
 import { outfitSchema } from '@/lib/validations/outfit'
+import { logger } from '@/lib/utils/logger'
 
 export async function GET(req: NextRequest) {
   const authResult = await requireAdmin(req)

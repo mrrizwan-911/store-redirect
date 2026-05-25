@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/utils/adminAuth'
 import { getCustomers } from '@/lib/services/admin/customer'
+import { logger } from '@/lib/utils/logger'
 
 export async function GET(req: NextRequest) {
   const authResult = await requireAdmin(req)
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
     const data = await getCustomers({ page, limit, search })
     return NextResponse.json({ success: true, data })
   } catch (error) {
-    console.error('Customers API error:', error)
+    logger.error('Customers API error:', error)
     return NextResponse.json({ success: false, error: 'Failed to fetch customers' }, { status: 500 })
   }
 }

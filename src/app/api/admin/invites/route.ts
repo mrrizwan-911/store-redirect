@@ -3,6 +3,7 @@ import { db } from '@/lib/db/client'
 import { getUserSession } from '@/lib/auth/session'
 import { sendAdminInviteEmail } from '@/lib/services/email/adminInvite'
 import { z } from 'zod'
+import { logger } from '@/lib/utils/logger'
 
 const InviteSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -50,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, message: `Invite sent to ${email}` })
   } catch (err) {
-    console.error('[AdminInvite] POST error:', err)
+    logger.error('[AdminInvite] POST error:', err)
     return NextResponse.json({ error: 'Failed to send invite' }, { status: 500 })
   }
 }
@@ -71,7 +72,7 @@ export async function GET() {
 
     return NextResponse.json({ invites })
   } catch (err) {
-    console.error('[AdminInvite] GET error:', err)
+    logger.error('[AdminInvite] GET error:', err)
     return NextResponse.json({ error: 'Failed to fetch invites' }, { status: 500 })
   }
 }

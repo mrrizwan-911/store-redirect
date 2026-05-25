@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       message: 'Account created. You can now sign in.',
     })
   } catch (err) {
-    console.error('[AdminInvite] Accept error:', err)
+    logger.error('[AdminInvite] Accept error:', err)
     return NextResponse.json({ error: 'Something went wrong' }, { status: 500 })
   }
 }

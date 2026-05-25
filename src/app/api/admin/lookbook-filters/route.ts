@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
 import { requireAdmin } from '@/lib/utils/adminAuth'
+import { logger } from '@/lib/utils/logger'
 
 const DEFAULT_FILTERS = {
   seasons: ['All Season', 'Summer', 'Winter'],
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: DEFAULT_FILTERS })
   } catch (error) {
-    console.error('Failed to fetch lookbook filters:', error)
+    logger.error('Failed to fetch lookbook filters:', error)
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 })
   }
 }
@@ -77,7 +78,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ success: true, data: lookbookFilters })
   } catch (error) {
-    console.error('Failed to update lookbook filters:', error)
+    logger.error('Failed to update lookbook filters:', error)
     return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 })
   }
 }

@@ -66,12 +66,20 @@ const cartSlice = createSlice({
              i.variantId === action.payload.variantId
       )
       if (item) {
-        item.quantity = Math.min(action.payload.quantity, item.stock)
+        if (action.payload.quantity <= 0) {
+          state.items = state.items.filter(i => i !== item)
+        } else {
+          item.quantity = Math.min(action.payload.quantity, item.stock)
+        }
       }
       state.appliedCoupon = null
     },
     setAppliedCoupon(state, action: PayloadAction<CartState['appliedCoupon']>) {
-      state.appliedCoupon = action.payload
+      if (action.payload && !action.payload.code) {
+        state.appliedCoupon = null;
+      } else {
+        state.appliedCoupon = action.payload;
+      }
     },
     clearAppliedCoupon(state) {
       state.appliedCoupon = null
