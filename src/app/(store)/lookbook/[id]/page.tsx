@@ -62,7 +62,7 @@ export default async function SingleOutfitPage({ params }: { params: Promise<{ i
 
   const mappedOutfit = {
     ...outfit,
-    items: outfit.items.map((item, index) => {
+    items: outfit.items.map((item: any, index: number) => {
       const currentPrice = isUK ? Number(item.product.priceUK) : Number(item.product.pricePK)
       const currentSalePrice = isUK
         ? (item.product.salePriceUK ? Number(item.product.salePriceUK) : null)

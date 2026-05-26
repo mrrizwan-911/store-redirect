@@ -33,7 +33,7 @@ export default async function EditOutfitPage({ params }: { params: Promise<{ id:
 
   const serializedOutfit = {
     ...outfit,
-    items: outfit.items.map(item => ({
+    items: outfit.items.map((item: any) => ({
       ...item,
       product: {
         ...item.product,

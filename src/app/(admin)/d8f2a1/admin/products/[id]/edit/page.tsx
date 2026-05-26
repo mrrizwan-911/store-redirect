@@ -46,7 +46,7 @@ export default async function EditProductPage(context: { params: Promise<{ id: s
     priceUK: Number(product.priceUK),
     salePricePK: product.salePricePK ? Number(product.salePricePK) : null,
     salePriceUK: product.salePriceUK ? Number(product.salePriceUK) : null,
-    variants: product.variants.map((v) => ({
+    variants: product.variants.map((v: any) => ({
       id: v.id,
       title: v.title,
       optionValues: v.optionValues,

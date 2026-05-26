@@ -27,7 +27,7 @@ export default async function NewFlashSalePage() {
     .filter(cat => cat.products.length > 0)
     .map((cat) => ({
       categoryName: cat.name,
-      products: cat.products.map(p => ({
+      products: cat.products.map((p: any) => ({
         id: p.id,
         name: p.name,
         price: Number(p.basePrice),

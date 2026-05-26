@@ -118,7 +118,7 @@ export default async function ProductPage({ params }: Props) {
   // Calculate avgRating and reviewCount
   const avgRating =
     product.reviews.length > 0
-      ? product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length
+      ? product.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / product.reviews.length
       : null
 
   // Fetch category-specific products (Same category, excluding current product, up to 8)
@@ -176,7 +176,7 @@ export default async function ProductPage({ params }: Props) {
     priceUK: Number(product.priceUK),
     salePricePK: product.salePricePK ? Number(product.salePricePK) : null,
     salePriceUK: product.salePriceUK ? Number(product.salePriceUK) : null,
-    variants: product.variants.map(v => ({
+    variants: product.variants.map((v: any) => ({
       ...v,
       price: v.price ? Number(v.price) : null,
       pricePK: v.pricePK ? Number(v.pricePK) : null,
@@ -235,14 +235,14 @@ export default async function ProductPage({ params }: Props) {
     description: product.shortDescription || product.description,
     sku: product.sku,
     brand: { '@type': 'Brand', name: 'Calnza' },
-    image: product.images.map(img => img.url),
+    image: product.images.map((img: any) => img.url),
     offers: {
       '@type': 'Offer',
       url: `${domain}/products/${resolvedParams.slug}`,
       priceCurrency: currency,
       price: enrichedProduct.basePrice,
       priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      availability: product.variants.some(v => v.stock > 0)
+      availability: product.variants.some((v: any) => v.stock > 0)
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: 'Calnza' },

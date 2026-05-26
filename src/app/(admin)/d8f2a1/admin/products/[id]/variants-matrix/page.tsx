@@ -25,7 +25,7 @@ export default async function VariantsMatrixPage(context: { params: Promise<{ id
   }
 
   // Serialize decimal to numbers
-  const variants = product.variants.map((v) => ({
+  const variants = product.variants.map((v: any) => ({
     id: v.id,
     title: v.title,
     sku: v.sku,

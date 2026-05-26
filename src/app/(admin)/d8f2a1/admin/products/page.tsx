@@ -82,7 +82,7 @@ export default async function AdminProductsPage({
             </thead>
             <tbody>
               {products.map((product) => {
-                const totalStock = product.variants.reduce((acc, v) => acc + v.stock, 0)
+                const totalStock = product.variants.reduce((acc: number, v: any) => acc + v.stock, 0)
                 const basePrice = Number(product.basePrice)
 
                 // Find active flash sale for this product

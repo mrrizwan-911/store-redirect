@@ -107,7 +107,7 @@ export default async function CategoryPage({
     products.map((p) => {
       const avgRating =
         p.reviews.length > 0
-          ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
+          ? p.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / p.reviews.length
           : null
       const currentPrice = SITE_COUNTRY === 'UK' ? Number(p.priceUK) : Number(p.pricePK)
       const currentSalePrice = SITE_COUNTRY === 'UK'

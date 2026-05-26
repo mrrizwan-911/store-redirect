@@ -83,7 +83,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     products.map((p) => {
       const avgRating =
         p.reviews.length > 0
-          ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
+          ? p.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / p.reviews.length
           : null
       // Pick price based on country
       const price = Number(SITE_COUNTRY === 'UK' ? p.priceUK : p.pricePK)

@@ -41,13 +41,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     salePrice: SITE_COUNTRY === 'UK'
       ? (p.salePriceUK ? Number(p.salePriceUK) : null)
       : (p.salePricePK ? Number(p.salePricePK) : null),
-    variants: p.variants.map((v) => ({
+    variants: p.variants.map((v: any) => ({
       ...v,
       title: v.title,
       optionValues: v.optionValues,
     })),
     avgRating: p.reviews.length
-      ? p.reviews.reduce((sum, r) => sum + r.rating, 0) / p.reviews.length
+      ? p.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / p.reviews.length
       : 0,
     reviewCount: p.reviews.length,
   }))

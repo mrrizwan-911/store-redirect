@@ -150,7 +150,7 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-50">
-                    {order.items.map((item) => (
+                    {order.items.map((item: any) => (
                       <tr key={item.id} className="hover:bg-neutral-50/50 transition-colors">
                         <td className="p-4">
                           <div className="flex gap-3">
