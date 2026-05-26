@@ -12,17 +12,23 @@ interface SearchPageProps {
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const { q: query = '' } = await searchParams
 
-  const featured = await db.product.findMany({
-    where: { isActive: true, isFeatured: true },
-    include: {
-      images: { where: { isPrimary: true }, take: 1 },
-      category: { select: { name: true, slug: true } },
-      variants: { select: { title: true, optionValues: true,  stock: true } },
-      reviews: { select: { rating: true } },
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 8,
-  })
+  let featured: any[] = []
+
+  try {
+    featured = await db.product.findMany({
+      where: { isActive: true, isFeatured: true },
+      include: {
+        images: { where: { isPrimary: true }, take: 1 },
+        category: { select: { name: true, slug: true } },
+        variants: { select: { title: true, optionValues: true,  stock: true } },
+        reviews: { select: { rating: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 8,
+    })
+  } catch (err) {
+    console.warn('[SearchPage] DB unavailable, rendering with empty featured:', err)
+  }
 
   const enriched = featured.map((p) => ({
     ...p,

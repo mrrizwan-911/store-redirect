@@ -33,54 +33,52 @@ export default async function AdminLoyaltyPage({ searchParams }: PageProps) {
     : {};
 
   // 2. Fetch Aggregates filtered by region
-  const totalMembers = await db.loyaltyAccount.count({
-    where: countryFilter,
-  });
+  let totalMembers = 0
+  let totalIssued = 0
+  let totalRedeemed = 0
+  let accounts: any[] = []
 
-  const issuedAgg = await db.loyaltyEvent.aggregate({
-    _sum: { points: true },
-    where: {
-      points: { gt: 0 },
-      account: countryFilter,
-    },
-  });
+  try {
+    const [membersCount, issuedAgg, redeemedAgg, accountsList] = await Promise.all([
+      db.loyaltyAccount.count({ where: countryFilter }),
+      db.loyaltyEvent.aggregate({
+        _sum: { points: true },
+        where: { points: { gt: 0 }, account: countryFilter },
+      }),
+      db.loyaltyEvent.aggregate({
+        _sum: { points: true },
+        where: { points: { lt: 0 }, account: countryFilter },
+      }),
+      db.loyaltyAccount.findMany({
+        where: {
+          AND: [
+            countryFilter,
+            currentTier !== 'all' ? { tier: currentTier as any } : {},
+            search ? {
+              user: {
+                OR: [
+                  { name: { contains: search, mode: 'insensitive' } },
+                  { email: { contains: search, mode: 'insensitive' } }
+                ]
+              }
+            } : {}
+          ]
+        },
+        include: {
+          user: true,
+          history: { orderBy: { createdAt: 'desc' } }
+        },
+        orderBy: { updatedAt: 'desc' }
+      }),
+    ])
 
-  const redeemedAgg = await db.loyaltyEvent.aggregate({
-    _sum: { points: true },
-    where: {
-      points: { lt: 0 },
-      account: countryFilter,
-    },
-  });
-
-  const totalIssued = issuedAgg._sum.points || 0;
-  // Use Math.abs because redeemed points are negative in the database
-  const totalRedeemed = Math.abs(redeemedAgg._sum.points || 0);
-
-  // 3. Fetch Members List
-  const accounts = await db.loyaltyAccount.findMany({
-    where: {
-      AND: [
-        countryFilter,
-        currentTier !== 'all' ? { tier: currentTier as any } : {},
-        search ? {
-          user: {
-            OR: [
-              { name: { contains: search, mode: 'insensitive' } },
-              { email: { contains: search, mode: 'insensitive' } }
-            ]
-          }
-        } : {}
-      ]
-    },
-    include: {
-      user: true,
-      history: {
-        orderBy: { createdAt: 'desc' }
-      }
-    },
-    orderBy: { updatedAt: 'desc' }
-  });
+    totalMembers = membersCount
+    totalIssued = issuedAgg._sum.points || 0
+    totalRedeemed = Math.abs(redeemedAgg._sum.points || 0)
+    accounts = accountsList
+  } catch (err) {
+    console.warn('[AdminLoyaltyPage] DB unavailable:', err)
+  }
 
   return (
     <div className="container mx-auto py-6 px-4 md:px-8 max-w-7xl">

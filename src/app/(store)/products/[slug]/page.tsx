@@ -15,17 +15,30 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params
-  const product = await db.product.findUnique({
-    where: { slug: resolvedParams.slug, isActive: true },
-    select: {
-      name: true,
-      shortDescription: true,
-      description: true,
-      images: { where: { isPrimary: true }, take: 1 },
-      pricePK: true,
-      priceUK: true,
-    }
-  })
+  let product: {
+    name: string
+    shortDescription: string | null
+    description: string
+    images: { url: string }[]
+    pricePK: any
+    priceUK: any
+  } | null = null
+
+  try {
+    product = await db.product.findUnique({
+      where: { slug: resolvedParams.slug, isActive: true },
+      select: {
+        name: true,
+        shortDescription: true,
+        description: true,
+        images: { where: { isPrimary: true }, take: 1 },
+        pricePK: true,
+        priceUK: true,
+      }
+    })
+  } catch (err) {
+    console.warn('[ProductPage] generateMetadata DB error:', err)
+  }
 
   if (!product) return { title: 'Product Not Found' }
 
@@ -66,31 +79,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const resolvedParams = await params
-  const product = await db.product.findUnique({
-    where: { slug: resolvedParams.slug, isActive: true },
-    include: {
-      category: { select: { id: true, name: true, slug: true } },
-      images: { orderBy: { sortOrder: 'asc' } },
-      variants: {
-        orderBy: { title: 'asc' },
-        select: {
-          id: true,
-          title: true,
-          optionValues: true,
-          stock: true,
-          sku: true,
-          price: true,
-          pricePK: true,
-          priceUK: true,
-        }
+  let product: any = null
+
+  try {
+    product = await db.product.findUnique({
+      where: { slug: resolvedParams.slug, isActive: true },
+      include: {
+        category: { select: { id: true, name: true, slug: true } },
+        images: { orderBy: { sortOrder: 'asc' } },
+        variants: {
+          orderBy: { title: 'asc' },
+          select: {
+            id: true,
+            title: true,
+            optionValues: true,
+            stock: true,
+            sku: true,
+            price: true,
+            pricePK: true,
+            priceUK: true,
+          }
+        },
+        reviews: {
+          include: { user: { select: { name: true } } },
+          orderBy: { createdAt: 'desc' },
+          take: 20,
+        },
       },
-      reviews: {
-        include: { user: { select: { name: true } } },
-        orderBy: { createdAt: 'desc' },
-        take: 20,
-      },
-    },
-  })
+    })
+  } catch (err) {
+    console.warn('[ProductPage] DB unavailable:', err)
+  }
 
   if (!product) {
     notFound()
@@ -103,35 +122,41 @@ export default async function ProductPage({ params }: Props) {
       : null
 
   // Fetch category-specific products (Same category, excluding current product, up to 8)
-  const categoryProducts = await db.product.findMany({
-    where: {
-      categoryId: product.categoryId,
-      id: { not: product.id },
-      isActive: true,
-    },
-    include: {
-      images: { where: { isPrimary: true }, take: 1 },
-      category: { select: { name: true, slug: true } },
-    },
-    take: 8,
-  })
+  let categoryProducts: any[] = []
+  let relatedProducts: any[] = []
+  let activeSale: any = null
 
-  // Fetch related products (e.g., featured or trending items from other categories)
-  const relatedProducts = await db.product.findMany({
-    where: {
-      id: { not: product.id },
-      isActive: true,
-      isFeatured: true,
-    },
-    include: {
-      images: { where: { isPrimary: true }, take: 1 },
-      category: { select: { name: true, slug: true } },
-    },
-    take: 4,
-  })
-
-  // Fetch active flash sale for this product
-  const activeSale = await getActiveFlashSaleForProduct(product.id)
+  try {
+    ;[categoryProducts, relatedProducts, activeSale] = await Promise.all([
+      db.product.findMany({
+        where: {
+          categoryId: product.categoryId,
+          id: { not: product.id },
+          isActive: true,
+        },
+        include: {
+          images: { where: { isPrimary: true }, take: 1 },
+          category: { select: { name: true, slug: true } },
+        },
+        take: 8,
+      }),
+      db.product.findMany({
+        where: {
+          id: { not: product.id },
+          isActive: true,
+          isFeatured: true,
+        },
+        include: {
+          images: { where: { isPrimary: true }, take: 1 },
+          category: { select: { name: true, slug: true } },
+        },
+        take: 4,
+      }),
+      getActiveFlashSaleForProduct(product.id),
+    ])
+  } catch (err) {
+    console.warn('[ProductPage] secondary queries DB error:', err)
+  }
 
   // Country-specific pricing
   const isUK = SITE_COUNTRY === 'UK'

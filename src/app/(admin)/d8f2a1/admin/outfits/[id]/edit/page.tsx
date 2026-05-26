@@ -9,19 +9,25 @@ export const dynamic = 'force-dynamic'
 export default async function EditOutfitPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params
 
-  const outfit = await db.outfit.findUnique({
-    where: { id: resolvedParams.id },
-    include: {
-      items: {
-        include: {
-          product: {
-            select: { id: true, name: true, slug: true, basePrice: true, images: true },
+  let outfit: any = null
+
+  try {
+    outfit = await db.outfit.findUnique({
+      where: { id: resolvedParams.id },
+      include: {
+        items: {
+          include: {
+            product: {
+              select: { id: true, name: true, slug: true, basePrice: true, images: true },
+            },
           },
+          orderBy: { sortOrder: 'asc' },
         },
-        orderBy: { sortOrder: 'asc' },
       },
-    },
-  })
+    })
+  } catch (err) {
+    console.warn('[EditOutfitPage] DB unavailable:', err)
+  }
 
   if (!outfit) notFound()
 

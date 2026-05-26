@@ -52,21 +52,26 @@ const getPaymentMethodLabel = (method: string) => {
 export default async function AdminOrderDetailPage({ params }: PageProps) {
   const { id } = await params
 
-  const order = await db.order.findUnique({
-    where: { id },
-    include: {
-      items: {
-        include: {
-          product: { include: { images: true } },
-          variant: true,
+  let order: any = null
+
+  try {
+    order = await db.order.findUnique({
+      where: { id },
+      include: {
+        items: {
+          include: {
+            product: { include: { images: true } },
+            variant: true,
+          },
         },
+        user: { select: { name: true, email: true, phone: true } },
+        address: true,
+        payment: true,
       },
-      user: { select: { name: true, email: true, phone: true } },
-      address: true,
-      payment: true,
-      // shippingOption removed - not in schema
-    },
-  })
+    })
+  } catch (err) {
+    console.warn('[AdminOrderDetailPage] DB unavailable:', err)
+  }
 
   if (!order) notFound()
 

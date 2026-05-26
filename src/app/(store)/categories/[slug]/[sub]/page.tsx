@@ -20,20 +20,32 @@ export default async function SubcategoryPage({
   const resolvedSearchParams = await searchParams
 
   // Verify subcategory exists and belongs to the parent category
-  const subcategory = await db.category.findFirst({
-    where: {
-      slug: sub,
-      isActive: true,
-      parent: { slug: slug, isActive: true },
-    },
-    select: {
-      id: true,
-      parentId: true,
-      name: true,
-      description: true,
-      parent: { select: { name: true, slug: true } },
-    },
-  })
+  let subcategory: {
+    id: string
+    parentId: string | null
+    name: string
+    description: string | null
+    parent: { name: string; slug: string } | null
+  } | null = null
+
+  try {
+    subcategory = await db.category.findFirst({
+      where: {
+        slug: sub,
+        isActive: true,
+        parent: { slug: slug, isActive: true },
+      },
+      select: {
+        id: true,
+        parentId: true,
+        name: true,
+        description: true,
+        parent: { select: { name: true, slug: true } },
+      },
+    })
+  } catch (err) {
+    console.warn('[SubcategoryPage] DB unavailable:', err)
+  }
 
   if (!subcategory) {
     notFound()
@@ -70,20 +82,27 @@ export default async function SubcategoryPage({
     where.reviews = { some: { rating: { gte: rating } } }
   }
 
-  const [products, total] = await Promise.all([
-    db.product.findMany({
-      where,
-      include: {
-        images: { where: { isPrimary: true }, take: 1 },
-        category: { select: { name: true, slug: true } },
-        variants: { select: { title: true, optionValues: true, stock: true } },
-        reviews: { select: { rating: true } },
-      },
-      orderBy: { [sortField]: sortDir },
-      take: 24,
-    }),
-    db.product.count({ where }),
-  ])
+  let products: any[] = []
+  let total = 0
+
+  try {
+    ;[products, total] = await Promise.all([
+      db.product.findMany({
+        where,
+        include: {
+          images: { where: { isPrimary: true }, take: 1 },
+          category: { select: { name: true, slug: true } },
+          variants: { select: { title: true, optionValues: true, stock: true } },
+          reviews: { select: { rating: true } },
+        },
+        orderBy: { [sortField]: sortDir },
+        take: 24,
+      }),
+      db.product.count({ where }),
+    ])
+  } catch (err) {
+    console.warn('[SubcategoryPage] DB unavailable for products:', err)
+  }
 
   const enrichedProducts = await enrichProductsWithFlashSales(
     products.map((p) => {

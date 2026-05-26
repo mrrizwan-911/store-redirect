@@ -5,19 +5,26 @@ import { notFound } from 'next/navigation'
 export const dynamic = 'force-dynamic'
 
 export default async function EditProductPage(context: { params: Promise<{ id: string }> }) {
-  const [product, categories] = await Promise.all([
-    db.product.findUnique({
-      where: { id: (await context.params).id },
-      include: {
-        variants: true,
-        images: { orderBy: { sortOrder: 'asc' } },
-      },
-    }),
-    db.category.findMany({
-      orderBy: { name: 'asc' },
-      select: { id: true, name: true },
-    }),
-  ])
+  let product: any = null
+  let categories: { id: string; name: string }[] = []
+
+  try {
+    ;[product, categories] = await Promise.all([
+      db.product.findUnique({
+        where: { id: (await context.params).id },
+        include: {
+          variants: true,
+          images: { orderBy: { sortOrder: 'asc' } },
+        },
+      }),
+      db.category.findMany({
+        orderBy: { name: 'asc' },
+        select: { id: true, name: true },
+      }),
+    ])
+  } catch (err) {
+    console.warn('[EditProductPage] DB unavailable:', err)
+  }
 
   if (!product) {
     notFound()

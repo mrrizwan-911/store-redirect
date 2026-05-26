@@ -32,10 +32,16 @@ export default async function AdminCouponsPage({
   }
 
   // Fetch initial coupons
-  const couponsData = await db.coupon.findMany({
-    where: whereClause,
-    orderBy: { createdAt: 'desc' },
-  });
+  let couponsData: any[] = []
+
+  try {
+    couponsData = await db.coupon.findMany({
+      where: whereClause,
+      orderBy: { createdAt: 'desc' },
+    })
+  } catch (err) {
+    console.warn('[AdminCouponsPage] DB unavailable:', err)
+  }
 
   // Convert Decimal objects to numbers/strings for Client Component serialization
   const coupons = couponsData.map(coupon => ({

@@ -20,10 +20,15 @@ export default async function CategoryPage({
   const resolvedSearchParams = await searchParams
 
   // Verify the parent category exists
-  const activeCategory = await db.category.findUnique({
-    where: { slug, isActive: true },
-    select: { id: true, name: true, description: true },
-  })
+  let activeCategory: { id: string; name: string; description: string | null } | null = null
+  try {
+    activeCategory = await db.category.findUnique({
+      where: { slug, isActive: true },
+      select: { id: true, name: true, description: true },
+    })
+  } catch (err) {
+    console.warn('[CategoryPage] DB unavailable:', err)
+  }
 
   if (!activeCategory) {
     notFound()
@@ -73,22 +78,29 @@ export default async function CategoryPage({
   }
 
   // Fetch data
-  const [products, total] = await Promise.all([
-    db.product.findMany({
-      where,
-      include: {
-        images: { where: { isPrimary: true }, take: 1 },
-        category: { select: { name: true, slug: true } },
-        variants: { select: { title: true, optionValues: true, stock: true } },
-        reviews: { select: { rating: true } },
-      },
-      orderBy: { [sortField]: sortDir },
-      take: 24,
-    }),
-    db.product.count({ where }),
-    // Note: sub-categories are fetched client-side via /api/categories/children
-    // No need to pass them here anymore
-  ])
+  let products: any[] = []
+  let total = 0
+
+  try {
+    ;[products, total] = await Promise.all([
+      db.product.findMany({
+        where,
+        include: {
+          images: { where: { isPrimary: true }, take: 1 },
+          category: { select: { name: true, slug: true } },
+          variants: { select: { title: true, optionValues: true, stock: true } },
+          reviews: { select: { rating: true } },
+        },
+        orderBy: { [sortField]: sortDir },
+        take: 24,
+      }),
+      db.product.count({ where }),
+      // Note: sub-categories are fetched client-side via /api/categories/children
+      // No need to pass them here anymore
+    ])
+  } catch (err) {
+    console.warn('[CategoryPage] DB unavailable for products:', err)
+  }
 
   // Process
   const enrichedProducts = await enrichProductsWithFlashSales(

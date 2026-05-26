@@ -7,12 +7,18 @@ export const dynamic = 'force-dynamic'
 export default async function VariantsMatrixPage(context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
   
-  const product = await db.product.findUnique({
-    where: { id },
-    include: {
-      variants: { orderBy: { sku: 'asc' } }
-    },
-  })
+  let product: any = null
+
+  try {
+    product = await db.product.findUnique({
+      where: { id },
+      include: {
+        variants: { orderBy: { sku: 'asc' } }
+      },
+    })
+  } catch (err) {
+    console.warn('[VariantsMatrixPage] DB unavailable:', err)
+  }
 
   if (!product) {
     notFound()

@@ -11,22 +11,29 @@ interface EditFlashSalePageProps {
 export default async function EditFlashSalePage({ params }: EditFlashSalePageProps) {
   const { id } = await params
 
-  const [sale, categories] = await Promise.all([
-    db.flashSale.findUnique({
-      where: { id },
-    }),
-    db.category.findMany({
-      where: { isActive: true },
-      include: {
-        products: {
-          where: { isActive: true },
-          select: { id: true, name: true, basePrice: true },
-          orderBy: { name: 'asc' },
-        }
-      },
-      orderBy: { name: 'asc' },
-    })
-  ])
+  let sale: any = null
+  let categories: any[] = []
+
+  try {
+    ;[sale, categories] = await Promise.all([
+      db.flashSale.findUnique({
+        where: { id },
+      }),
+      db.category.findMany({
+        where: { isActive: true },
+        include: {
+          products: {
+            where: { isActive: true },
+            select: { id: true, name: true, basePrice: true },
+            orderBy: { name: 'asc' },
+          }
+        },
+        orderBy: { name: 'asc' },
+      })
+    ])
+  } catch (err) {
+    console.warn('[EditFlashSalePage] DB unavailable:', err)
+  }
 
   if (!sale) {
     notFound()

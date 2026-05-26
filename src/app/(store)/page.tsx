@@ -28,10 +28,17 @@ async function fetchProducts(where: object, orderBy: object, take: number) {
 }
 
 export default async function Homepage() {
-  const [featuredRaw, newArrivalsRaw] = await Promise.all([
-    fetchProducts({ isFeatured: true }, { createdAt: 'desc' }, 8),
-    fetchProducts({}, { createdAt: 'desc' }, 8),
-  ])
+  let featuredRaw: Awaited<ReturnType<typeof fetchProducts>> = []
+  let newArrivalsRaw: Awaited<ReturnType<typeof fetchProducts>> = []
+
+  try {
+    ;[featuredRaw, newArrivalsRaw] = await Promise.all([
+      fetchProducts({ isFeatured: true }, { createdAt: 'desc' }, 8),
+      fetchProducts({}, { createdAt: 'desc' }, 8),
+    ])
+  } catch (err) {
+    console.warn('[Homepage] DB unavailable, rendering with empty products:', err)
+  }
 
   // Determine which price field to use based on site country
   const isUK = SITE_COUNTRY === 'UK'

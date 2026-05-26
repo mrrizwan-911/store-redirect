@@ -25,23 +25,30 @@ export default async function AdminProductsPage({
     whereClause.priceUK = { gt: 0 }
   }
 
-  const [products, activeFlashSales] = await Promise.all([
-    db.product.findMany({
-      where: whereClause,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        category: true,
-        variants: true,
-      },
-    }),
-    db.flashSale.findMany({
-      where: {
-        startTime: { lte: new Date() },
-        endTime: { gte: new Date() },
-      },
-      orderBy: { createdAt: 'desc' }
-    })
-  ])
+  let products: any[] = []
+  let activeFlashSales: any[] = []
+
+  try {
+    ;[products, activeFlashSales] = await Promise.all([
+      db.product.findMany({
+        where: whereClause,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          category: true,
+          variants: true,
+        },
+      }),
+      db.flashSale.findMany({
+        where: {
+          startTime: { lte: new Date() },
+          endTime: { gte: new Date() },
+        },
+        orderBy: { createdAt: 'desc' }
+      })
+    ])
+  } catch (err) {
+    console.warn('[AdminProductsPage] DB unavailable:', err)
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 font-sans">

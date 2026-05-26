@@ -45,6 +45,9 @@ export default async function LookbookPage({
         },
       },
       orderBy: { createdAt: 'desc' },
+    }).catch((err) => {
+      console.warn('[LookbookPage] DB unavailable, returning empty outfits:', err)
+      return []
     }),
     getLookbookFilters(),
   ])

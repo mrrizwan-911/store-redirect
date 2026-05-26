@@ -49,26 +49,34 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   }
 
   // Fetch data in parallel
-  const [products, total, parentCategories] = await Promise.all([
-    db.product.findMany({
-      where,
-      include: {
-        images: { where: { isPrimary: true }, take: 1 },
-        category: { select: { name: true, slug: true } },
-        variants: { select: { title: true, optionValues: true, stock: true } },
-        reviews: { select: { rating: true } },
-      },
-      orderBy: { [sortField]: sortDir },
-      take: 24,
-    }),
-    db.product.count({ where }),
-    // Only root (parent) categories for the filter
-    db.category.findMany({
-      where: { isActive: true, parentId: null },
-      select: { id: true, name: true, slug: true },
-      orderBy: { sortOrder: 'asc' },
-    }),
-  ])
+  let products: any[] = []
+  let total = 0
+  let parentCategories: { id: string; name: string; slug: string }[] = []
+
+  try {
+    ;[products, total, parentCategories] = await Promise.all([
+      db.product.findMany({
+        where,
+        include: {
+          images: { where: { isPrimary: true }, take: 1 },
+          category: { select: { name: true, slug: true } },
+          variants: { select: { title: true, optionValues: true, stock: true } },
+          reviews: { select: { rating: true } },
+        },
+        orderBy: { [sortField]: sortDir },
+        take: 24,
+      }),
+      db.product.count({ where }),
+      // Only root (parent) categories for the filter
+      db.category.findMany({
+        where: { isActive: true, parentId: null },
+        select: { id: true, name: true, slug: true },
+        orderBy: { sortOrder: 'asc' },
+      }),
+    ])
+  } catch (err) {
+    console.warn('[ProductsPage] DB unavailable, rendering with empty data:', err)
+  }
 
   // Process ratings and flash sales
   const enrichedProducts = await enrichProductsWithFlashSales(

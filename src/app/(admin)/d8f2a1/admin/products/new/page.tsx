@@ -4,10 +4,16 @@ import { ProductForm } from '@/components/admin/products/ProductForm'
 export const dynamic = 'force-dynamic'
 
 export default async function NewProductPage() {
-  const categories = await db.category.findMany({
-    orderBy: { name: 'asc' },
-    select: { id: true, name: true },
-  })
+  let categories: { id: string; name: string }[] = []
+
+  try {
+    categories = await db.category.findMany({
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true },
+    })
+  } catch (err) {
+    console.warn('[NewProductPage] DB unavailable:', err)
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 font-sans">

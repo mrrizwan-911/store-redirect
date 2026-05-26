@@ -25,10 +25,16 @@ export default async function AdminFlashSalesPage({
     whereClause.country = { in: ['UK', 'ALL'] }
   }
 
-  const sales = await db.flashSale.findMany({
-    where: whereClause,
-    orderBy: { startTime: 'desc' },
-  })
+  let sales: any[] = []
+
+  try {
+    sales = await db.flashSale.findMany({
+      where: whereClause,
+      orderBy: { startTime: 'desc' },
+    })
+  } catch (err) {
+    console.warn('[AdminFlashSalesPage] DB unavailable:', err)
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 font-sans">
