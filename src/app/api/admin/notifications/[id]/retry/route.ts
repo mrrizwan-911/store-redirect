@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db/client'
 import { requireAdmin } from '@/lib/utils/adminAuth'
 import { logger } from '@/lib/utils/logger'
+import { retryEmailLog } from '@/lib/services/email/retry'
 
 export async function POST(
   req: NextRequest,
@@ -13,22 +13,15 @@ export async function POST(
   const { id } = await params
 
   try {
-    const log = await db.emailLog.findUnique({
-      where: { id },
-    })
-
-    if (!log) {
-      return NextResponse.json({ error: 'Notification log not found' }, { status: 404 })
+    const result = await retryEmailLog(id)
+    if (!result.ok) {
+      return NextResponse.json({ success: false, error: result.error }, { status: result.status })
     }
 
-    logger.info(`Admin ${authRes} triggered email retry for log ID: ${id}`, {
-      email: log.email,
-      type: log.type,
-    })
+    logger.info(`Admin ${authRes} retried email log ID: ${id}`)
 
-    // Return a stubbed success response as per instructions
     return NextResponse.json(
-      { success: true, message: "Retry triggered (stubbed)" },
+      { success: true, message: 'Retry email sent' },
       { status: 200 }
     )
   } catch (error) {

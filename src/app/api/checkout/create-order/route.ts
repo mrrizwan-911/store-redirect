@@ -8,6 +8,7 @@ import { getUserSession } from '@/lib/auth/session'
 import { verifyTurnstile } from '@/lib/utils/verifyTurnstile'
 import { OrderStatus, PaymentMethod, PaymentStatus } from '@prisma/client'
 import { getEnabledPaymentMethods } from '@/lib/constants/site'
+import { createOrderAccessToken } from '@/lib/utils/orderAccessToken'
 
 export async function POST(req: NextRequest) {
   try {
@@ -375,6 +376,7 @@ export async function POST(req: NextRequest) {
       success: true,
       data: {
         orderId: result.id,
+        accessToken: createOrderAccessToken(result.id),
         orderNumber: result.orderNumber,
         total: result.total,
         status: result.status,

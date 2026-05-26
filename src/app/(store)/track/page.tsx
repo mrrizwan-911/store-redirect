@@ -11,20 +11,21 @@ import { cn } from '@/lib/utils'
 
 export default function TrackOrderPage() {
   const [trackingId, setTrackingId] = useState('')
+  const [email, setEmail] = useState('')
   const [order, setOrder] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!trackingId.trim()) return
+    if (!trackingId.trim() || !email.trim()) return
 
     setIsLoading(true)
     setError(null)
     setOrder(null)
 
     try {
-      const res = await fetch(`/api/orders/track/${trackingId.trim()}`)
+      const res = await fetch(`/api/orders/track/${encodeURIComponent(trackingId.trim())}?email=${encodeURIComponent(email.trim())}`)
       const result = await res.json()
 
       if (result.success) {
@@ -47,13 +48,13 @@ export default function TrackOrderPage() {
       <div className="text-center space-y-4 mb-16">
         <h1 className="font-display text-5xl md:text-6xl tracking-tight">Track Your Order</h1>
         <p className="text-neutral-500 text-sm max-w-md mx-auto uppercase tracking-widest font-bold">
-          Enter your Order Number or Tracking ID to see live updates.
+          Enter your Order Number or Tracking ID with your order email to see live updates.
         </p>
       </div>
 
       <div className="max-w-2xl mx-auto mb-20">
-        <form onSubmit={handleTrack} className="flex gap-2">
-          <div className="relative flex-1">
+        <form onSubmit={handleTrack} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-2">
+          <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
             <Input
               placeholder="e.g. AS-12345678 or Order #..."
@@ -62,6 +63,13 @@ export default function TrackOrderPage() {
               className="h-14 pl-12 bg-white border-2 border-neutral-100 rounded-[12px] focus-visible:ring-0 focus-visible:border-black transition-all text-sm font-medium"
             />
           </div>
+          <Input
+            type="email"
+            placeholder="Order email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="h-14 bg-white border-2 border-neutral-100 rounded-[12px] focus-visible:ring-0 focus-visible:border-black transition-all text-sm font-medium"
+          />
           <Button
             type="submit"
             disabled={isLoading}

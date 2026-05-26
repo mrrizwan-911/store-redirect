@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { CircleCheck, ArrowRight, MessageCircle } from 'lucide-react'
 import { formatPrice } from '@/lib/constants/site'
@@ -32,6 +33,7 @@ interface OrderSummary {
 
 export default function OrderConfirmationPage() {
   const { orderId } = useParams<{ orderId: string }>()
+  const searchParams = useSearchParams()
   const [order, setOrder] = useState<OrderSummary | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -45,7 +47,9 @@ export default function OrderConfirmationPage() {
 
     async function fetchOrder() {
       try {
-        const res = await fetch(`/api/orders/confirmation/${orderId}`)
+        const token = searchParams.get('token')
+        const tokenParam = token ? `?token=${encodeURIComponent(token)}` : ''
+        const res = await fetch(`/api/orders/confirmation/${orderId}${tokenParam}`)
         const data = await res.json()
         if (!res.ok || !data.success) throw new Error(data.error || 'Order not found')
         setOrder(data.data)
@@ -79,7 +83,7 @@ export default function OrderConfirmationPage() {
       }
     }
     if (orderId) fetchOrder()
-  }, [orderId])
+  }, [orderId, searchParams])
 
   function handleWhatsAppSupport() {
     if (!order) return

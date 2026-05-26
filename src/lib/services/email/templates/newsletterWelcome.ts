@@ -1,5 +1,6 @@
-export function newsletterWelcomeTemplate(code: string): { subject: string; html: string; text: string } {
+export function newsletterWelcomeTemplate(code: string, unsubscribeUrl?: string): { subject: string; html: string; text: string } {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://calnza.com'
+  const safeUnsubscribeUrl = unsubscribeUrl || `${appUrl}/unsubscribe`
   const subject = "Welcome to the Inner Circle | Your 10% Off Inside"
 
   const text = `
@@ -17,7 +18,7 @@ Apply this code at checkout for 10% off your first order.
 → Explore Collections: ${appUrl}
 → New Arrivals: ${appUrl}/products?sort=createdAt_desc
 
-CALNZA © 2026 · Unsubscribe: ${appUrl}/unsubscribe
+CALNZA © 2026 · Unsubscribe: ${safeUnsubscribeUrl}
 `.trim()
 
   const html = `
@@ -95,7 +96,7 @@ CALNZA © 2026 · Unsubscribe: ${appUrl}/unsubscribe
                 </tr>
                 <tr>
                   <td colspan="2" style="padding-top:20px;border-top:1px solid #1A1A1A;margin-top:20px;">
-                    <p style="margin:16px 0 0;font-size:9px;color:#333333;line-height:1.6;">You're receiving this because you subscribed to the CALNZA newsletter. &nbsp;<a href="${appUrl}/unsubscribe" style="color:#555555;text-decoration:underline;">Unsubscribe</a></p>
+                    <p style="margin:16px 0 0;font-size:9px;color:#333333;line-height:1.6;">You're receiving this because you subscribed to the CALNZA newsletter. &nbsp;<a href="${safeUnsubscribeUrl}" style="color:#555555;text-decoration:underline;">Unsubscribe</a></p>
                   </td>
                 </tr>
               </table>

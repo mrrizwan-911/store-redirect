@@ -3,12 +3,14 @@ import { db } from "@/lib/db/client";
 import { z } from "zod";
 import { logger } from "@/lib/utils/logger";
 import { checkRateLimit, getClientIp, rateLimiters } from "@/lib/utils/rateLimit";
+import { verifyTurnstile } from "@/lib/utils/verifyTurnstile";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   subject: z.string().optional(),
   message: z.string().min(10, "Message must be at least 10 characters"),
+  turnstileToken: z.string().min(1, "Security verification is required"),
 });
 
 export async function POST(req: NextRequest) {
@@ -24,6 +26,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { success: false, error: result.error.issues[0].message },
         { status: 400 }
+      );
+    }
+
+    const isHuman = await verifyTurnstile(result.data.turnstileToken, clientIp);
+    if (!isHuman) {
+      return NextResponse.json(
+        { success: false, error: "Security verification failed" },
+        { status: 403 }
       );
     }
 

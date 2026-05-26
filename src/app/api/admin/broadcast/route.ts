@@ -5,6 +5,7 @@ import { sendEmail } from "@/lib/services/email/sender";
 import { logger } from "@/lib/utils/logger";
 import { z } from "zod";
 import { escapeHtml, safeEmailLink } from "@/lib/utils/sanitize";
+import { createUnsubscribeUrl } from "@/lib/utils/unsubscribeToken";
 
 const broadcastSchema = z.object({
   subject: z.string().min(3),
@@ -75,7 +76,7 @@ export async function POST(req: Request) {
           <p style="font-size: 10px; color: #999; line-height: 1.6;">
             © 2026 CALNZA. All rights reserved.<br/>
             You are receiving this because you are subscribed to our inner circle.<br/>
-            <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://calnza.com'}/unsubscribe?email=${encodeURIComponent(email)}" style="color: #666; text-decoration: underline;">Unsubscribe</a>
+            <a href="${createUnsubscribeUrl(email)}" style="color: #666; text-decoration: underline;">Unsubscribe</a>
           </p>
         </div>
       </div>

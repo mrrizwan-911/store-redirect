@@ -8,6 +8,11 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params
+    const email = req.nextUrl.searchParams.get('email')?.trim().toLowerCase()
+
+    if (!email) {
+      return NextResponse.json({ success: false, error: 'Email is required to track an order' }, { status: 400 })
+    }
 
     const order = await db.order.findFirst({
       where: {
@@ -19,11 +24,17 @@ export async function GET(
       include: {
         address: {
           select: {
+            email: true,
             firstName: true,
             lastName: true,
             city: true,
             province: true,
           }
+        },
+        user: {
+          select: {
+            email: true,
+          },
         },
         items: {
           include: {
@@ -51,7 +62,20 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 })
     }
 
+    const ownerEmail = order.user?.email?.toLowerCase()
+    const addressEmail = order.address?.email?.toLowerCase()
+    if (email !== ownerEmail && email !== addressEmail) {
+      return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 })
+    }
+
     // Sanitize the response for public consumption
+    const sanitizedAddress = order.address ? {
+      firstName: order.address.firstName,
+      lastName: order.address.lastName,
+      city: order.address.city,
+      province: order.address.province,
+    } : null
+
     const sanitizedOrder = {
       orderNumber: order.orderNumber,
       trackingNumber: order.trackingNumber,
@@ -61,7 +85,7 @@ export async function GET(
       shippingCost: Number(order.shippingCost),
       discount: Number(order.discount),
       total: Number(order.total),
-      address: order.address,
+      address: sanitizedAddress,
       items: order.items.map(item => {
         let size = null;
         let color = null;

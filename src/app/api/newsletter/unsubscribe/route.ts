@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
 import { logger } from "@/lib/utils/logger";
 import { z } from "zod";
+import { verifyUnsubscribeToken } from "@/lib/utils/unsubscribeToken";
 
 const unsubscribeSchema = z.object({
-  email: z.string().email(),
+  token: z.string().min(1),
 });
 
 export async function POST(req: Request) {
@@ -16,9 +17,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Invalid email" }, { status: 400 });
     }
 
-    const { email } = result.data;
+    const email = verifyUnsubscribeToken(result.data.token);
+    if (!email) {
+      return NextResponse.json({ success: false, error: "Invalid or expired unsubscribe link" }, { status: 400 });
+    }
 
-    await db.subscriber.update({
+    await db.subscriber.updateMany({
       where: { email },
       data: { status: "UNSUBSCRIBED" },
     });

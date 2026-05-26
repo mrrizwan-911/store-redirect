@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
 import { sendEmail } from "@/lib/services/email/sender";
 import { logger } from "@/lib/utils/logger";
+import { createUnsubscribeUrl } from "@/lib/utils/unsubscribeToken";
 
 /**
  * Weekly New Arrivals Digest Cron
@@ -80,7 +81,7 @@ export async function GET(req: Request) {
           <p style="font-size: 9px; color: #999; line-height: 1.6;">
             © 2026 CALNZA. All rights reserved.<br/>
             You're receiving this because you're part of our inner circle.<br/>
-            <a href="${appUrl}/unsubscribe?email=${encodeURIComponent(email)}" style="color: #666;">Unsubscribe</a>
+            <a href="${createUnsubscribeUrl(email, appUrl)}" style="color: #666;">Unsubscribe</a>
           </p>
         </div>
       </div>

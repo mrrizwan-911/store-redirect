@@ -6,10 +6,13 @@ import { newsletterWelcomeTemplate } from "@/lib/services/email/templates/newsle
 import { z } from "zod";
 import { logger } from "@/lib/utils/logger";
 import { checkRateLimit, getClientIp, rateLimiters } from "@/lib/utils/rateLimit";
+import { createUnsubscribeUrl } from "@/lib/utils/unsubscribeToken";
+import { verifyTurnstile } from "@/lib/utils/verifyTurnstile";
 
 const subscribeSchema = z.object({
   email: z.string().email("Invalid email address"),
   source: z.string().optional().default("HOMEPAGE"),
+  turnstileToken: z.string().min(1, "Security verification is required"),
 });
 
 export async function POST(req: NextRequest) {
@@ -29,6 +32,13 @@ export async function POST(req: NextRequest) {
     }
 
     const { email, source } = result.data;
+    const isHuman = await verifyTurnstile(result.data.turnstileToken, clientIp);
+    if (!isHuman) {
+      return NextResponse.json(
+        { success: false, error: "Security verification failed" },
+        { status: 403 }
+      );
+    }
 
     // 1. Check if already a subscriber
     const existing = await db.subscriber.findUnique({
@@ -74,7 +84,7 @@ export async function POST(req: NextRequest) {
       const coupon = await generateWelcomeCoupon(email);
 
       // 5. Send Welcome Email with Coupon
-      const { subject, html, text } = newsletterWelcomeTemplate(coupon.code);
+      const { subject, html, text } = newsletterWelcomeTemplate(coupon.code, createUnsubscribeUrl(email));
 
       await sendEmail({
         to: email,
@@ -98,6 +108,9 @@ export async function POST(req: NextRequest) {
             <div style="text-align: center; margin-top: 30px;">
               <a href="${process.env.NEXT_PUBLIC_APP_URL}/products" style="display: inline-block; padding: 15px 30px; background: #000; color: #fff; text-decoration: none; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em;">Shop New Arrivals</a>
             </div>
+            <p style="text-align: center; font-size: 11px; color: #777; margin-top: 24px;">
+              <a href="${createUnsubscribeUrl(email)}" style="color: #555; text-decoration: underline;">Unsubscribe</a>
+            </p>
           </div>
         `,
         text: "Welcome back to CALNZA! Your subscription has been confirmed.",

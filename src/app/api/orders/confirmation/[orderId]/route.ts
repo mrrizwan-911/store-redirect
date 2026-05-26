@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db/client'
+import { getUserSession } from '@/lib/auth/session'
 import { logger } from '@/lib/utils/logger'
+import { verifyOrderAccessToken } from '@/lib/utils/orderAccessToken'
 
 export async function GET(
   req: NextRequest,
@@ -13,6 +15,7 @@ export async function GET(
       where: { id: orderId },
       select: {
         id: true,
+        userId: true,
         orderNumber: true,
         status: true,
         total: true,
@@ -35,10 +38,20 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 })
     }
 
+    const token = req.nextUrl.searchParams.get('token')
+    const session = await getUserSession()
+    const ownsOrder = Boolean(session?.userId && order.userId === session.userId)
+    const hasTokenAccess = verifyOrderAccessToken(token, order.id)
+
+    if (!ownsOrder && !hasTokenAccess) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     return NextResponse.json({
       success: true,
       data: {
         ...order,
+        userId: undefined,
         total: Number(order.total),
         subtotal: Number(order.subtotal),
         shippingCost: Number(order.shippingCost),

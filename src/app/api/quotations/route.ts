@@ -6,6 +6,7 @@ import { QuotationStatus } from "@prisma/client";
 import { getUserSession } from "@/lib/auth/session";
 import { generateQuotationDraft } from "@/lib/services/ai/quotation-draft";
 import { checkRateLimit, getClientIp, rateLimiters } from "@/lib/utils/rateLimit";
+import { verifyTurnstile } from "@/lib/utils/verifyTurnstile";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,6 +16,15 @@ export async function POST(req: NextRequest) {
 
     const session = await getUserSession();
     const body = await req.json();
+
+    if (!body.turnstileToken) {
+      return NextResponse.json({ success: false, error: "Security verification is required" }, { status: 403 });
+    }
+
+    const isHuman = await verifyTurnstile(body.turnstileToken, clientIp);
+    if (!isHuman) {
+      return NextResponse.json({ success: false, error: "Security verification failed" }, { status: 403 });
+    }
 
     const validatedData = quotationSchema.parse(body);
     logger.info("Public quotation creation request", {

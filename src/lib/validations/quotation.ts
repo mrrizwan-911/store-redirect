@@ -22,6 +22,7 @@ export const quotationSchema = z.object({
   postalCode: z.string().min(1, "Postal code is required"),
   country: z.string().min(1, "Country is required"),
   items: z.array(quotationItemSchema).min(1, "At least one item is required"),
+  turnstileToken: z.string().optional(),
 });
 
 // ─── Admin: General Status / Draft Update ────────────────────────────────────

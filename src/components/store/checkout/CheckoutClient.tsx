@@ -604,7 +604,8 @@ export function CheckoutClient() {
                     if (isAuthenticated) {
                       router.push(`/account/orders/${confirmedOrder.orderId}`)
                     } else {
-                      router.push(`/order-confirmation/${confirmedOrder.orderId}`)
+                      const tokenParam = confirmedOrder.accessToken ? `?token=${encodeURIComponent(confirmedOrder.accessToken)}` : ''
+                      router.push(`/order-confirmation/${confirmedOrder.orderId}${tokenParam}`)
                     }
                   }}
                   className="w-full bg-black text-white rounded-full h-12 text-[11px] uppercase tracking-[0.2em] font-bold
