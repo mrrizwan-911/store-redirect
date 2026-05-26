@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { X, Loader2, CircleCheck } from 'lucide-react'
+import { TurnstileWidget } from '@/components/ui/TurnstileWidget'
 
 const STORAGE_KEY = 'calnza_exit_popup_seen'
 const MIN_TIME_ON_PAGE_MS = 3000   // must be on page ≥ 3 seconds before popup can show
@@ -21,6 +22,7 @@ export function ExitIntentPopup() {
   const [isLoading, setIsLoading]     = useState(false)
   const [isSuccess, setIsSuccess]     = useState(false)
   const [error, setError]             = useState<string | null>(null)
+  const [turnstileToken, setTurnstileToken] = useState('')
 
   const hasShownRef   = useRef(false)
   const mountTimeRef  = useRef(Date.now())
@@ -76,6 +78,10 @@ export function ExitIntentPopup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email) return
+    if (!turnstileToken) {
+      setError('Please complete the security verification.')
+      return
+    }
 
     setIsLoading(true)
     setError(null)
@@ -84,12 +90,13 @@ export function ExitIntentPopup() {
       const res = await fetch('/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'EXIT_POPUP' }),
+        body: JSON.stringify({ email, source: 'EXIT_POPUP', turnstileToken }),
       })
       const data = await res.json()
 
       if (data.success) {
         setIsSuccess(true)
+        setTurnstileToken('')
         setTimeout(() => setVisible(false), 2500)
       } else {
         setError(data.error || 'Something went wrong. Please try again.')
@@ -169,9 +176,16 @@ export function ExitIntentPopup() {
                   <p className="text-xs text-red-500">{error}</p>
                 )}
 
+                <TurnstileWidget
+                  size="compact"
+                  onSuccess={setTurnstileToken}
+                  onExpire={() => setTurnstileToken('')}
+                  onError={() => setTurnstileToken('')}
+                />
+
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || !turnstileToken}
                   className="w-full h-12 bg-black text-white text-[11px] font-bold uppercase tracking-[0.2em] hover:bg-neutral-900 transition-colors duration-300 disabled:opacity-60 flex items-center justify-center gap-2"
                 >
                   {isLoading ? (

@@ -20,6 +20,13 @@ export async function POST(req: NextRequest) {
     if (rateLimitErr) return rateLimitErr;
 
     const body = await req.json();
+    if (!body.turnstileToken) {
+      return NextResponse.json(
+        { success: false, error: "Security verification is required" },
+        { status: 403 }
+      );
+    }
+
     const result = contactSchema.safeParse(body);
 
     if (!result.success) {

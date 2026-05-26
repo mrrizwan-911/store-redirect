@@ -6,22 +6,28 @@ import { Input } from '@/components/ui/input'
 import { CircleCheck, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { TurnstileWidget } from '@/components/ui/TurnstileWidget'
 
 export function NewsletterSection() {
   const [email, setEmail]           = useState('')
   const [isLoading, setIsLoading]   = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email) return
+    if (!turnstileToken) {
+      toast.error('Please complete the security verification.')
+      return
+    }
 
     setIsLoading(true)
     try {
       const response = await fetch('/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'HOMEPAGE' }),
+        body: JSON.stringify({ email, source: 'HOMEPAGE', turnstileToken }),
       })
 
       const result = await response.json()
@@ -29,6 +35,7 @@ export function NewsletterSection() {
       if (result.success) {
         setIsSubmitted(true)
         setEmail('')
+        setTurnstileToken('')
         toast.success('Welcome to the inner circle!')
       } else {
         toast.error(result.error || 'Failed to subscribe')
@@ -88,9 +95,14 @@ export function NewsletterSection() {
                     )}
                   />
                 </div>
+                <TurnstileWidget
+                  onSuccess={setTurnstileToken}
+                  onExpire={() => setTurnstileToken('')}
+                  onError={() => setTurnstileToken('')}
+                />
                 <Button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || !turnstileToken}
                   className={cn(
                     'h-14 px-12 rounded-[var(--radius)] uppercase tracking-[0.2em] text-[11px] font-bold',
                     'bg-black text-white hover:bg-neutral-900 transition-all duration-500',

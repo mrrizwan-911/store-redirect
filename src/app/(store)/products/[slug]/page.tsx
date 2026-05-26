@@ -5,19 +5,7 @@ import { Metadata } from 'next'
 import { enrichProductsWithFlashSales, getActiveFlashSaleForProduct, calculateFlashSalePrice } from '@/lib/services/payment/priceValidator'
 import { SITE_COUNTRY } from '@/lib/constants/site'
 
-// ISR: cache product pages for 5 minutes, regenerate on next request after that
-export const revalidate = 300
-
-// Pre-render the top 50 featured products at build time (optional, speeds up first visits)
-export async function generateStaticParams() {
-  const products = await db.product.findMany({
-    where: { isActive: true, isFeatured: true },
-    select: { slug: true },
-    take: 50,
-  })
-  return products.map(p => ({ slug: p.slug }))
-}
-
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{

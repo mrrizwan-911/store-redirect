@@ -6,29 +6,36 @@ import Image from 'next/image'
 import { Camera, Globe, Share2, Phone as WhatsApp, Mail, MapPin, Loader2, Send } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { TurnstileWidget } from '@/components/ui/TurnstileWidget'
 
 export function Footer() {
   const [settings, setSettings]         = useState<any>(null)
   const [loading, setLoading]           = useState(true)
   const [email, setEmail]               = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [turnstileToken, setTurnstileToken] = useState('')
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email) return
+    if (!turnstileToken) {
+      toast.error('Please complete the security verification.')
+      return
+    }
 
     setIsSubmitting(true)
     try {
       const response = await fetch('/api/newsletter/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'FOOTER' }),
+        body: JSON.stringify({ email, source: 'FOOTER', turnstileToken }),
       })
 
       const result = await response.json()
 
       if (result.success) {
         setEmail('')
+        setTurnstileToken('')
         toast.success('Thank you for subscribing!')
       } else {
         toast.error(result.error || 'Failed to subscribe')
@@ -195,7 +202,8 @@ export function Footer() {
               <p className="text-white/40 text-[11px] uppercase tracking-[0.2em] leading-relaxed">
                 Join the inner circle for exclusive updates.
               </p>
-              <form onSubmit={handleSubscribe} className="relative group">
+              <form onSubmit={handleSubscribe} className="space-y-3">
+                <div className="relative group">
                 <input
                   type="email"
                   placeholder="EMAIL ADDRESS"
@@ -211,7 +219,7 @@ export function Footer() {
                 />
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !turnstileToken}
                   className="absolute right-0 bottom-3 text-white/40 hover:text-white transition-colors duration-500"
                 >
                   {isSubmitting ? (
@@ -220,6 +228,14 @@ export function Footer() {
                     <Send className="w-3 h-3" />
                   )}
                 </button>
+                </div>
+                <TurnstileWidget
+                  theme="dark"
+                  size="compact"
+                  onSuccess={setTurnstileToken}
+                  onExpire={() => setTurnstileToken('')}
+                  onError={() => setTurnstileToken('')}
+                />
               </form>
             </div>
           </div>

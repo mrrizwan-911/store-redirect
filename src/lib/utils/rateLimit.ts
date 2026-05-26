@@ -1,49 +1,47 @@
 import { Ratelimit } from '@upstash/ratelimit'
-import { Redis } from '@upstash/redis'
 import { NextRequest, NextResponse } from 'next/server'
-
-const redis = Redis.fromEnv()
+import redis from '@/lib/redis'
 
 export const rateLimiters = {
   // Auth endpoints — strictest
-  auth: new Ratelimit({
+  auth: redis ? new Ratelimit({
     redis,
     limiter: Ratelimit.fixedWindow(5, '15 m'),
     prefix: 'rl:auth',
     analytics: true,
-  }),
+  }) : null,
 
   // Checkout — per user, not just IP
-  checkout: new Ratelimit({
+  checkout: redis ? new Ratelimit({
     redis,
     limiter: Ratelimit.fixedWindow(10, '1 m'),
     prefix: 'rl:checkout',
     analytics: true,
-  }),
+  }) : null,
 
   // AI endpoints — expensive, limit hard
-  ai: new Ratelimit({
+  ai: redis ? new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(10, '1 m'),
     prefix: 'rl:ai',
     analytics: true,
-  }),
+  }) : null,
 
   // General public API — generous
-  api: new Ratelimit({
+  api: redis ? new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(100, '1 m'),
     prefix: 'rl:api',
     analytics: true,
-  }),
+  }) : null,
 
   // OTP requests — prevent OTP brute force
-  otp: new Ratelimit({
+  otp: redis ? new Ratelimit({
     redis,
     limiter: Ratelimit.fixedWindow(3, '10 m'),
     prefix: 'rl:otp',
     analytics: true,
-  }),
+  }) : null,
 }
 
 /**
@@ -52,9 +50,11 @@ export const rateLimiters = {
  *               if (rateLimitErr) return rateLimitErr
  */
 export async function checkRateLimit(
-  limiter: Ratelimit,
+  limiter: Ratelimit | null,
   identifier: string  // IP address or userId
 ): Promise<NextResponse | null> {
+  if (!limiter) return null
+
   const { success, limit, remaining, reset } = await limiter.limit(identifier)
 
   if (!success) {

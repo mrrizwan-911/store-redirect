@@ -19,6 +19,7 @@ declare global {
       remove: (widgetId: string) => void
     }
     onTurnstileLoad?: () => void
+    __turnstileRenderCallbacks?: Set<() => void>
   }
 }
 
@@ -63,24 +64,26 @@ export function TurnstileWidget({
     // If Turnstile is already loaded, render immediately
     if (window.turnstile) {
       renderWidget()
-      return
-    }
-
-    // Otherwise inject the script once and render on load
-    if (!document.getElementById('cf-turnstile-script')) {
-      window.onTurnstileLoad = renderWidget
-      const script = document.createElement('script')
-      script.id  = 'cf-turnstile-script'
-      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad'
-      script.async = true
-      script.defer = true
-      document.head.appendChild(script)
     } else {
-      // Script already injected but Turnstile not yet ready — set callback
-      window.onTurnstileLoad = renderWidget
+      window.__turnstileRenderCallbacks ||= new Set()
+      window.__turnstileRenderCallbacks.add(renderWidget)
+      window.onTurnstileLoad = () => {
+        window.__turnstileRenderCallbacks?.forEach((callback) => callback())
+      }
+
+      // Otherwise inject the script once and render on load
+      if (!document.getElementById('cf-turnstile-script')) {
+        const script = document.createElement('script')
+        script.id  = 'cf-turnstile-script'
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad'
+        script.async = true
+        script.defer = true
+        document.head.appendChild(script)
+      }
     }
 
     return () => {
+      window.__turnstileRenderCallbacks?.delete(renderWidget)
       if (widgetIdRef.current && window.turnstile) {
         window.turnstile.remove(widgetIdRef.current)
       }

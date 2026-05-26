@@ -16,12 +16,14 @@ import { cn } from "@/lib/utils";
 import { ProductCombobox } from "./ProductCombobox";
 import { useRouter } from "next/navigation";
 import { useAppSelector } from "@/store/hooks";
+import { TurnstileWidget } from "@/components/ui/TurnstileWidget";
 
 export const QuotationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submittedRef, setSubmittedRef] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<Record<number, any>>({});
+  const [turnstileToken, setTurnstileToken] = useState("");
   const router = useRouter();
   const { isAuthenticated } = useAppSelector((s) => s.auth);
 
@@ -52,12 +54,17 @@ export const QuotationForm = () => {
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
 
   const onSubmit = async (data: QuotationInput) => {
+    if (!turnstileToken) {
+      toast.error("Please complete the security verification.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const response = await fetch("/api/quotations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, turnstileToken }),
       });
 
       // Always parse JSON — even on 4xx/5xx the API returns JSON
@@ -73,6 +80,7 @@ export const QuotationForm = () => {
         setIsSuccess(true);
         toast.success("Quotation request submitted successfully!");
         reset();
+        setTurnstileToken("");
       } else {
         throw new Error(result?.error || "Failed to submit request");
       }
@@ -350,10 +358,16 @@ export const QuotationForm = () => {
             )}
           </div>
 
+          <TurnstileWidget
+            onSuccess={setTurnstileToken}
+            onExpire={() => setTurnstileToken("")}
+            onError={() => setTurnstileToken("")}
+          />
+
           <Button
             type="submit"
             data-testid="quotation-submit-btn"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !turnstileToken}
             className="w-full h-12 rounded-none bg-black text-white hover:bg-zinc-800 transition-all font-medium text-lg font-body"
           >
             {isSubmitting ? (

@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import { Mail, MapPin, Phone, Loader2, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { TurnstileWidget } from '@/components/ui/TurnstileWidget'
 
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [settings, setSettings] = useState<any>(null)
+  const [turnstileToken, setTurnstileToken] = useState('')
 
   const [formData, setFormData] = useState({
     name: '',
@@ -35,13 +37,17 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!turnstileToken) {
+      toast.error('Please complete the security verification.')
+      return
+    }
     setIsSubmitting(true)
 
     try {
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, turnstileToken }),
       })
 
       const result = await response.json()
@@ -49,6 +55,7 @@ export default function ContactPage() {
       if (result.success) {
         setIsSuccess(true)
         setFormData({ name: '', email: '', subject: '', message: '' })
+        setTurnstileToken('')
         toast.success('Your message has been sent successfully.')
       } else {
         toast.error(result.error || 'Failed to send message')
@@ -185,9 +192,15 @@ export default function ContactPage() {
                     />
                   </div>
 
+                  <TurnstileWidget
+                    onSuccess={setTurnstileToken}
+                    onExpire={() => setTurnstileToken('')}
+                    onError={() => setTurnstileToken('')}
+                  />
+
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !turnstileToken}
                     className={cn(
                       "w-full bg-black text-white py-4 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-neutral-900 transition-all rounded-[var(--radius)] flex items-center justify-center",
                       isSubmitting && "opacity-70 cursor-not-allowed"
