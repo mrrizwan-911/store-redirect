@@ -7,17 +7,25 @@ export const revalidate = 3600 // regenerate sitemap every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch all active products and categories in parallel
-  const [products, categories] = await Promise.all([
-    db.product.findMany({
-      where: { isActive: true },
-      select: { slug: true, updatedAt: true, createdAt: true },
-      orderBy: { updatedAt: 'desc' },
-    }),
-    db.category.findMany({
-      where: { isActive: true },
-      select: { slug: true, createdAt: true },
-    }),
-  ])
+  // Gracefully fall back to empty arrays if the DB is unreachable at build time
+  let products: { slug: string; updatedAt: Date; createdAt: Date }[] = []
+  let categories: { slug: string; createdAt: Date }[] = []
+
+  try {
+    ;[products, categories] = await Promise.all([
+      db.product.findMany({
+        where: { isActive: true },
+        select: { slug: true, updatedAt: true, createdAt: true },
+        orderBy: { updatedAt: 'desc' },
+      }),
+      db.category.findMany({
+        where: { isActive: true },
+        select: { slug: true, createdAt: true },
+      }),
+    ])
+  } catch (err) {
+    console.warn('[sitemap] DB unavailable, returning static pages only:', err)
+  }
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
