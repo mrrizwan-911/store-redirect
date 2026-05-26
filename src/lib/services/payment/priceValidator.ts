@@ -10,18 +10,23 @@ import { getDisplayPrice, getLineItemPrice, normalizePricingCountry } from '@/li
 export async function getActiveFlashSaleForProduct(productId: string, country = SITE_COUNTRY) {
   const now = new Date()
   const normalizedCountry = normalizePricingCountry(country)
-  return db.flashSale.findFirst({
-    where: {
-      startTime: { lte: now },
-      endTime: { gte: now },
-      country: { in: [normalizedCountry, 'ALL'] },
-      OR: [
-        { scope: 'ALL' },
-        { productIds: { has: productId } }
-      ]
-    },
-    orderBy: { createdAt: 'desc' }
-  })
+  try {
+    return await db.flashSale.findFirst({
+      where: {
+        startTime: { lte: now },
+        endTime: { gte: now },
+        country: { in: [normalizedCountry, 'ALL'] },
+        OR: [
+          { scope: 'ALL' },
+          { productIds: { has: productId } }
+        ]
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+  } catch (err) {
+    console.warn('[getActiveFlashSaleForProduct] DB unavailable:', err)
+    return null
+  }
 }
 
 /**
@@ -45,17 +50,24 @@ export function calculateFlashSalePrice(basePrice: number, activeSale: any): num
  */
 export async function getValidatedPrice(productId: string, country = SITE_COUNTRY): Promise<number> {
   const normalizedCountry = normalizePricingCountry(country)
-  const product = await db.product.findUnique({
-    where: { id: productId },
-    select: {
-      pricePK: true,
-      priceUK: true,
-      salePricePK: true,
-      salePriceUK: true,
-      basePrice: true,
-      salePrice: true,
-    },
-  })
+  let product: any = null
+
+  try {
+    product = await db.product.findUnique({
+      where: { id: productId },
+      select: {
+        pricePK: true,
+        priceUK: true,
+        salePricePK: true,
+        salePriceUK: true,
+        basePrice: true,
+        salePrice: true,
+      },
+    })
+  } catch (err) {
+    console.warn('[getValidatedPrice] DB unavailable:', err)
+    return 0
+  }
 
   if (!product) {
     return null as any
@@ -82,17 +94,26 @@ export async function enrichProductsWithFlashSales<T extends { id: string; baseP
   products: T[],
   country = SITE_COUNTRY
 ): Promise<(T & { flashSalePrice?: number; flashSaleEndTime?: string })[]> {
+  if (products.length === 0) return products
+
   const now = new Date()
   const normalizedCountry = normalizePricingCountry(country)
-  // Fetch all active sales that fall within the current time window, ignoring the cron-dependent 'isActive' field
-  const activeFlashSales = await db.flashSale.findMany({
-    where: {
-      startTime: { lte: now },
-      endTime: { gte: now },
-      country: { in: [normalizedCountry, 'ALL'] },
-    },
-    orderBy: { createdAt: 'desc' }
-  })
+
+  let activeFlashSales: any[] = []
+  try {
+    // Fetch all active sales that fall within the current time window, ignoring the cron-dependent 'isActive' field
+    activeFlashSales = await db.flashSale.findMany({
+      where: {
+        startTime: { lte: now },
+        endTime: { gte: now },
+        country: { in: [normalizedCountry, 'ALL'] },
+      },
+      orderBy: { createdAt: 'desc' }
+    })
+  } catch (err) {
+    console.warn('[enrichProductsWithFlashSales] DB unavailable, skipping flash sale enrichment:', err)
+    return products
+  }
 
   if (activeFlashSales.length === 0) return products
 

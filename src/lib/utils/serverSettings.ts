@@ -13,12 +13,18 @@ export async function getServerSiteSettings(): Promise<any> {
 
   const country = (process.env.NEXT_PUBLIC_SITE_COUNTRY ?? 'pk').toLowerCase()
 
-  let settings = await db.siteSettings.findUnique({ where: { id: country } })
-  if (!settings) {
-    settings = await db.siteSettings.findUnique({ where: { id: 'global' } })
-  }
-  if (!settings) {
-    settings = await db.siteSettings.findFirst()
+  let settings = null
+  try {
+    settings = await db.siteSettings.findUnique({ where: { id: country } })
+    if (!settings) {
+      settings = await db.siteSettings.findUnique({ where: { id: 'global' } })
+    }
+    if (!settings) {
+      settings = await db.siteSettings.findFirst()
+    }
+  } catch (err) {
+    console.warn('[getServerSiteSettings] DB unavailable:', err)
+    return null
   }
 
   _cache = { data: settings, expiresAt: now + CACHE_TTL_MS }
