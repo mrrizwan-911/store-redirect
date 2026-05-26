@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
 import { z } from "zod";
 import { logger } from "@/lib/utils/logger";
+import { checkRateLimit, getClientIp, rateLimiters } from "@/lib/utils/rateLimit";
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -10,8 +11,12 @@ const contactSchema = z.object({
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const clientIp = getClientIp(req);
+    const rateLimitErr = await checkRateLimit(rateLimiters.api, clientIp);
+    if (rateLimitErr) return rateLimitErr;
+
     const body = await req.json();
     const result = contactSchema.safeParse(body);
 

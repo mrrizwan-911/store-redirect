@@ -7,9 +7,6 @@ const securityHeaders = [
   // HSTS — 2 year max-age, include subdomains, preload
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
 
-  // Prevent clickjacking
-  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-
   // Prevent MIME sniffing
   { key: 'X-Content-Type-Options', value: 'nosniff' },
 

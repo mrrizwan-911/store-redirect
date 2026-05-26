@@ -12,6 +12,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setUser, setToken, logout } from '@/store/slices/authSlice';
 import AuthLayout from '@/components/store/auth/AuthLayout';
 import { TurnstileWidget } from '@/components/ui/TurnstileWidget';
+import { isSafeInternalPath } from '@/lib/utils/redirect';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,10 +39,11 @@ export default function LoginPage() {
 
     if (isAuthenticated && user) {
       router.refresh(); // Clear Next.js client-side cache
+      const from = searchParams.get('from');
       if (user.role === 'ADMIN') {
-        router.push('/d8f2a1/admin/analytics');
+        router.push(isSafeInternalPath(from) ? from : '/d8f2a1/admin/analytics');
       } else {
-        router.push('/account');
+        router.push(isSafeInternalPath(from) ? from : '/account');
       }
     }
   }, [isAuthenticated, user, router, searchParams, dispatch]);
@@ -92,10 +94,11 @@ export default function LoginPage() {
 
       // Redirect immediately using router for better Next.js state sync
       router.refresh();
+      const from = searchParams.get('from');
       if (result.data.user.role === 'ADMIN') {
-        router.push('/d8f2a1/admin/analytics');
+        router.push(isSafeInternalPath(from) ? from : '/d8f2a1/admin/analytics');
       } else {
-        router.push('/account');
+        router.push(isSafeInternalPath(from) ? from : '/account');
       }
     } catch (error) {
       if (error instanceof ZodError) {

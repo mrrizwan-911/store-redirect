@@ -19,10 +19,15 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const minPrice = Number(resolvedSearchParams.minPrice) || 0
   const maxPrice = Number(resolvedSearchParams.maxPrice) || 20000
   const sort = (resolvedSearchParams.sort as string) || 'createdAt_desc'
-  const [sortField, sortDir] = sort.split('_') as [string, 'asc' | 'desc']
+  let [sortField, sortDir] = sort.split('_') as [string, 'asc' | 'desc']
 
   // Price field based on region
   const priceField = SITE_COUNTRY === 'UK' ? 'priceUK' : 'pricePK'
+  if (sortField === 'price') sortField = priceField
+  if (sortField === 'date') sortField = 'createdAt'
+  const allowedSortFields = new Set(['createdAt', 'name', 'pricePK', 'priceUK'])
+  if (!allowedSortFields.has(sortField)) sortField = 'createdAt'
+  if (sortDir !== 'asc') sortDir = 'desc'
 
   // Build where clause
   // If subCategory is set → filter by exact subcategory slug
@@ -87,7 +92,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         salePricePK: p.salePricePK ? Number(p.salePricePK) : null,
         salePriceUK: p.salePriceUK ? Number(p.salePriceUK) : null,
       }
-    })
+    }),
+    SITE_COUNTRY
   )
 
   const finalProducts = enrichedProducts.map((p) => ({

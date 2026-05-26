@@ -1,18 +1,23 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
 import { generateWelcomeCoupon } from "@/lib/services/marketing/coupon";
 import { sendEmail } from "@/lib/services/email/sender";
 import { newsletterWelcomeTemplate } from "@/lib/services/email/templates/newsletterWelcome";
 import { z } from "zod";
 import { logger } from "@/lib/utils/logger";
+import { checkRateLimit, getClientIp, rateLimiters } from "@/lib/utils/rateLimit";
 
 const subscribeSchema = z.object({
   email: z.string().email("Invalid email address"),
   source: z.string().optional().default("HOMEPAGE"),
 });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const clientIp = getClientIp(req);
+    const rateLimitErr = await checkRateLimit(rateLimiters.api, clientIp);
+    if (rateLimitErr) return rateLimitErr;
+
     const body = await req.json();
     const result = subscribeSchema.safeParse(body);
 

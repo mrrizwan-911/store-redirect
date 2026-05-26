@@ -46,11 +46,14 @@ export default async function SubcategoryPage({
   const sort = (resolvedSearchParams.sort as string) || 'createdAt_desc'
   let [sortField, sortDir] = sort.split('_') as [string, 'asc' | 'desc']
 
-  if (sortField === 'price') sortField = 'basePrice'
-  if (sortField === 'date') sortField = 'createdAt'
-
   // Price field based on region
   const priceField = SITE_COUNTRY === 'UK' ? 'priceUK' : 'pricePK'
+
+  if (sortField === 'price') sortField = priceField
+  if (sortField === 'date') sortField = 'createdAt'
+  const allowedSortFields = new Set(['createdAt', 'name', 'pricePK', 'priceUK'])
+  if (!allowedSortFields.has(sortField)) sortField = 'createdAt'
+  if (sortDir !== 'asc') sortDir = 'desc'
 
   // Products strictly in this sub-category
   const where: any = {
@@ -104,7 +107,8 @@ export default async function SubcategoryPage({
         basePrice: currentPrice,
         salePrice: currentSalePrice,
       }
-    })
+    }),
+    SITE_COUNTRY
   )
 
   const finalProducts = enrichedProducts.map((p) => ({

@@ -11,9 +11,10 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '20')
   const search = searchParams.get('search') || undefined
+  const country = searchParams.get('country') || undefined
 
   try {
-    const data = await getCustomers({ page, limit, search })
+    const data = await getCustomers({ page, limit, search, country })
     return NextResponse.json({ success: true, data })
   } catch (error) {
     logger.error('Customers API error:', error)

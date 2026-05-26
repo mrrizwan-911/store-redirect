@@ -96,6 +96,8 @@ export async function POST(req: Request) {
       }
     }
 
+    const basePrice = data.basePrice ?? data.pricePK ?? data.priceUK
+
     const product = await db.product.create({
       data: {
         name: data.name,
@@ -103,7 +105,7 @@ export async function POST(req: Request) {
         description: data.description,
         shortDescription: data.shortDescription,
         categoryId: data.categoryId,
-        basePrice: data.basePrice,
+        basePrice,
         salePrice: data.salePrice,
         pricePK: data.pricePK,
         priceUK: data.priceUK,
@@ -130,7 +132,7 @@ export async function POST(req: Request) {
                 optionValues: v.optionValues || {},
                 stock: v.stock,
                 sku: v.sku,
-                price: v.price,
+                price: v.price ?? v.pricePK ?? v.priceUK ?? basePrice,
                 pricePK: v.pricePK,
                 priceUK: v.priceUK,
               }))
@@ -139,7 +141,7 @@ export async function POST(req: Request) {
                 optionValues: {},
                 stock: data.baseStock || 0,
                 sku: data.sku,
-                price: data.basePrice,
+                price: basePrice,
                 pricePK: data.pricePK,
                 priceUK: data.priceUK,
               }],

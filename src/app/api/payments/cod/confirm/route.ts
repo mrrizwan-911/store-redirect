@@ -3,6 +3,7 @@ import { db } from '@/lib/db/client'
 import { verifyAccessToken } from '@/lib/auth/jwt'
 import { logger } from '@/lib/utils/logger'
 import { OrderStatus, PaymentStatus } from '@prisma/client'
+import { getEnabledPaymentMethods } from '@/lib/constants/site'
 
 /**
  * COD Confirmation Route.
@@ -11,6 +12,10 @@ import { OrderStatus, PaymentStatus } from '@prisma/client'
  */
 export async function POST(req: NextRequest) {
   try {
+    if (!getEnabledPaymentMethods().includes('COD')) {
+      return NextResponse.json({ success: false, error: 'Cash on Delivery is not available for this region' }, { status: 400 })
+    }
+
     const token = req.headers.get('authorization')?.replace('Bearer ', '')
     if (!token) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })

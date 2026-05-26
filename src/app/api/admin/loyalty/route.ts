@@ -84,6 +84,7 @@ export async function GET(req: NextRequest) {
 
     // Get loyalty stats
     const stats = await db.loyaltyAccount.aggregate({
+      where: whereClause,
       _sum: { points: true },
       _count: { id: true },
     })
@@ -91,6 +92,7 @@ export async function GET(req: NextRequest) {
     // Get tier distribution
     const tierDistribution = await db.loyaltyAccount.groupBy({
       by: ['tier'],
+      where: whereClause,
       _count: { id: true },
     })
 
@@ -101,9 +103,8 @@ export async function GET(req: NextRequest) {
       PLATINUM: tierDistribution.find((t) => t.tier === 'PLATINUM')?._count.id || 0,
     }
 
-    // Get redeemed points (loyalty events with 'REDEEM' in reason)
-    // Simple approach: just sum all event points; finer filtering can be added later
     const redeemedEvents = await db.loyaltyEvent.aggregate({
+      where: { points: { lt: 0 } },
       _sum: { points: true },
     })
 
@@ -125,7 +126,7 @@ export async function GET(req: NextRequest) {
         stats: {
           totalMembers: stats._count.id,
           totalPointsIssued: stats._sum.points || 0,
-          totalPointsRedeemed: redeemedEvents._sum.points || 0,
+          totalPointsRedeemed: Math.abs(redeemedEvents._sum.points || 0),
           byTier,
         },
         members: formattedMembers,

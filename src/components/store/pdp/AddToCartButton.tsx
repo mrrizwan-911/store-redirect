@@ -8,6 +8,8 @@ import { ShoppingBag } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { fbAddToCart } from '@/lib/utils/metaPixel'
 import { sendGAEvent } from '@next/third-parties/google'
+import { SITE_COUNTRY } from '@/lib/constants/site'
+import { getLineItemPrice, normalizePricingCountry } from '@/lib/utils/pricing'
 
 interface AddToCartButtonProps {
   product: {
@@ -15,6 +17,10 @@ interface AddToCartButtonProps {
     name: string
     basePrice: number
     salePrice?: number | null
+    pricePK?: number | null
+    priceUK?: number | null
+    salePricePK?: number | null
+    salePriceUK?: number | null
     images: { url: string }[]
   }
   selectedVariant: {
@@ -22,6 +28,8 @@ interface AddToCartButtonProps {
     title: string
     stock: number
     price?: number | null
+    pricePK?: number | null
+    priceUK?: number | null
   } | null
   quantity: number
   priceOverride?: number // Added for flash sale support
@@ -57,7 +65,11 @@ export default function AddToCartButton({
     // Simulate a small delay for better UX
     setTimeout(() => {
       // Fire Meta Pixel event
-      const finalPrice = priceOverride ?? Number(selectedVariant.price || product.salePrice || product.basePrice)
+      const finalPrice = priceOverride ?? getLineItemPrice({
+        product,
+        variant: selectedVariant,
+        country: normalizePricingCountry(SITE_COUNTRY),
+      })
       fbAddToCart({
         content_name: product.name,
         content_ids: [product.id],

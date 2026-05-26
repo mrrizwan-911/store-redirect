@@ -97,9 +97,13 @@ export async function GET(req: NextRequest) {
 
   const searchTerm = q || search
 
+  const priceField = country === 'UK' ? 'priceUK' : 'pricePK'
   let [sortField, sortDir] = sort.split('_') as [string, 'asc' | 'desc']
-  if (sortField === 'price') sortField = 'basePrice'
+  if (sortField === 'price') sortField = priceField
   if (sortField === 'date') sortField = 'createdAt'
+  const allowedSortFields = new Set(['createdAt', 'name', 'pricePK', 'priceUK'])
+  if (!allowedSortFields.has(sortField)) sortField = 'createdAt'
+  if (sortDir !== 'asc') sortDir = 'desc'
 
   // Build where clause
   // Priority: subCategory > category > none
@@ -119,7 +123,7 @@ export async function GET(req: NextRequest) {
     ...regionFilter,
     ...(featured && { isFeatured: true }),
     ...categoryFilter,
-    basePrice: { gte: minPrice, lte: maxPrice },
+    [priceField]: { gte: minPrice, lte: maxPrice },
     variants: { some: { stock: { gt: 0 } } },
     ...(searchTerm && {
       OR: [

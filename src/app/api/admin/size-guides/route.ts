@@ -3,10 +3,11 @@ import { z } from 'zod'
 import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { requireAdmin } from '@/lib/utils/adminAuth'
+import { sanitizeRichText } from '@/lib/utils/sanitize'
 
 const createSchema = z.object({
   title: z.string().min(1).max(100),
-  content: z.string().default(''),
+  content: z.string().default('').transform((value) => sanitizeRichText(value)),
   categoryId: z.string().optional().nullable(),
 })
 

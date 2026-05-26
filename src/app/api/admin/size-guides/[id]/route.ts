@@ -3,10 +3,11 @@ import { z } from 'zod'
 import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { requireAdmin } from '@/lib/utils/adminAuth'
+import { sanitizeRichText } from '@/lib/utils/sanitize'
 
 const updateSchema = z.object({
   title: z.string().min(1).max(100).optional(),
-  content: z.string().optional(),
+  content: z.string().transform((value) => sanitizeRichText(value)).optional(),
   categoryId: z.string().nullable().optional(),
 })
 

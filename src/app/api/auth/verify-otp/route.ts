@@ -5,9 +5,11 @@ import { otpSchema } from '@/lib/validations/auth'
 import { sendWelcomeEmail } from '@/lib/services/email/welcome'
 import { signAccessToken, signRefreshToken } from '@/lib/auth/jwt'
 import { awardPoints } from '@/lib/services/loyalty/award'
+import { checkRateLimit, getClientIp, rateLimiters } from '@/lib/utils/rateLimit'
 
 export async function POST(req: NextRequest) {
   try {
+    const clientIp = getClientIp(req)
     const body = await req.json()
     const parsed = otpSchema.safeParse(body)
 
@@ -19,6 +21,8 @@ export async function POST(req: NextRequest) {
     }
 
     const { userId, code } = parsed.data
+    const rateLimitErr = await checkRateLimit(rateLimiters.otp, `${clientIp}:otp:${userId}`)
+    if (rateLimitErr) return rateLimitErr
 
     const otp = await db.otpToken.findFirst({
       where: {

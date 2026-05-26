@@ -12,3 +12,21 @@ export function sanitizeRichText(input: string): string {
     allowedAttributes: {},
   }).trim()
 }
+
+export function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
+export function safeEmailLink(input: string): string {
+  if (input.startsWith('/')) return input
+  try {
+    const url = new URL(input)
+    if (url.protocol === 'https:') return url.toString()
+  } catch {}
+  return '/products'
+}

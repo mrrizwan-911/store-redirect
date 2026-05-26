@@ -4,6 +4,7 @@ import { db } from '@/lib/db/client'
 import { getUserSession } from '@/lib/auth/session'
 import { initiateEasypaisaPayment, EasypaisaPaymentMode } from '@/lib/services/payment/easypaisa'
 import { logger } from '@/lib/utils/logger'
+import { getEnabledPaymentMethods } from '@/lib/constants/site'
 
 const initiateSchema = z.object({
   orderId: z.string().min(1, 'Order ID is required'),
@@ -16,6 +17,10 @@ const initiateSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    if (!getEnabledPaymentMethods().includes('EASYPAISA')) {
+      return NextResponse.json({ success: false, error: 'EasyPaisa is not available for this region' }, { status: 400 })
+    }
+
     const session = await getUserSession()
     if (!session) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })

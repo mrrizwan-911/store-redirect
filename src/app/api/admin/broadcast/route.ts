@@ -4,6 +4,7 @@ import { getUserSession } from "@/lib/auth/session";
 import { sendEmail } from "@/lib/services/email/sender";
 import { logger } from "@/lib/utils/logger";
 import { z } from "zod";
+import { escapeHtml, safeEmailLink } from "@/lib/utils/sanitize";
 
 const broadcastSchema = z.object({
   subject: z.string().min(3),
@@ -34,6 +35,10 @@ export async function POST(req: Request) {
     }
 
     const { subject, header, body: content, ctaLabel, ctaLink, segment } = result.data;
+    const safeHeader = escapeHtml(header);
+    const safeContent = escapeHtml(content).replace(/\n/g, "<br/>");
+    const safeCtaLabel = escapeHtml(ctaLabel);
+    const safeCtaLink = safeEmailLink(ctaLink);
 
     // 3. Fetch targeted subscribers
     let where: any = { status: "ACTIVE" };
@@ -56,14 +61,14 @@ export async function POST(req: Request) {
         <div style="text-align: center; margin-bottom: 40px;">
           <p style="font-size: 10px; font-weight: 700; letter-spacing: 0.35em; text-transform: uppercase; color: #000;">CALNZA</p>
         </div>
-        <h1 style="font-family: 'Playfair Display', serif; font-size: 28px; text-transform: uppercase; letter-spacing: 0.1em; text-align: center; margin-bottom: 24px;">${header}</h1>
+        <h1 style="font-family: 'Playfair Display', serif; font-size: 28px; text-transform: uppercase; letter-spacing: 0.1em; text-align: center; margin-bottom: 24px;">${safeHeader}</h1>
         <div style="font-size: 14px; line-height: 1.8; color: #444; margin-bottom: 40px; white-space: pre-wrap;">
-          ${content}
+          ${safeContent}
         </div>
         <div style="text-align: center; margin-bottom: 40px;">
-          <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://calnza.com'}${ctaLink}"
+          <a href="${safeCtaLink.startsWith('https://') ? safeCtaLink : `${process.env.NEXT_PUBLIC_APP_URL || 'https://calnza.com'}${safeCtaLink}`}"
              style="display: inline-block; padding: 18px 48px; background: #000; color: #fff; text-decoration: none; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em;">
-            ${ctaLabel}
+            ${safeCtaLabel}
           </a>
         </div>
         <div style="border-top: 1px solid #eee; padding-top: 30px; text-align: center;">

@@ -5,15 +5,23 @@ import { quotationSchema } from "@/lib/validations/quotation";
 import { QuotationStatus } from "@prisma/client";
 import { getUserSession } from "@/lib/auth/session";
 import { generateQuotationDraft } from "@/lib/services/ai/quotation-draft";
+import { checkRateLimit, getClientIp, rateLimiters } from "@/lib/utils/rateLimit";
 
 export async function POST(req: NextRequest) {
   try {
+    const clientIp = getClientIp(req);
+    const rateLimitErr = await checkRateLimit(rateLimiters.api, clientIp);
+    if (rateLimitErr) return rateLimitErr;
+
     const session = await getUserSession();
     const body = await req.json();
-    logger.request("Public quotation creation request", body);
 
     const validatedData = quotationSchema.parse(body);
-    logger.info("Quotation validated data", { validatedData });
+    logger.info("Public quotation creation request", {
+      hasUser: Boolean(session?.userId),
+      itemCount: validatedData.items.length,
+      country: validatedData.country,
+    });
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
@@ -62,8 +70,11 @@ export async function POST(req: NextRequest) {
       aiDraft: "Acknowledgment draft pending...",
     };
 
-    // Log the exact data being sent to Prisma for debugging
-    logger.info("Sending to Prisma", { data });
+    logger.info("Sending quotation to Prisma", {
+      hasUser: Boolean(data.userId),
+      itemCount: validatedData.items.length,
+      country: data.country,
+    });
 
     try {
       const quotation = await db.quotation.create({ data });
@@ -87,7 +98,6 @@ export async function POST(req: NextRequest) {
         message: dbError.message,
         code: dbError.code,
         meta: dbError.meta,
-        data // Log the data that caused the error
       });
       return NextResponse.json(
         {

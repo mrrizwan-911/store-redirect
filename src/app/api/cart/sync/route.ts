@@ -3,16 +3,22 @@ import { db } from '@/lib/db/client'
 import { verifyAccessToken } from '@/lib/auth/jwt'
 import { syncCartSchema } from '@/lib/validations/cart'
 import { logger } from '@/lib/utils/logger'
+import { getUserSession } from '@/lib/auth/session'
+import { getValidatedCartTotal } from '@/lib/services/payment/priceValidator'
+import { SITE_COUNTRY } from '@/lib/constants/site'
 
 async function getUserIdFromRequest(req: NextRequest): Promise<string | null> {
   const token = req.headers.get('authorization')?.replace('Bearer ', '')
-  if (!token) return null
-  try {
-    const payload = verifyAccessToken(token)
-    return payload.userId
-  } catch {
-    return null
+  if (token) {
+    try {
+      const payload = verifyAccessToken(token)
+      return payload.userId
+    } catch {
+      // Fall through to refresh-cookie session.
+    }
   }
+  const session = await getUserSession()
+  return session?.userId ?? null
 }
 
 export async function POST(req: NextRequest) {
@@ -94,8 +100,21 @@ export async function POST(req: NextRequest) {
     include: {
       items: {
         include: {
-          product: { select: { id: true, name: true, slug: true, basePrice: true, salePrice: true, images: { where: { isPrimary: true }, take: 1 } } },
-          variant: { select: { id: true, title: true, optionValues: true,  price: true } },
+          product: {
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              basePrice: true,
+              salePrice: true,
+              pricePK: true,
+              priceUK: true,
+              salePricePK: true,
+              salePriceUK: true,
+              images: { where: { isPrimary: true }, take: 1 },
+            },
+          },
+          variant: { select: { id: true, title: true, optionValues: true, price: true, pricePK: true, priceUK: true, stock: true } },
         }
       }
     }
@@ -105,10 +124,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, data: { items: [], subtotal: 0, itemCount: 0 } })
   }
 
-  const subtotal = updatedCart.items.reduce((sum, item) => {
-    const unitPrice = Number(item.variant?.price ?? item.product.salePrice ?? item.product.basePrice)
-    return sum + unitPrice * item.quantity
-  }, 0)
+  const { subtotal } = await getValidatedCartTotal(
+    updatedCart.items.map((item) => ({
+      productId: item.productId,
+      variantId: item.variantId,
+      quantity: item.quantity,
+    })),
+    SITE_COUNTRY
+  )
 
   const itemCount = updatedCart.items.reduce((s, i) => s + i.quantity, 0)
 

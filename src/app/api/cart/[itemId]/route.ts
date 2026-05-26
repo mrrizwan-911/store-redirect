@@ -3,16 +3,22 @@ import { db } from '@/lib/db/client'
 import { verifyAccessToken } from '@/lib/auth/jwt'
 import { updateItemSchema } from '@/lib/validations/cart'
 import { logger } from '@/lib/utils/logger'
+import { getUserSession } from '@/lib/auth/session'
+import { getValidatedCartTotal } from '@/lib/services/payment/priceValidator'
+import { SITE_COUNTRY } from '@/lib/constants/site'
 
 async function getUserIdFromRequest(req: NextRequest): Promise<string | null> {
   const token = req.headers.get('authorization')?.replace('Bearer ', '')
-  if (!token) return null
-  try {
-    const payload = verifyAccessToken(token)
-    return payload.userId
-  } catch {
-    return null
+  if (token) {
+    try {
+      const payload = verifyAccessToken(token)
+      return payload.userId
+    } catch {
+      // Fall through to refresh-cookie session.
+    }
   }
+  const session = await getUserSession()
+  return session?.userId ?? null
 }
 
 export async function PATCH(req: NextRequest, context: { params: Promise<{ itemId: string }> }) {
@@ -75,8 +81,8 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ itemI
     include: {
       items: {
         include: {
-          product: { select: { basePrice: true, salePrice: true } },
-          variant: { select: { price: true } }
+          product: { select: { basePrice: true, salePrice: true, pricePK: true, priceUK: true, salePricePK: true, salePriceUK: true } },
+          variant: { select: { price: true, pricePK: true, priceUK: true, stock: true } }
         }
       }
     }
@@ -85,10 +91,15 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ itemI
   let subtotal = 0
   let itemCount = 0
   if (updatedCart) {
-    subtotal = updatedCart.items.reduce((sum, i) => {
-      const unitPrice = Number(i.variant?.price ?? i.product.salePrice ?? i.product.basePrice)
-      return sum + unitPrice * i.quantity
-    }, 0)
+    const validated = await getValidatedCartTotal(
+      updatedCart.items.map((i) => ({
+        productId: i.productId,
+        variantId: i.variantId,
+        quantity: i.quantity,
+      })),
+      SITE_COUNTRY
+    )
+    subtotal = validated.subtotal
     itemCount = updatedCart.items.reduce((s, i) => s + i.quantity, 0)
   }
 

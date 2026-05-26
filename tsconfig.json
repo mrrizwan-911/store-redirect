@@ -34,6 +34,11 @@
     "node_modules",
     "prisma",
     "scripts",
+    "tests",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
     "dist",
     ".next",
     "prisma/seed.ts"

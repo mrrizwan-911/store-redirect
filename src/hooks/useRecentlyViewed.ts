@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '@/lib/utils/logger';
 
 const STORAGE_KEY = 'calnza_recently_viewed';
 const MAX_ITEMS = 12;

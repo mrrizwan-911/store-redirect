@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { logger } from '@/lib/utils/logger'
 import { Ratelimit } from '@upstash/ratelimit'
 import redis from '@/lib/redis'
+import { verifyJwtAtEdge } from '@/lib/auth/edgeJwt'
 
 // ─── Rate Limiters (via Upstash Redis) ───────────────────────────────────────
 const strictRateLimit = redis
@@ -33,19 +34,6 @@ const BAD_BOT_UA = [
 const UK_CODES = new Set(['GB'])
 const PK_CODES = new Set(['PK'])
 
-// ─── JWT decode (Edge-safe, no verification) ──────────────────────────────────
-function decodeJwt(token: string) {
-  try {
-    const parts = token.split('.')
-    if (parts.length !== 3) return null
-    let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
-    while (base64.length % 4) base64 += '='
-    return JSON.parse(atob(base64))
-  } catch {
-    return null
-  }
-}
-
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
@@ -62,7 +50,7 @@ export async function proxy(req: NextRequest) {
   let token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null
   if (!token) token = req.cookies.get('access_token')?.value ?? null
 
-  const payload = token ? decodeJwt(token) : null
+  const payload = token ? await verifyJwtAtEdge(token) : null
   const isAdmin = payload?.role === 'ADMIN'
 
   // ── 3. Rate Limiting (non-admin only) ──────────────────────────────────────

@@ -3,13 +3,6 @@ import { db } from '@/lib/db/client'
 import { requireAdmin } from '@/lib/utils/adminAuth'
 import { productSchema, generateSlug } from '@/lib/validations/admin'
 import { logger } from '@/lib/utils/logger'
-import { v2 as cloudinary } from 'cloudinary'
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-})
 
 export async function GET(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -91,35 +84,27 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       }
     }
 
-    // Since Prisma doesn't support nested set for replacing the whole array easily with updates,
-    // we delete existing variants and create the new ones
-    await db.productVariant.deleteMany({
-      where: { productId: (await context.params).id },
-    })
+    const productId = (await context.params).id
+    const basePrice = data.basePrice ?? data.pricePK ?? data.priceUK
 
-    const existingImages = await db.productImage.findMany({
-      where: { productId: (await context.params).id },
-      select: { cloudinaryPublicId: true },
-    })
-    await db.productImage.deleteMany({
-      where: { productId: (await context.params).id },
-    })
+    const product = await db.$transaction(async (tx) => {
+      await tx.productVariant.deleteMany({
+        where: { productId },
+      })
 
-    // Fire-and-forget Cloudinary cleanup — don't block the response on it
-    const toDestroy = existingImages.map((img) => img.cloudinaryPublicId).filter(Boolean) as string[]
-    if (toDestroy.length > 0) {
-      Promise.all(toDestroy.map((pid) => cloudinary.uploader.destroy(pid))).catch(() => {})
-    }
+      await tx.productImage.deleteMany({
+        where: { productId },
+      })
 
-    const product = await db.product.update({
-      where: { id: (await context.params).id },
-      data: {
+      return tx.product.update({
+        where: { id: productId },
+        data: {
         name: data.name,
         slug,
         description: data.description,
         shortDescription: data.shortDescription,
         categoryId: data.categoryId,
-        basePrice: data.basePrice,
+        basePrice,
         salePrice: data.salePrice,
         pricePK: data.pricePK,
         priceUK: data.priceUK,
@@ -145,7 +130,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
                 optionValues: v.optionValues || {},
                 stock: v.stock,
                 sku: v.sku,
-                price: v.price,
+                price: v.price ?? v.pricePK ?? v.priceUK ?? basePrice,
                 pricePK: v.pricePK,
                 priceUK: v.priceUK,
               }))
@@ -154,16 +139,17 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
                 optionValues: {},
                 stock: data.baseStock || 0,
                 sku: data.sku,
-                price: data.basePrice,
+                price: basePrice,
                 pricePK: data.pricePK,
                 priceUK: data.priceUK,
               }],
+          },
         },
-      },
-      include: {
-        variants: true,
-        images: true,
-      },
+        include: {
+          variants: true,
+          images: true,
+        },
+      })
     })
 
     logger.info('Updated product', { productId: product.id })
@@ -184,22 +170,10 @@ export async function DELETE(req: Request, context: { params: Promise<{ id: stri
 
     const productId = (await context.params).id
 
-    // Fetch images before soft-deleting so we have publicIds
-    const imagesToDelete = await db.productImage.findMany({
-      where: { productId },
-      select: { cloudinaryPublicId: true },
-    })
-
     const product = await db.product.update({
       where: { id: productId },
       data: { isActive: false },
     })
-
-    // Fire-and-forget — don't block the response
-    const publicIds = imagesToDelete.map((img) => img.cloudinaryPublicId).filter(Boolean) as string[]
-    if (publicIds.length > 0) {
-      Promise.all(publicIds.map((pid) => cloudinary.uploader.destroy(pid))).catch(() => {})
-    }
 
     logger.info('Deactivated product', { productId: product.id })
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
 import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { resetPasswordSchema } from '@/lib/validations/auth'
@@ -17,10 +18,11 @@ export async function POST(req: NextRequest) {
     }
 
     const { token, password } = parsed.data
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
 
     // 1. Find token
     const resetToken = await db.passwordResetToken.findUnique({
-      where: { token },
+      where: { token: tokenHash },
       include: { user: true },
     })
 

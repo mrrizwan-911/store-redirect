@@ -5,6 +5,12 @@ import { sendEmail } from '@/lib/services/email/sender'
 import { logger } from '@/lib/utils/logger'
 import { QuotationStatus, OrderStatus, PaymentMethod, PaymentStatus } from '@prisma/client'
 import { generatePaymentToken } from '@/lib/utils/paymentToken'
+import { getProductPrice, normalizePricingCountry } from '@/lib/utils/pricing'
+
+function countryFromQuotation(country?: string | null) {
+  const value = country?.toUpperCase()
+  return value === 'UK' || value === 'UNITED KINGDOM' || value === 'GB' ? 'UK' : 'PK'
+}
 
 export async function POST(
   req: NextRequest,
@@ -48,17 +54,21 @@ export async function POST(
 
     const products = await db.product.findMany({
       where: { id: { in: productIds } },
-      select: { id: true, name: true, basePrice: true },
+      select: { id: true, name: true, basePrice: true, pricePK: true, priceUK: true, salePricePK: true, salePriceUK: true },
     })
+    const orderCountry = countryFromQuotation(quotation.country)
+    const pricingCountry = normalizePricingCountry(orderCountry)
+    const currencyLabel = orderCountry === 'UK' ? 'GBP' : 'PKR'
+    const locale = orderCountry === 'UK' ? 'en-GB' : 'en-PK'
 
     // Build order items — use admin-set unit prices, fall back to basePrice
     const orderItems = rawItems
       .map((item: any) => {
         const product = products.find((p) => p.id === item.productId)
         if (!product) return null
-        const unitPrice = item.unitPrice != null ? Number(item.unitPrice) : Number(product.basePrice)
+        const unitPrice = item.unitPrice != null ? Number(item.unitPrice) : getProductPrice(product, pricingCountry).price
         const discountPerUnit = Number(item.discountAmount ?? 0)
-        const finalPrice = unitPrice - discountPerUnit
+        const finalPrice = Math.max(0, unitPrice - discountPerUnit)
         return {
           productId: item.productId,
           variantId: item.variantId || null,
@@ -138,6 +148,7 @@ export async function POST(
           userId,
           addressId,
           status: OrderStatus.PENDING,
+          country: orderCountry,
           subtotal,
           shippingCost: 0,
           discount: 0,
@@ -174,6 +185,13 @@ export async function POST(
       // Decrement stock for each variant
       for (const item of orderItems) {
         if (item.variantId) {
+          const variant = await tx.productVariant.findUnique({
+            where: { id: item.variantId },
+            select: { stock: true },
+          })
+          if (!variant || variant.stock < item.quantity) {
+            throw new Error('INSUFFICIENT_STOCK')
+          }
           await tx.productVariant.update({
             where: { id: item.variantId },
             data: { stock: { decrement: item.quantity } },
@@ -192,8 +210,8 @@ export async function POST(
         return `<tr>
           <td style="padding:8px 4px;border-bottom:1px solid #eee;font-size:13px;">${product?.name || 'Product'}</td>
           <td style="padding:8px 4px;border-bottom:1px solid #eee;font-size:13px;text-align:center;">${item.quantity}</td>
-          <td style="padding:8px 4px;border-bottom:1px solid #eee;font-size:13px;text-align:right;">PKR ${item.price.toLocaleString('en-PK')}</td>
-          <td style="padding:8px 4px;border-bottom:1px solid #eee;font-size:13px;text-align:right;font-weight:bold;">PKR ${(item.price * item.quantity).toLocaleString('en-PK')}</td>
+          <td style="padding:8px 4px;border-bottom:1px solid #eee;font-size:13px;text-align:right;">${currencyLabel} ${item.price.toLocaleString(locale)}</td>
+          <td style="padding:8px 4px;border-bottom:1px solid #eee;font-size:13px;text-align:right;font-weight:bold;">${currencyLabel} ${(item.price * item.quantity).toLocaleString(locale)}</td>
         </tr>`
       })
       .join('')
@@ -237,7 +255,7 @@ export async function POST(
           <tfoot>
             <tr style="background:#0a0a0a;color:#fff;">
               <td colspan="3" style="padding:10px 4px;font-size:13px;font-weight:bold;letter-spacing:1px;">GRAND TOTAL</td>
-              <td style="padding:10px 4px;text-align:right;font-size:14px;font-weight:bold;">PKR ${total.toLocaleString('en-PK')}</td>
+              <td style="padding:10px 4px;text-align:right;font-size:14px;font-weight:bold;">${currencyLabel} ${total.toLocaleString(locale)}</td>
             </tr>
           </tfoot>
         </table>

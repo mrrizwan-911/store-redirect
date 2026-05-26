@@ -15,18 +15,17 @@ function changePct(current: number, previous: number): number {
 /**
  * Prisma WHERE clause for the `country` field on Order.
  *
- * Order.country values: "pk" | "uk" | "both"
- *   "both"  = product/order available in both regions
+ * Order.country values: "PK" | "UK"
  *
  * Region param behaviour:
- *   "pk"  → country IN ['pk', 'both']
- *   "uk"  → country IN ['uk', 'both']
+ *   "pk" / "PK"  → country = 'PK'
+ *   "uk" / "UK"  → country = 'UK'
  *   "all" / null → no filter (all rows)
  */
 function countryFilter(region?: string | null): object {
-  if (!region || region === 'all') return {}
-  if (region === 'pk') return { address: { country: { in: ['pk', 'both'] } } }
-  if (region === 'uk') return { address: { country: { in: ['uk', 'both'] } } }
+  const normalized = region?.toUpperCase()
+  if (!normalized || normalized === 'ALL') return {}
+  if (normalized === 'PK' || normalized === 'UK') return { country: normalized }
   return {}
 }
 
@@ -36,9 +35,18 @@ function countryFilter(region?: string | null): object {
  * against a fixed allow-list before this function is called.
  */
 function countrySQL(region?: string | null): string {
-  if (!region || region === 'all') return ''
-  if (region === 'pk') return `AND a.country IN ('pk','both')`
-  if (region === 'uk') return `AND a.country IN ('uk','both')`
+  const normalized = region?.toUpperCase()
+  if (!normalized || normalized === 'ALL') return ''
+  if (normalized === 'PK') return `AND o.country = 'PK'`
+  if (normalized === 'UK') return `AND o.country = 'UK'`
+  return ''
+}
+
+function countryAddressSQL(region?: string | null): string {
+  const normalized = region?.toUpperCase()
+  if (!normalized || normalized === 'ALL') return ''
+  if (normalized === 'PK') return `AND a.country IN ('PK','Pakistan','pk','both')`
+  if (normalized === 'UK') return `AND a.country IN ('UK','United Kingdom','GB','uk','both')`
   return ''
 }
 
@@ -47,7 +55,7 @@ function countrySQL(region?: string | null): string {
 export async function getAbandonedCartStats(region?: string | null) {
   const now = new Date()
   const sixtyMinsAgo = new Date(now.getTime() - 60 * 60 * 1000)
-  const regionCond = countrySQL(region)
+  const regionCond = countryAddressSQL(region)
 
   // Use raw sql for count to easily apply region logic
   const statsRaw = await db.$queryRaw<{ count: number; potentialRevenue: number }[]>`

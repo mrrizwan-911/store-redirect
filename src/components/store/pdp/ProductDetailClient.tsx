@@ -25,6 +25,8 @@ import { formatPrice, currencySymbol } from '@/lib/utils/currency'
 import { generateWhatsAppOrderUrl } from '@/lib/utils/whatsapp'
 import { fbViewContent } from '@/lib/utils/metaPixel'
 import { sendGAEvent } from '@next/third-parties/google'
+import { SITE_COUNTRY } from '@/lib/constants/site'
+import { getDisplayPrice, getLineItemPrice, normalizePricingCountry } from '@/lib/utils/pricing'
 
 interface Product {
   id: string
@@ -34,6 +36,10 @@ interface Product {
   shortDescription?: string | null
   basePrice: any
   salePrice?: any | null
+  pricePK?: any | null
+  priceUK?: any | null
+  salePricePK?: any | null
+  salePriceUK?: any | null
   activeSale?: {
     id: string
     name: string
@@ -47,7 +53,7 @@ interface Product {
   category: { name: string; slug: string }
   images: { id: string; url: string; altText?: string | null; isPrimary: boolean }[]
   variantOptions: any
-  variants: { id: string; title: string; optionValues: any; stock: number; price?: any | null; sku: string }[]
+  variants: { id: string; title: string; optionValues: any; stock: number; price?: any | null; pricePK?: any | null; priceUK?: any | null; sku: string }[]
   reviews: any[]
   avgRating: number | null
   reviewCount: number
@@ -143,7 +149,8 @@ export default function ProductDetailClient({ product, categoryProducts, related
   }, [product.variants, selectedOptions])
 
   const currentPrice = useMemo(() => {
-    const baseUnitPrice = Number(selectedVariant?.price || product.salePrice || product.basePrice)
+    const country = normalizePricingCountry(SITE_COUNTRY)
+    const baseUnitPrice = getLineItemPrice({ product, variant: selectedVariant, country })
     if (product.activeSale) {
       if (product.activeSale.discountType === 'PERCENTAGE') {
         const discountPct = product.activeSale.discountPct || 0
@@ -154,12 +161,15 @@ export default function ProductDetailClient({ product, categoryProducts, related
       }
     }
     return baseUnitPrice
-  }, [selectedVariant, product.salePrice, product.basePrice, product.activeSale])
+  }, [selectedVariant, product])
 
   const originalPrice = useMemo(() => {
-    if (product.activeSale) return Number(selectedVariant?.price || product.basePrice)
-    return product.salePrice ? Number(product.basePrice) : null
-  }, [selectedVariant, product.basePrice, product.salePrice, product.activeSale])
+    const country = normalizePricingCountry(SITE_COUNTRY)
+    const baseUnitPrice = getLineItemPrice({ product, variant: selectedVariant, country })
+    if (product.activeSale) return baseUnitPrice
+    const display = getDisplayPrice(product, country)
+    return display.isOnSale ? display.originalPrice : null
+  }, [selectedVariant, product])
 
   const handleQuantityChange = (type: 'inc' | 'dec') => {
     if (type === 'inc') {

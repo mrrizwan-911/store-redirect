@@ -4,16 +4,21 @@ import { verifyAccessToken } from '@/lib/auth/jwt'
 import { addItemSchema } from '@/lib/validations/cart'
 import { logger } from '@/lib/utils/logger'
 import { getValidatedCartTotal } from '@/lib/services/payment/priceValidator'
+import { getUserSession } from '@/lib/auth/session'
+import { SITE_COUNTRY } from '@/lib/constants/site'
 
 async function getUserIdFromRequest(req: NextRequest): Promise<string | null> {
   const token = req.headers.get('authorization')?.replace('Bearer ', '')
-  if (!token) return null
-  try {
-    const payload = verifyAccessToken(token)
-    return payload.userId
-  } catch {
-    return null
+  if (token) {
+    try {
+      const payload = verifyAccessToken(token)
+      return payload.userId
+    } catch {
+      // Fall through to refresh-cookie session.
+    }
   }
+  const session = await getUserSession()
+  return session?.userId ?? null
 }
 
 export async function GET(req: NextRequest) {
@@ -29,10 +34,20 @@ export async function GET(req: NextRequest) {
       items: {
         include: {
           product: {
-            select: { id: true, name: true, slug: true, basePrice: true, salePrice: true,
-                       images: { where: { isPrimary: true }, take: 1 } },
+            select: {
+              id: true,
+              name: true,
+              slug: true,
+              basePrice: true,
+              salePrice: true,
+              pricePK: true,
+              priceUK: true,
+              salePricePK: true,
+              salePriceUK: true,
+              images: { where: { isPrimary: true }, take: 1 },
+            },
           },
-          variant: { select: { id: true, title: true, optionValues: true,  price: true } },
+          variant: { select: { id: true, title: true, optionValues: true, price: true, pricePK: true, priceUK: true, stock: true } },
         },
       },
     },
@@ -52,7 +67,7 @@ export async function GET(req: NextRequest) {
 
   let subtotal = 0
   try {
-    const { subtotal: validatedSubtotal, lineItems } = await getValidatedCartTotal(cartInput)
+    const { subtotal: validatedSubtotal, lineItems } = await getValidatedCartTotal(cartInput, SITE_COUNTRY)
     subtotal = validatedSubtotal
 
     // Inject the validated price directly into the items returned to the frontend
@@ -67,7 +82,7 @@ export async function GET(req: NextRequest) {
     logger.error('Cart total validation failed', { error: err.message })
     // Fallback if price validation fails
     subtotal = cart.items.reduce((sum, item) => {
-      const unitPrice = Number(item.variant?.price ?? item.product.salePrice ?? item.product.basePrice)
+      const unitPrice = Number((item as any).validatedPrice ?? item.variant?.price ?? item.product.salePrice ?? item.product.basePrice)
       return sum + unitPrice * item.quantity
     }, 0)
   }

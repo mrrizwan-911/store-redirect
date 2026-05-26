@@ -70,8 +70,9 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
 
   if (!order) notFound()
 
-  const countryInfo = getCountryLabel('PK') // country field not in schema
-  const currency = getCurrencySymbol('PK')
+  const country = order.country || 'PK'
+  const countryInfo = getCountryLabel(country)
+  const currency = getCurrencySymbol(country)
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-10 font-sans">

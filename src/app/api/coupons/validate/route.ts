@@ -4,6 +4,7 @@ import { db } from '@/lib/db/client'
 import { validateCouponSchema } from '@/lib/validations/coupon'
 import { logger } from '@/lib/utils/logger'
 import { verifyRefreshToken } from '@/lib/auth/jwt'
+import { SITE_COUNTRY } from '@/lib/constants/site'
 
 export async function POST(req: NextRequest) {
   let body
@@ -20,6 +21,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { code, orderValue } = parsed.data
+  const country = parsed.data.country || SITE_COUNTRY
   logger.info('Validating coupon', { code, orderValue })
 
   const coupon = await db.coupon.findUnique({
@@ -28,6 +30,10 @@ export async function POST(req: NextRequest) {
 
   if (!coupon || !coupon.isActive) {
     return NextResponse.json({ success: false, error: 'Invalid coupon code' }, { status: 404 })
+  }
+
+  if (coupon.country !== 'ALL' && coupon.country !== country) {
+    return NextResponse.json({ success: false, error: 'Coupon is not available for this region' }, { status: 400 })
   }
 
   const now = new Date()

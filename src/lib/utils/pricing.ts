@@ -6,6 +6,10 @@
 
 export type CountryCode = 'PK' | 'UK'
 
+export function normalizePricingCountry(country?: string | null): CountryCode {
+  return country === 'UK' ? 'UK' : 'PK'
+}
+
 export function getProductPrice(product: any, country: CountryCode) {
   if (!product) return { price: 0, salePrice: null }
 
@@ -30,6 +34,20 @@ export function getVariantPrice(variant: any, country: CountryCode) {
   return {
     price: variantPrice != null ? Number(variantPrice) : null,
   }
+}
+
+export function getLineItemPrice({
+  product,
+  variant,
+  country,
+}: {
+  product: any
+  variant?: any | null
+  country: CountryCode
+}): number {
+  const variantPrice = variant ? getVariantPrice(variant, country).price : null
+  if (variantPrice != null) return variantPrice
+  return getDisplayPrice(product, country).currentPrice
 }
 
 export function getDisplayPrice(product: any, country: CountryCode) {

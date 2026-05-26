@@ -46,6 +46,7 @@ export async function POST(req: Request, context: { params: Promise<{ id: string
       data: {
         productId: (await context.params).id,
         url,
+        cloudinaryPublicId: publicId,
         isPrimary: setPrimary,
         sortOrder: product.images.length,
       },

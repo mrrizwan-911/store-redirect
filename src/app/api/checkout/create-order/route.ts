@@ -7,6 +7,7 @@ import { logger } from '@/lib/utils/logger'
 import { getUserSession } from '@/lib/auth/session'
 import { verifyTurnstile } from '@/lib/utils/verifyTurnstile'
 import { OrderStatus, PaymentMethod, PaymentStatus } from '@prisma/client'
+import { getEnabledPaymentMethods } from '@/lib/constants/site'
 
 export async function POST(req: NextRequest) {
   try {
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
       couponCode,
       loyaltyPoints,
       itemsCount: items.length,
-      guestEmail,
+      isGuest: Boolean(guestEmail),
       paymentMethod,
       country,
     })
@@ -89,22 +90,26 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // ── Validate Shipping Option ──────────────────────────────────────────
-    // TODO: Uncomment when ShippingOption model is added to schema
-    // const shippingOption = await db.shippingOption.findUnique({
-    //   where: { id: shippingOptionId },
-    // })
-    // if (!shippingOption || !shippingOption.isActive) {
-    //   return NextResponse.json(
-    //     { success: false, error: 'Selected shipping option is not available' },
-    //     { status: 400 }
-    //   )
-    // }
-
-    // For now, just validate that shippingOptionId is provided
-    if (!shippingOptionId) {
+    const orderCountry = country === 'UK' ? 'UK' : country === 'GLOBAL' ? 'GLOBAL' : 'PK'
+    const allowedMethods = getEnabledPaymentMethods()
+    if (!allowedMethods.includes(paymentMethod)) {
       return NextResponse.json(
-        { success: false, error: 'Shipping option is required' },
+        { success: false, error: 'Payment method is not available for this region' },
+        { status: 400 }
+      )
+    }
+
+    // ── Validate Shipping Option ──────────────────────────────────────────
+    const shippingOption = await db.shippingOption.findUnique({
+      where: { id: shippingOptionId },
+    })
+    if (
+      !shippingOption ||
+      !shippingOption.isActive ||
+      !shippingOption.countries.includes(orderCountry)
+    ) {
+      return NextResponse.json(
+        { success: false, error: 'Selected shipping option is not available' },
         { status: 400 }
       )
     }
@@ -143,14 +148,16 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Validate Prices and compute subtotal ─────────────────────────────
-    const { subtotal, lineItems } = await getValidatedCartTotal(items)
+    const { subtotal, lineItems } = await getValidatedCartTotal(items, orderCountry)
 
     // ── Compute Shipping Cost ─────────────────────────────────────────────
-    // TODO: Use shippingOption.price when ShippingOption model is added
-    let shippingCost = 0 // Default free shipping for now
-
-    // Free shipping threshold check commented out until model is added
-    // if (subtotal >= 5000) { shippingCost = 0 }
+    const freeShippingThreshold = shippingOption.freeShippingThreshold
+      ? Number(shippingOption.freeShippingThreshold)
+      : null
+    const shippingCost =
+      freeShippingThreshold !== null && subtotal >= freeShippingThreshold
+        ? 0
+        : Number(shippingOption.price)
 
     // ── Validate Coupon ───────────────────────────────────────────────────
     let discount = 0
@@ -163,6 +170,7 @@ export async function POST(req: NextRequest) {
       let isValid =
         coupon &&
         coupon.isActive &&
+        (coupon.country === 'ALL' || coupon.country === orderCountry) &&
         (!coupon.expiresAt || coupon.expiresAt > now) &&
         (!coupon.maxUses || coupon.usedCount < coupon.maxUses) &&
         (!coupon.minOrderValue || subtotal >= Number(coupon.minOrderValue))
@@ -269,7 +277,7 @@ export async function POST(req: NextRequest) {
           orderNumber,
           userId,
           addressId: finalAddressId,
-          // shippingOptionId and country removed - not in schema
+          country: orderCountry,
           status: initialStatus,
           subtotal,
           shippingCost,
@@ -358,7 +366,7 @@ export async function POST(req: NextRequest) {
     logger.info('Order created successfully', {
       orderId: result.id,
       orderNumber: result.orderNumber,
-      // country removed - not in schema
+      country: result.country,
       status: result.status,
       paymentMethod,
     })
@@ -371,7 +379,7 @@ export async function POST(req: NextRequest) {
         total: result.total,
         status: result.status,
         paymentMethod,
-        // country removed - not in schema
+        country: result.country,
         nextStep:
           paymentMethod === 'COD' ? 'confirmed_cod'
           : paymentMethod === 'CARD' ? 'confirmed_stripe'

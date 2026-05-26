@@ -23,6 +23,7 @@ export const couponSchema = z.object({
 export const validateCouponSchema = z.object({
   code: z.string().min(1, "Coupon code is required"),
   orderValue: z.number().min(0, "Order value must be positive"),
+  country: z.enum(['PK', 'UK', 'GLOBAL']).optional(),
 });
 
 export type CouponInput = z.infer<typeof couponSchema>;

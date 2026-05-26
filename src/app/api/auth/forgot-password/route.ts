@@ -4,9 +4,14 @@ import { db } from '@/lib/db/client'
 import { logger } from '@/lib/utils/logger'
 import { forgotPasswordSchema } from '@/lib/validations/auth'
 import { sendForgotPasswordEmail } from '@/lib/services/email/forgotPassword'
+import { checkRateLimit, getClientIp, rateLimiters } from '@/lib/utils/rateLimit'
 
 export async function POST(req: NextRequest) {
   try {
+    const clientIp = getClientIp(req)
+    const rateLimitErr = await checkRateLimit(rateLimiters.auth, clientIp)
+    if (rateLimitErr) return rateLimitErr
+
     const body = await req.json()
     const parsed = forgotPasswordSchema.safeParse(body)
 
@@ -33,6 +38,7 @@ export async function POST(req: NextRequest) {
 
     // Generate token
     const token = crypto.randomBytes(32).toString('hex')
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000) // 1 hour
 
     // Single transaction: Cleanup old tokens and create new one
@@ -43,7 +49,7 @@ export async function POST(req: NextRequest) {
       db.passwordResetToken.create({
         data: {
           userId: user.id,
-          token,
+          token: tokenHash,
           expiresAt,
         },
       }),
