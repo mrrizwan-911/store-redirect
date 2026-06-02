@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ── Primary SEO ─────────────────────────────────────────────────────── -->
+  <title>Calnza — Luxury Fashion | Pakistan & United Kingdom</title>
+  <meta name="description" content="Calnza is a luxury fashion brand for Pakistan and the United Kingdom. Shop premium clothing, dresses, shirts, and more. Visit calnza.pk for Pakistan and calnza.co.uk for UK." />
+  <meta name="keywords" content="Calnza, Calnza PK, Calnza Pakistan, Calnza UK, Calnza United Kingdom, Calnza clothes, Calnza fashion, Calnza dresses, Calnza shirts, luxury fashion Pakistan, luxury fashion UK" />
+  <meta name="robots" content="index, follow" />
+  <meta name="author" content="Calnza" />
+
+  <!-- ── Canonical & hreflang ──────────────────────────────────────────── -->
+  <link rel="canonical" href="https://calnza.com" />
+  <link rel="alternate" hreflang="en-PK" href="https://calnza.pk" />
+  <link rel="alternate" hreflang="en-GB" href="https://calnza.co.uk" />
+  <link rel="alternate" hreflang="x-default" href="https://calnza.com" />
+
+  <!-- ── Open Graph (Facebook, WhatsApp, LinkedIn) ────────────────────── -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Calnza" />
+  <meta property="og:title" content="Calnza — Luxury Fashion | Pakistan & United Kingdom" />
+  <meta property="og:description" content="Shop premium Calnza clothing. Visit calnza.pk for Pakistan or calnza.co.uk for the United Kingdom." />
+  <meta property="og:url" content="https://calnza.com" />
+  <meta property="og:image" content="https://calnza.com/redirect-pc.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="en_GB" />
+  <meta property="og:locale:alternate" content="en_PK" />
+
+  <!-- ── Twitter / X Card ─────────────────────────────────────────────── -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Calnza — Luxury Fashion | Pakistan & UK" />
+  <meta name="twitter:description" content="Shop premium Calnza clothing. Visit calnza.pk or calnza.co.uk." />
+  <meta name="twitter:image" content="https://calnza.com/redirect-pc.png" />
+
+  <!-- ── Structured Data: Organization ────────────────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Calnza",
+    "url": "https://calnza.com",
+    "logo": "https://calnza.com/logo.png",
+    "description": "Luxury fashion brand serving Pakistan and the United Kingdom.",
+    "sameAs": [
+      "https://calnza.pk",
+      "https://calnza.co.uk"
+    ],
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "areaServed": "PK",
+        "availableLanguage": "en",
+        "url": "https://calnza.pk/contact"
+      },
+      {
+        "@type": "ContactPoint",
+        "contactType": "customer service",
+        "areaServed": "GB",
+        "availableLanguage": "en",
+        "url": "https://calnza.co.uk/contact"
+      }
+    ],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Calnza Products",
+      "itemListElement": [
+        { "@type": "OfferCatalog", "name": "Pakistan Store", "url": "https://calnza.pk" },
+        { "@type": "OfferCatalog", "name": "UK Store", "url": "https://calnza.co.uk" }
+      ]
+    }
+  }
+  </script>
+
+  <!-- Preload all three hero images so there's no flash on any device -->
+  <link rel="preload" as="image" href="redirect-pc.png"      media="(min-width: 1025px)" />
+  <link rel="preload" as="image" href="redirect-tablets.png" media="(min-width: 601px) and (max-width: 1024px)" />
+  <link rel="preload" as="image" href="redirect-mobile.png"  media="(max-width: 600px)" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300&family=Inter:wght@300;400;500&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* ─── RESET ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a; /* fallback while image loads */
+    }
+
+    /* ─────────────────────────────────────────────────
+       HERO — default = desktop image
+    ───────────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      background-image: url('redirect-pc.png');
+      background-size: cover;
+      background-position: center center;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: clamp(40px, 6vw, 100px);
+    }
+
+    /* Dark overlay — keeps text and card legible over the store image */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 100% at 100% 50%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.42) 100%),
+        linear-gradient(180deg, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.06) 45%, rgba(0,0,0,0.28) 100%);
+      z-index: 1;
+    }
+
+    /* ─────────────────────────────────────────────────
+       BRAND — TOP LEFT
+    ───────────────────────────────────────────────── */
+    .brand {
+      position: absolute;
+      top: 46px;
+      left: 56px;
+      z-index: 10;
+      animation: fadeDown 0.8s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .brand-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-size: clamp(1.9rem, 3.5vw, 3rem);
+      color: #fff;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      line-height: 1;
+      text-shadow: 0 2px 24px rgba(0,0,0,0.5);
+    }
+
+    .brand-sub {
+      font-size: 0.55rem;
+      color: rgba(255,255,255,0.55);
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      margin-top: 8px;
+      font-weight: 300;
+    }
+
+    /* ─────────────────────────────────────────────────
+       BOTTOM-LEFT CAPTION (desktop only)
+    ───────────────────────────────────────────────── */
+    .hero-caption {
+      position: absolute;
+      bottom: 48px;
+      left: 56px;
+      z-index: 10;
+      animation: fadeIn 1s 0.4s ease both;
+    }
+
+    .hero-caption p {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: clamp(0.95rem, 1.8vw, 1.3rem);
+      color: rgba(255,255,255,0.78);
+      line-height: 1.6;
+      text-shadow: 0 1px 14px rgba(0,0,0,0.45);
+    }
+
+    .hero-caption span {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.56rem;
+      letter-spacing: 0.24em;
+      color: rgba(201,168,76,0.88);
+      text-transform: uppercase;
+      margin-top: 6px;
+      font-style: normal;
+    }
+
+    /* ─────────────────────────────────────────────────
+       FROSTED GLASS SELECTOR CARD
+    ───────────────────────────────────────────────── */
+    .card-wrap {
+      position: relative;
+      z-index: 10;
+      animation: slideUp 0.8s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.80);
+      backdrop-filter: blur(30px) saturate(150%) brightness(1.04);
+      -webkit-backdrop-filter: blur(30px) saturate(150%) brightness(1.04);
+      border-radius: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      box-shadow:
+        0 24px 64px rgba(0,0,0,0.20),
+        0 4px 18px rgba(0,0,0,0.08),
+        inset 0 1px 0 rgba(255,255,255,0.95);
+      padding: 38px 34px 32px;
+      width: clamp(270px, 26vw, 330px);
+    }
+
+    /* "Select Your Country" heading */
+    .card-title {
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 0.88rem;
+      color: #1a1a1a;
+      letter-spacing: 0.01em;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+
+    .card-divider {
+      height: 1px;
+      background: rgba(0,0,0,0.07);
+      margin-bottom: 14px;
+    }
+
+    /* ─── COUNTRY ROWS ────────────────────────────── */
+    .country-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .country-row {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 14px 16px;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.50);
+      border: 1.5px solid rgba(0,0,0,0.055);
+      cursor: pointer;
+      text-decoration: none;
+      color: #1a1a1a;
+      transition:
+        background 0.22s ease,
+        border-color 0.22s ease,
+        transform 0.18s ease,
+        box-shadow 0.22s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .country-row:hover {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(0,0,0,0.11);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+    }
+
+    .country-row:active {
+      transform: translateY(0);
+      box-shadow: none;
+      background: rgba(255,255,255,0.70);
+    }
+
+    /* Loading state when redirecting */
+    .country-row.loading {
+      pointer-events: none;
+      opacity: 0.55;
+    }
+
+    .flag {
+      font-size: 1.6rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .country-info { flex: 1; }
+
+    .country-label {
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: #111;
+      display: block;
+      line-height: 1.2;
+    }
+
+    .country-sub {
+      font-size: 0.61rem;
+      color: #909090;
+      letter-spacing: 0.03em;
+      display: block;
+      margin-top: 3px;
+    }
+
+    .country-chevron {
+      color: #c8c8c8;
+      font-size: 1.15rem;
+      flex-shrink: 0;
+      transition: transform 0.18s ease, color 0.18s ease;
+    }
+
+    .country-row:hover .country-chevron {
+      transform: translateX(3px);
+      color: #666;
+    }
+
+    /* Card footer */
+    .card-footer {
+      margin-top: 22px;
+      text-align: center;
+      font-size: 0.57rem;
+      color: #b0b0b0;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      line-height: 1.9;
+    }
+
+    /* ─────────────────────────────────────────────────
+       KEYFRAMES
+    ───────────────────────────────────────────────── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+
+    /* ═══════════════════════════════════════════════
+       TABLET  (601px – 1024px)
+       Image: redirect-tablets.png
+       Card: right side, slightly smaller padding
+    ═══════════════════════════════════════════════ */
+    @media (min-width: 601px) and (max-width: 1024px) {
+      .hero {
+        background-image: url('redirect-tablets.png');
+        background-position: center center;
+        padding-right: clamp(28px, 4vw, 60px);
+      }
+
+      .hero::before {
+        background:
+          radial-gradient(ellipse 80% 100% at 100% 50%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.45) 100%),
+          linear-gradient(180deg, rgba(0,0,0,0.20) 0%, rgba(0,0,0,0.05) 45%, rgba(0,0,0,0.25) 100%);
+      }
+
+      .brand {
+        top: 36px;
+        left: 40px;
+      }
+
+      .brand-name {
+        font-size: clamp(1.6rem, 3vw, 2.4rem);
+        letter-spacing: 0.40em;
+      }
+
+      .hero-caption {
+        bottom: 36px;
+        left: 40px;
+      }
+
+      .card {
+        padding: 30px 28px 26px;
+        width: clamp(260px, 32vw, 310px);
+        border-radius: 20px;
+      }
+    }
+
+
+    /* ═══════════════════════════════════════════════
+       MOBILE  (≤600px)
+       Image: redirect-mobile.png — portrait crop
+       Card: pinned to bottom, full-width
+    ═══════════════════════════════════════════════ */
+    @media (max-width: 600px) {
+      html, body { overflow: auto; }
+
+      .hero {
+        /* Switch to tall portrait image */
+        background-image: url('redirect-mobile.png');
+        background-position: center 20%;
+        /* Flex: stack brand on top, card at bottom */
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: stretch;
+        padding: 0 16px 28px;
+        height: 100svh;
+        min-height: 580px;
+      }
+
+      /* Stronger bottom gradient so card is legible */
+      .hero::before {
+        background: linear-gradient(
+          180deg,
+          rgba(0,0,0,0.10) 0%,
+          rgba(0,0,0,0.04) 35%,
+          rgba(0,0,0,0.60) 100%
+        );
+      }
+
+      /* Brand: centered at top */
+      .brand {
+        position: absolute;
+        top: 32px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      .brand-name {
+        font-size: clamp(1.55rem, 7vw, 2rem);
+        letter-spacing: 0.38em;
+      }
+
+      /* Caption: hidden on mobile (no room) */
+      .hero-caption { display: none; }
+
+      /* Card: full-width, bottom */
+      .card-wrap {
+        width: 100%;
+        animation: slideUp 0.7s cubic-bezier(0.22,1,0.36,1) both;
+      }
+
+      .card {
+        width: 100%;
+        border-radius: 18px;
+        padding: 26px 22px 22px;
+        /* Slightly more opaque on mobile for readability */
+        background: rgba(255,255,255,0.87);
+      }
+
+      .card-title { font-size: 0.85rem; margin-bottom: 14px; }
+
+      .country-row { padding: 13px 14px; gap: 12px; }
+      .flag { font-size: 1.45rem; }
+      .country-label { font-size: 0.82rem; }
+      .country-sub { font-size: 0.60rem; }
+
+      .card-footer { margin-top: 16px; }
+    }
+
+    /* Extra small phones */
+    @media (max-width: 380px) {
+      .hero { padding: 0 12px 22px; }
+      .card { padding: 22px 18px 20px; border-radius: 16px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+
+    <!-- ── Brand ──────────────────────────────────── -->
+    <div class="brand">
+      <div class="brand-name">Calnza</div>
+      <div class="brand-sub">Luxury Apparel &amp; Couture</div>
+    </div>
+
+    <!-- ── Bottom-left caption (desktop/tablet) ───── -->
+    <div class="hero-caption">
+      <p>Crafted with precision.<br />Worn with grace.</p>
+      <span>Summer Collection · 2026</span>
+    </div>
+
+    <!-- ── Frosted Glass Country Selector ─────────── -->
+    <div class="card-wrap">
+      <div class="card">
+
+        <div class="card-title">Select Your Country</div>
+        <div class="card-divider"></div>
+
+        <div class="country-list">
+
+          <!-- Pakistan -->
+          <a
+            id="btn-pk"
+            href="https://calnza.pk"
+            class="country-row"
+            onclick="choose(event,'PK','https://calnza.pk','btn-pk')"
+            aria-label="Shop Pakistan Storefront"
+          >
+            <span class="flag">🇵🇰</span>
+            <div class="country-info">
+              <span class="country-label">Pakistan</span>
+              <span class="country-sub">PKR · EasyPaisa · COD · Card</span>
+            </div>
+            <span class="country-chevron">›</span>
+          </a>
+
+          <!-- United Kingdom -->
+          <a
+            id="btn-uk"
+            href="https://calnza.co.uk"
+            class="country-row"
+            onclick="choose(event,'UK','https://calnza.co.uk','btn-uk')"
+            aria-label="Shop United Kingdom Storefront"
+          >
+            <span class="flag">🇬🇧</span>
+            <div class="country-info">
+              <span class="country-label">United Kingdom</span>
+              <span class="country-sub">GBP · Secure Card Payment</span>
+            </div>
+            <span class="country-chevron">›</span>
+          </a>
+
+        </div>
+
+        <div class="card-footer">
+          © 2026 Calnza &nbsp;·&nbsp; Lahore &amp; London
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .hero -->
+
+
+  <script>
+    /* ── Redirect with region cookie ─────────────────────── */
+    function choose(e, region, url, btnId) {
+      e.preventDefault();
+      // Visual loading state
+      document.getElementById(btnId)?.classList.add('loading');
+      // Set 30-day preference cookie on .calnza.com root domain
+      const exp = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toUTCString();
+      document.cookie =
+        `calnza_region=${region}; expires=${exp}; path=/; domain=.calnza.com; SameSite=Lax; Secure`;
+      // Small delay so loading state is visible, then redirect
+      setTimeout(() => { window.location.href = url; }, 180);
+    }
+
+    /* ── Cloudflare geo auto-highlight ───────────────────── */
+    // If a Cloudflare Worker injects ?country=PK or ?country=GB,
+    // we visually highlight the suggested option.
+    (function () {
+      const c = new URLSearchParams(location.search).get('country');
+      const map = { PK: 'btn-pk', GB: 'btn-uk' };
+      const id  = map[c];
+      if (id) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.style.background     = 'rgba(255,255,255,0.92)';
+          el.style.borderColor    = 'rgba(0,0,0,0.14)';
+          el.style.boxShadow      = '0 4px 16px rgba(0,0,0,0.09)';
+        }
+      }
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+name: CI/CD — Static HTML Check
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    name: Check Static Files
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate HTML
+        run: npx htmlhint "**/*.html"

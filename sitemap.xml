@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!--
+    calnza.com — Brand hub / country selector
+    This sitemap tells Google:
+      - calnza.com is the canonical .com landing page
+      - calnza.pk  is the Pakistan regional storefront
+      - calnza.co.uk is the UK regional storefront
+    All three are linked as hreflang alternates so Google
+    serves the right domain for each country's search queries.
+  -->
+
+  <url>
+    <loc>https://calnza.com/</loc>
+    <lastmod>2026-05-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+    <!-- hreflang alternates tell Google which domain to show per country -->
+    <xhtml:link
+      rel="alternate"
+      hreflang="x-default"
+      href="https://calnza.com/" />
+    <xhtml:link
+      rel="alternate"
+      hreflang="en-PK"
+      href="https://calnza.pk/" />
+    <xhtml:link
+      rel="alternate"
+      hreflang="en-GB"
+      href="https://calnza.co.uk/" />
+  </url>
+
+  <!-- Pakistan store — Google will show calnza.pk for PK queries -->
+  <url>
+    <loc>https://calnza.pk/</loc>
+    <lastmod>2026-05-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en-PK" href="https://calnza.pk/" />
+    <xhtml:link rel="alternate" hreflang="en-GB" href="https://calnza.co.uk/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://calnza.com/" />
+  </url>
+
+  <!-- UK store — Google will show calnza.co.uk for UK queries -->
+  <url>
+    <loc>https://calnza.co.uk/</loc>
+    <lastmod>2026-05-24</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en-GB" href="https://calnza.co.uk/" />
+    <xhtml:link rel="alternate" hreflang="en-PK" href="https://calnza.pk/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://calnza.com/" />
+  </url>
+
+</urlset>
